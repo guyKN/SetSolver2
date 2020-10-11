@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.guykn.setsolver.imageprocessing.SetCardFinder;
-import com.guykn.setsolver.imageprocessing.classifiers.FeatureClassifier.ClassificationResult;
 import com.guykn.setsolver.set.SetCard;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
@@ -50,7 +49,7 @@ public class CardClassifier {
         SetCardShape shape = new SetCardShape(shapeClassifier.classify(image));
         SetCardFill fill = new SetCardFill(fillClassifier.classify(image));
 
-        return new SetCard(color, count, fill, shape);
+        return new SetCard(pos, color, count, fill, shape);
     }
 
 }

@@ -12,7 +12,7 @@
                 android:startX="42.9492"
                 android:startY="49.59793"
                 android:type="linear">
-                <!--
+                <!-- todo: re-add this
                 <item
                     android:ColorEnum="#44000000"
                     android:offset="0.0" />
