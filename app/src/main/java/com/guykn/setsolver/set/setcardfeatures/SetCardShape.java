@@ -33,7 +33,6 @@ public class SetCardShape extends SetCardFeature<SetCardShape.SetCardShapeEnum> 
 
     }
     private SetCardShapeEnum shape;
-    private double certainty;
     public SetCardShapeEnum getShape() {
         return shape;
     }
