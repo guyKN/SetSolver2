@@ -1,0 +1,3 @@
+0 Empty
+1 Partial
+2 Full

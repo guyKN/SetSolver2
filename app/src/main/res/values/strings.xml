@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Set Solver</string>
+    <string name="the_image_you_took">The image you took</string>
+    <string name="take_a_photo">Take A Photo</string>
+    <string name="min_threshold">Min Threshold:</string>
+    <string name="ratio">Ratio:</string>
+    <string name="recalculate_edges">Recalculate edges</string>
+    <string name="blur_radius">Blur Radius:</string>
+    <string name="update_photo">update photo</string>
+    <string name="recalculate_with_new_parameters">Recalculate With new parameters</string>
+</resources>
