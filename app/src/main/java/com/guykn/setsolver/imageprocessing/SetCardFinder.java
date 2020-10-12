@@ -51,6 +51,9 @@ public class SetCardFinder {
 
     public enum BackgroundType {BLACK, ORIGINAL_IMAGE, EDGES}
 
+
+
+
     public SetCardFinder(String imagePath, Config config, Context context) throws IOException {
         this.config = config;
         this.imagePath = imagePath;
