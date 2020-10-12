@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 
 import com.guykn.setsolver.imageprocessing.SetCardFinder;
 import com.guykn.setsolver.set.SetCard;
+import com.guykn.setsolver.set.SetCardPosition;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
 import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
@@ -16,6 +17,8 @@ import java.io.IOException;
 
 public class CardClassifier {
 
+    //todo: use SetCardPosition rather than RotatedRect in the functions
+    //todo: maybe add factory method?
     private static String COLOR_MODEL_PATH =  "Models/Color/";
     private static String FILL_MODEL_PATH =  "Models/Fill/";
     private static String SHAPE_MODEL_PATH =  "Models/Shape/";
@@ -38,18 +41,15 @@ public class CardClassifier {
         shapeClassifier = new FeatureClassifier(context, config, SHAPE_MODEL_PATH);
     }
 
-    public SetCard classify(Mat mat){
-        Bitmap bmp = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);//todo: check if this is the proper config
-        Utils.matToBitmap(mat, bmp);
-        return classify(bmp);
-    }
-    public SetCard classify(Bitmap image){
-        SetCardCount count = new SetCardCount(countClassifier.classify(image));
-        SetCardColor color = new SetCardColor(colorClassifier.classify(image));
-        SetCardShape shape = new SetCardShape(shapeClassifier.classify(image));
-        SetCardFill fill = new SetCardFill(fillClassifier.classify(image));
 
-        return new SetCard(pos, color, count, fill, shape);
+    public SetCard classify(Bitmap originalImage, SetCardPosition position){
+        Bitmap cropped = position.cropToCard(originalImage);
+        SetCardCount count = new SetCardCount(countClassifier.classify(cropped));
+        SetCardColor color = new SetCardColor(colorClassifier.classify(cropped));
+        SetCardShape shape = new SetCardShape(shapeClassifier.classify(cropped));
+        SetCardFill fill = new SetCardFill(fillClassifier.classify(cropped));
+
+        return new SetCard(color, count, fill, shape, position);
     }
 
 }

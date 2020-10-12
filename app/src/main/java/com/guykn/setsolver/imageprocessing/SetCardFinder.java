@@ -62,7 +62,7 @@ public class SetCardFinder {
         needToDoHughLines = true;
         classifier = new CardClassifier(context, config);
     }
-
+    @Deprecated
     public void setConfig(Config newConfig){
         //todo: remove this probably
         if(!newConfig.image.equals(config.image)){
@@ -229,6 +229,8 @@ public class SetCardFinder {
             needToFindContours = false;
         }
     }
+
+    //todo: don't use lists, since they use unnecassary memory. Instead do a loop and let things to out of the when they need to
     private void findRectsFromContours() {
         allCardRects = new ArrayList<RotatedRect>();
         croppedCards = new ArrayList<>();
@@ -246,14 +248,14 @@ public class SetCardFinder {
                 System.out.println(rectArea);
                 if(rectArea > config.contours.minContourArea) {
                     allCardRects.add(rotatedRect);
-                    Mat cropped = cropToRotatedRect(rotatedRect);
+                    Mat cropped = cropToRotatedRect(rotatedRect); //todo: remove this part, since we're using a SetCardPosition Object
                     croppedCards.add(cropped);
                 }
             }
         }
     }
-    //the below function is wrong but still being preserved
     //http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/, https://answers.opencv.org/question/497/extract-a-rotatedrect-area/
+    @Deprecated
     private Mat cropToRotatedRect(RotatedRect rect){
         Mat M = new Mat();
         Mat rotated = new Mat();
@@ -302,7 +304,6 @@ public class SetCardFinder {
             for(int i=0; i<4; ++i){
                 Imgproc.line(canvas, points[i], points[(i+1)%4], color,3);
             }
-
         }
         return canvas;
     }

@@ -1,5 +1,5 @@
 package com.guykn.setsolver.set;
 
-public class SetBoardPosition {
+public class SetBoard {
 
 }

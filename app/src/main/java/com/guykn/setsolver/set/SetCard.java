@@ -11,19 +11,20 @@ import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 import java.util.Locale;
 
 public class SetCard {
-    private SetCardPosition pos;
+    private SetCardPosition position;
     private SetCardColor color;
     private SetCardCount count;
     private SetCardFill fill;
     private SetCardShape shape;
 
-    public SetCard(SetCardPosition pos, SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape) {
-        this.pos = pos;
+    public SetCard(SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape, SetCardPosition position) {
         this.color = color;
         this.count = count;
         this.fill = fill;
         this.shape = shape;
+        this.position = position;
     }
+
     public double getTotalCertainty(){
         return color.getCertainty() * count.getCertainty() * fill.getCertainty() * shape.getCertainty();
     }
@@ -36,7 +37,20 @@ public class SetCard {
                 color.toString(), count.toString(), fill.toString(), shape.toString(), getTotalCertainty()*100);
     }
 
-    public SetCardPosition getPos() {
-        return pos;
+    public SetCardPosition getPosition() {
+        return position;
+    }
+    public SetCardColor getColor(){
+        return color;
+    }
+    public SetCardCount getCount() {
+        return count;
+    }
+
+    public SetCardFill getFill() {
+        return fill;
+    }
+    public SetCardShape getShape() {
+        return shape;
     }
 }
