@@ -9,9 +9,9 @@ import android.graphics.Paint;
  * Anything that can be drawn on a canvas implements this interface.
  */
 public interface DrawableOnCanvas {
-    public default Canvas drawOnCanvas(Canvas canvas){
-        return drawOnCanvas(canvas, new Paint());
+    public default void drawOnCanvas(Canvas canvas){
+        drawOnCanvas(canvas, new Paint());
     };
-    public Canvas drawOnCanvas(Canvas canvas, Paint paint);
+    public void drawOnCanvas(Canvas canvas, Paint paint);
 
 }

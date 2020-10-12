@@ -10,19 +10,19 @@ import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 
 import java.util.Locale;
 
-public class SetCard {
-    private GenericRotatedRectangle position;
+public class SetCard extends GenericRotatedRectangle {
     private SetCardColor color;
     private SetCardCount count;
     private SetCardFill fill;
     private SetCardShape shape;
 
-    public SetCard(SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape, GenericRotatedRectangle position) {
+    protected SetCard(double centerX, double centerY, double width, double height, double angle,
+            SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape) {
+        super(centerX, centerY, width, height, angle);
         this.color = color;
         this.count = count;
         this.fill = fill;
         this.shape = shape;
-        this.position = position;
     }
 
     public double getTotalCertainty(){
@@ -37,9 +37,6 @@ public class SetCard {
                 color.toString(), count.toString(), fill.toString(), shape.toString(), getTotalCertainty()*100);
     }
 
-    public GenericRotatedRectangle getPosition() {
-        return position;
-    }
     public SetCardColor getColor(){
         return color;
     }

@@ -1,11 +1,17 @@
 package com.guykn.setsolver.set;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Point;
 
 import com.guykn.setsolver.interfaces.DrawableOnCanvas;
+import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
+import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
+import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
+import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 
 import org.opencv.core.RotatedRect;
 
@@ -25,11 +31,21 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
 
     @Override
-    public Bitmap drawOnCanvas(Bitmap canvas, Color color, int thickness) {
-        return null;
+    public void drawOnCanvas(Canvas canvas, Paint paint) {
+        Point[] corners = getCorners(canvas.getWidth(), canvas.getHeight());
+        for(int i=0;i<corners.length;i++){
+            int iNext = (i+1)%corners.length;
+            canvas.drawLine(
+                    corners[i].x,
+                    corners[i].y,
+                    corners[iNext].x,
+                    corners[iNext].y,
+                    paint
+            );
+        }
     }
 
-    public Point[] getCorners(int canvasWidth, int canvasHeight){
+    private Point[] getCorners(int canvasWidth, int canvasHeight){
         double angleRadians = angle/180*Math.PI;
         double sin = Math.sin(angleRadians);
         double cos = Math.sin(angleRadians);
@@ -43,7 +59,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         int adjustedCenterX = (int) (centerX * canvasWidth);
         int adjustedCenterY = (int) (centerY * canvasHeight);
 
-        Point p0 = new Point(adjustedCenterX + segment1X + segment2X,
+        Point p0 = new Point (adjustedCenterX + segment1X + segment2X,
                              adjustedCenterY + segment1Y + segment2Y);
         Point p1 = new Point(adjustedCenterX + segment1X - segment2X,
                              adjustedCenterY + segment1Y - segment2Y);
@@ -55,7 +71,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         return new Point[] {p0,p1,p2,p3};
     }
 
-    public Bitmap cropToCard(Bitmap originalImage){
+    public Bitmap cropToRect(Bitmap originalImage){
         int adjustedCenterX = (int) centerX * originalImage.getWidth();
         int adjustedCenterY = (int) centerY * originalImage.getHeight();
         int adjustedWidth = (int) width * originalImage.getWidth();
@@ -77,7 +93,11 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         );
     }
 
-    private GenericRotatedRectangle(double centerX, double centerY, double width, double height, double angle) {
+    public SetCard toSetCard(SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape){
+        return new SetCard(centerX, centerY, width, height, angle, color, count, fill, shape);
+    }
+
+    protected GenericRotatedRectangle(double centerX, double centerY, double width, double height, double angle) {
         this.centerX = centerX;
         this.centerY = centerY;
         this.width = width;
@@ -85,12 +105,12 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         this.angle = angle;
     }
 
-    public static GenericRotatedRectangle fromRotatedRect(RotatedRect rect, int canvasWidth, int canvasHeight){
-        double centerX = rect.center.x / canvasWidth;
-        double centerY = rect.center.x / canvasHeight;
-        double width = rect.size.width/canvasWidth;
-        double height = rect.size.height / canvasHeight;
-        double angle = rect.angle;
-        return new GenericRotatedRectangle(centerX, centerY, width,height, angle);
+    public GenericRotatedRectangle(RotatedRect rect, int canvasWidth, int canvasHeight){
+        centerX = rect.center.x / canvasWidth;
+        centerY = rect.center.x / canvasHeight;
+        width = rect.size.width/canvasWidth;
+        height = rect.size.height / canvasHeight;
+        angle = rect.angle;
     }
+
 }

@@ -41,13 +41,13 @@ public class CardClassifier {
 
 
     public SetCard classify(Bitmap originalImage, GenericRotatedRectangle position){
-        Bitmap cropped = position.cropToCard(originalImage);
+        Bitmap cropped = position.cropToRect(originalImage);
         SetCardCount count = new SetCardCount(countClassifier.classify(cropped));
         SetCardColor color = new SetCardColor(colorClassifier.classify(cropped));
         SetCardShape shape = new SetCardShape(shapeClassifier.classify(cropped));
         SetCardFill fill = new SetCardFill(fillClassifier.classify(cropped));
 
-        return new SetCard(color, count, fill, shape, position);
+        return position.toSetCard(color, count, fill, shape);
     }
 
 }
