@@ -277,14 +277,14 @@ public class SetCardFinder {
                 double rectArea = rotatedRect.size.area();
                 System.out.println(rectArea);
                 if(rectArea > config.contours.minContourArea) {
-                    GenericRotatedRectangle position = GenericRotatedRectangle.fromRotatedRect(rotatedRect, config.image.width, config.image.height);
+                    GenericRotatedRectangle position = new GenericRotatedRectangle(rotatedRect, config.image.width, config.image.height);
                     cardAction.doAction(position);
                 }
             }
         }
     }
 
-    //public void get
+    //here put a function to get all cards
 
 
 
