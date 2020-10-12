@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
 import com.guykn.setsolver.imageprocessing.classify.CardAction;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.set.SetCard;
-import com.guykn.setsolver.set.SetCardPosition;
+import com.guykn.setsolver.set.GenericRotatedRectangle;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -277,12 +277,14 @@ public class SetCardFinder {
                 double rectArea = rotatedRect.size.area();
                 System.out.println(rectArea);
                 if(rectArea > config.contours.minContourArea) {
-                    SetCardPosition position = SetCardPosition.fromRotatedRect(rotatedRect, config.image.width, config.image.height);
+                    GenericRotatedRectangle position = GenericRotatedRectangle.fromRotatedRect(rotatedRect, config.image.width, config.image.height);
                     cardAction.doAction(position);
                 }
             }
         }
     }
+
+    //public void get
 
 
 

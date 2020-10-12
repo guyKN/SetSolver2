@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 
 import com.guykn.setsolver.imageprocessing.detect.SetCardFinder;
 import com.guykn.setsolver.set.SetCard;
-import com.guykn.setsolver.set.SetCardPosition;
+import com.guykn.setsolver.set.GenericRotatedRectangle;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
 import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
@@ -40,7 +40,7 @@ public class CardClassifier {
     }
 
 
-    public SetCard classify(Bitmap originalImage, SetCardPosition position){
+    public SetCard classify(Bitmap originalImage, GenericRotatedRectangle position){
         Bitmap cropped = position.cropToCard(originalImage);
         SetCardCount count = new SetCardCount(countClassifier.classify(cropped));
         SetCardColor color = new SetCardColor(colorClassifier.classify(cropped));

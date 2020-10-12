@@ -1,8 +1,7 @@
 package com.guykn.setsolver.imageprocessing.classify;
 
-import com.guykn.setsolver.set.SetCardPosition;
-import com.guykn.setsolver.set.setcardfeatures.SetCardFeatureEnum;
+import com.guykn.setsolver.set.GenericRotatedRectangle;
 
 public interface CardAction {
-    public void doAction(SetCardPosition position);
+    public void doAction(GenericRotatedRectangle position);
 }

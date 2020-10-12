@@ -11,13 +11,13 @@ import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 import java.util.Locale;
 
 public class SetCard {
-    private SetCardPosition position;
+    private GenericRotatedRectangle position;
     private SetCardColor color;
     private SetCardCount count;
     private SetCardFill fill;
     private SetCardShape shape;
 
-    public SetCard(SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape, SetCardPosition position) {
+    public SetCard(SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape, GenericRotatedRectangle position) {
         this.color = color;
         this.count = count;
         this.fill = fill;
@@ -37,7 +37,7 @@ public class SetCard {
                 color.toString(), count.toString(), fill.toString(), shape.toString(), getTotalCertainty()*100);
     }
 
-    public SetCardPosition getPosition() {
+    public GenericRotatedRectangle getPosition() {
         return position;
     }
     public SetCardColor getColor(){

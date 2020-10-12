@@ -1,18 +1,19 @@
 package com.guykn.setsolver.set;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
 
+import com.guykn.setsolver.interfaces.DrawableOnCanvas;
+
 import org.opencv.core.RotatedRect;
 
-import java.lang.reflect.Array;
-
 /**
- * Stores the position of an individual set Card on the camera.
- * Always stores x and y values from 0 to 1, so that its compatible with all resolutions, and no conversion errors occur.
+ * Stores the location of a rotated rectangle in an image (Primary used to track where set cards are)
+ * Is generic, meaning all values are stored as doubles from 0 to 1. This ensures that conversion between different canvases is easy.
  */
-public class SetCardPosition {
+public class GenericRotatedRectangle implements DrawableOnCanvas {
     //todo: also allow to crop a bitmap to the position
     //todo: also draw on a canvas in this class.
 
@@ -21,6 +22,12 @@ public class SetCardPosition {
     private double width;
     private double height;
     private double angle;
+
+
+    @Override
+    public Bitmap drawOnCanvas(Bitmap canvas, Color color, int thickness) {
+        return null;
+    }
 
     public Point[] getCorners(int canvasWidth, int canvasHeight){
         double angleRadians = angle/180*Math.PI;
@@ -70,7 +77,7 @@ public class SetCardPosition {
         );
     }
 
-    private SetCardPosition(double centerX, double centerY, double width, double height, double angle) {
+    private GenericRotatedRectangle(double centerX, double centerY, double width, double height, double angle) {
         this.centerX = centerX;
         this.centerY = centerY;
         this.width = width;
@@ -78,13 +85,12 @@ public class SetCardPosition {
         this.angle = angle;
     }
 
-    public static SetCardPosition fromRotatedRect(RotatedRect rect, int canvasWidth, int canvasHeight){
+    public static GenericRotatedRectangle fromRotatedRect(RotatedRect rect, int canvasWidth, int canvasHeight){
         double centerX = rect.center.x / canvasWidth;
         double centerY = rect.center.x / canvasHeight;
         double width = rect.size.width/canvasWidth;
         double height = rect.size.height / canvasHeight;
         double angle = rect.angle;
-        return new SetCardPosition(centerX, centerY, width,height, angle);
+        return new GenericRotatedRectangle(centerX, centerY, width,height, angle);
     }
-
 }
