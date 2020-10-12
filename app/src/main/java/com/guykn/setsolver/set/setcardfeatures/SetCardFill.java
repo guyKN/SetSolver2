@@ -1,6 +1,6 @@
 package com.guykn.setsolver.set.setcardfeatures;
 
-import com.guykn.setsolver.imageprocessing.classifiers.FeatureClassifier;
+import com.guykn.setsolver.imageprocessing.classify.FeatureClassifier;
 
 public class SetCardFill extends SetCardFeature<SetCardFill.SetCardFillEnum> {
     public enum SetCardFillEnum implements SetCardFeatureEnum {

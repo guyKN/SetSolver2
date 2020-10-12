@@ -2,13 +2,12 @@ package com.guykn.setsolver;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.guykn.setsolver.imageprocessing.SetCardFinder;
+import com.guykn.setsolver.imageprocessing.detect.SetCardFinder;
 import com.guykn.setsolver.set.SetCard;
 
 import org.opencv.core.Mat;

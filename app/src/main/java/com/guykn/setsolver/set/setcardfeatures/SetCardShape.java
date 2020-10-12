@@ -2,7 +2,7 @@ package com.guykn.setsolver.set.setcardfeatures;
 
 import androidx.annotation.NonNull;
 
-import com.guykn.setsolver.imageprocessing.classifiers.FeatureClassifier;
+import com.guykn.setsolver.imageprocessing.classify.FeatureClassifier;
 
 import java.util.Locale;
 

@@ -1,9 +1,9 @@
-package com.guykn.setsolver.imageprocessing.classifiers;
+package com.guykn.setsolver.imageprocessing.classify;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import com.guykn.setsolver.imageprocessing.SetCardFinder;
+import com.guykn.setsolver.imageprocessing.detect.SetCardFinder;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;

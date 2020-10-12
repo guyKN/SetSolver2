@@ -1,9 +1,9 @@
-package com.guykn.setsolver.imageprocessing.classifiers;
+package com.guykn.setsolver.imageprocessing.classify;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import com.guykn.setsolver.imageprocessing.SetCardFinder;
+import com.guykn.setsolver.imageprocessing.detect.SetCardFinder;
 import com.guykn.setsolver.set.SetCard;
 import com.guykn.setsolver.set.SetCardPosition;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
@@ -11,8 +11,6 @@ import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
 import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
 import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 
-import org.opencv.android.Utils;
-import org.opencv.core.Mat;
 import java.io.IOException;
 
 public class CardClassifier {

@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.guykn.setsolver.ImageProcessingThreadManager.DisplayImageMessage;
-import com.guykn.setsolver.imageprocessing.SetCardFinder;
+import com.guykn.setsolver.imageprocessing.detect.SetCardFinder;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 
@@ -33,7 +33,7 @@ import org.opencv.android.OpenCVLoader;
 import java.io.File;
 import java.io.IOException;
 
-import static com.guykn.setsolver.imageprocessing.SetCardFinder.Config.getDefaultConfig;
+import static com.guykn.setsolver.imageprocessing.detect.SetCardFinder.Config.getDefaultConfig;
 
 public class MainActivity extends AppCompatActivity {
 

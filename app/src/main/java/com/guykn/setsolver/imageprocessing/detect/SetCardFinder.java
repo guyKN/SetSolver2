@@ -1,10 +1,15 @@
-package com.guykn.setsolver.imageprocessing;
+package com.guykn.setsolver.imageprocessing.detect;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
-import com.guykn.setsolver.imageprocessing.classifiers.CardClassifier;
+import com.guykn.setsolver.imageprocessing.classify.CardAction;
+import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.set.SetCard;
+import com.guykn.setsolver.set.SetCardPosition;
 
+import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -14,7 +19,6 @@ import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
@@ -23,27 +27,35 @@ import java.util.List;
 import java.util.Random;
 
 public class SetCardFinder {
-    //todo: remove Hough transform code, remove the setConfig function since there's no need to change config.
     //todo: manage memory: make sure only things that are necessary are loaded into memory.
     //todo: make an interface to encompass important things about this class, and implement that interface here
+    //todo: replace needToDoX booleans with having or not having null as a value
+
     private Mat initialMat = new Mat();
     private Mat blurredMat = new Mat(); //same as initialMat, but in greyscale and with a gausian filter
     private Mat hierarchy = new Mat();
     private Mat cannyOutput = new Mat();
+    private Bitmap originalImageBitmap;
+
+    List<MatOfPoint> contours = new ArrayList<>();
+    @Deprecated
     private Mat houghLinesP = new Mat(); //lines after the P hough transform
+    @Deprecated
     private Mat houghLines = new Mat();
+    @Deprecated
     private List<Integer> indexOfNonSimilarHoughLines;
+    @Deprecated
     private List<RotatedRect> allCardRects;
-    private List<MatOfPoint> contours;
+    @Deprecated
     private List<Mat> croppedCards;
 
     private boolean needToDoGaussianFilter;
     private boolean needToDoCanny;
     private boolean needToFindContours;
+    @Deprecated
     private boolean needToDoHughLines_P;
+    @Deprecated
     private boolean needToDoHughLines;
-
-    private String imagePath;
     private Config config;
     private CardClassifier classifier;
     private Random rng = new Random(12789);
@@ -51,25 +63,43 @@ public class SetCardFinder {
 
     public enum BackgroundType {BLACK, ORIGINAL_IMAGE, EDGES}
 
-
-
-
-    public SetCardFinder(String imagePath, Config config, Context context) throws IOException {
+    public SetCardFinder(Bitmap originalImageBitmap, Config config, Context context) throws IOException {
         this.config = config;
-        this.imagePath = imagePath;
-        loadImage();
+        this.originalImageBitmap = originalImageBitmap;
+        this.context = context;
+
+        loadMat();
+        classifier = new CardClassifier(context, config);
+
         needToDoGaussianFilter = true;
         needToDoCanny = true;
         needToFindContours = true;
         needToDoHughLines_P = true;
         needToDoHughLines = true;
-        classifier = new CardClassifier(context, config);
     }
+
+    public SetCardFinder(String imagePath, Config config, Context context) throws IOException {
+        this(BitmapFactory.decodeFile(imagePath),
+                config, context);
+    }
+
+
+    /**
+     * Loads the initialMat by converting originalImageBitmap from Bitmap to Mat, and scaling it down to the correct size. Called by the constructor.
+     */
+    private void loadMat(){
+        Mat fullImage = new Mat();
+        Utils.bitmapToMat(originalImageBitmap, fullImage);
+        Size scaledDownSize = new Size(config.image.width,config.image.height);
+        Imgproc.resize(fullImage, initialMat, scaledDownSize, 0,0, Imgproc.INTER_AREA);
+    }
+
+
     @Deprecated
     public void setConfig(Config newConfig){
-        //todo: remove this probably
+        //todo: remove this properly
         if(!newConfig.image.equals(config.image)){
-            loadImage();
+            loadMat();
             needToDoGaussianFilter = true;
             needToDoCanny = true;
             needToFindContours = true;
@@ -99,17 +129,13 @@ public class SetCardFinder {
         config = newConfig;
     }
 
-    private void loadImage(){
-        Mat fullImage = Imgcodecs.imread(imagePath);
-        Size scaledDownSize = new Size(config.image.width,config.image.height);
-        Imgproc.resize(fullImage, initialMat, scaledDownSize, 0,0, Imgproc.INTER_AREA);
-    }
 
     /*Gausinan Filter************************************************************************/
     private void doGaussianFilterIfNecessary(){
         if(needToDoGaussianFilter){
             Imgproc.cvtColor(initialMat, blurredMat, Imgproc.COLOR_BGR2GRAY); //convert to greyscale
             Imgproc.blur(blurredMat, blurredMat, new Size(config.gaussianBlur.radius, config.gaussianBlur.radius));//users gausian blur to remove noise.
+            initialMat.release(); //removes the values of initialMal from memory, so that it doesn't waste memory.
             needToDoGaussianFilter = false;
         }
     }
@@ -123,6 +149,7 @@ public class SetCardFinder {
     private void doCannyEdgeDetectionIfNecessary(){
         if(needToDoCanny){
             Imgproc.Canny(blurredMat, cannyOutput, config.cannyEdgeDetection.threshold, config.cannyEdgeDetection.ratio*config.cannyEdgeDetection.threshold);
+            blurredMat.release(); //removes blurredMat from memory in order to save memory.
             needToDoCanny = false;
         }
     }
@@ -228,15 +255,15 @@ public class SetCardFinder {
             Mat reBlurredCanny = new Mat();
             Imgproc.blur(cannyOutput, reBlurredCanny, new Size(config.contours.reBlurRadius, config.contours.reBlurRadius));//re-apply a gausian blur to remove noise in the edges
             Imgproc.findContours(reBlurredCanny, contours, hierarchy, config.contours.hierarchyType, Imgproc.CHAIN_APPROX_SIMPLE);
-            findRectsFromContours();
             needToFindContours = false;
         }
     }
 
-    //todo: don't use lists, since they use unnecassary memory. Instead do a loop and let things to out of the when they need to
-    private void findRectsFromContours() {
-        allCardRects = new ArrayList<RotatedRect>();
-        croppedCards = new ArrayList<>();
+    /**
+     * Calls the doAction method on with a setCardPosition for every card found
+     * @param cardAction implements CardAction. calls the doAction(SetCard card) method on this for every card found.
+     */
+    public void doWithEveryCardFound(CardAction cardAction) {
         for (MatOfPoint contour : contours) {
             MatOfPoint2f f_contour = new MatOfPoint2f();
             contour.convertTo(f_contour, CvType.CV_32FC2); //convert to matofpoint2f
@@ -250,13 +277,17 @@ public class SetCardFinder {
                 double rectArea = rotatedRect.size.area();
                 System.out.println(rectArea);
                 if(rectArea > config.contours.minContourArea) {
-                    allCardRects.add(rotatedRect);
-                    Mat cropped = cropToRotatedRect(rotatedRect); //todo: remove this part, since we're using a SetCardPosition Object
-                    croppedCards.add(cropped);
+                    SetCardPosition position = SetCardPosition.fromRotatedRect(rotatedRect, config.image.width, config.image.height);
+                    cardAction.doAction(position);
                 }
             }
         }
     }
+
+    public
+
+
+
     //http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/, https://answers.opencv.org/question/497/extract-a-rotatedrect-area/
     @Deprecated
     private Mat cropToRotatedRect(RotatedRect rect){
@@ -318,6 +349,7 @@ public class SetCardFinder {
     }
 
     /*Card classification*******************************************************************/
+    @Deprecated
     public SetCard getCardClassifications(){
         doGaussianFilterIfNecessary();
         doCannyEdgeDetectionIfNecessary();
@@ -399,6 +431,7 @@ public class SetCardFinder {
         public GaussianBlur gaussianBlur = new GaussianBlur();
         public CannyEdgeDetection cannyEdgeDetection = new CannyEdgeDetection();
         public Contours contours = new Contours();
+        @Deprecated
         public HoughTransform houghTransform = new HoughTransform();
 
         public static Config  getDefaultConfig(){
