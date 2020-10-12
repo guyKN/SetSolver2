@@ -64,6 +64,7 @@ public class SetCardFinder {
     }
 
     public void setConfig(Config newConfig){
+        //todo: remove this probably
         if(!newConfig.image.equals(config.image)){
             loadImage();
             needToDoGaussianFilter = true;
@@ -129,6 +130,7 @@ public class SetCardFinder {
     }
 
     /*HoughLines************************************************************************/
+    @Deprecated
     private void doHoughLinesIfNecessary(){
         if(needToDoHughLines){
             System.out.println("inside function. RhoJump=" + config.houghTransform.rhoJump );
@@ -137,6 +139,7 @@ public class SetCardFinder {
             needToDoHughLines = false;
         }
     }
+    @Deprecated
     private void houghTransformRemoveSimilarLines(){
         indexOfNonSimilarHoughLines = new ArrayList<>();
         for(int i=0;i<houghLines.rows();i++){
@@ -157,18 +160,21 @@ public class SetCardFinder {
             }
         }
     }
+    @Deprecated
     private  boolean houghTransformCheckIfLinesAreNear(double rho0, double rho1, double theta0, double theta1){
         double dRho = rho0 - rho1;
         double dTheta = theta1 - theta0;
         return dRho < config.houghTransform.rhoSimilarityThreshold && dRho > -config.houghTransform.rhoSimilarityThreshold && dTheta < config.houghTransform.thetaSimilarityThreshold && dTheta > - config.houghTransform.thetaSimilarityThreshold;
     }
 
+    @Deprecated
     public Mat getHoughLinesDrawing(BackgroundType backgroundType){
         doGaussianFilterIfNecessary();
         doCannyEdgeDetectionIfNecessary();
         doHoughLinesIfNecessary();
         return drawHoughLines(backgroundType);
     }
+    @Deprecated
     private Mat drawHoughLines(BackgroundType backgroundType){
         Mat background = getMatFromBackgroundType(backgroundType);
         //for (int x : indexOfNonSimilarHoughLines) {
@@ -187,18 +193,21 @@ public class SetCardFinder {
     }
 
     /*HoughLines_P************************************************************************/
+    @Deprecated
     private void doHoughLinesIfNecessary_P(){
         if(needToDoHughLines_P){
             Imgproc.HoughLinesP(cannyOutput, houghLinesP, config.houghTransform.rhoJump, config.houghTransform.thetaJump,config.houghTransform.threshold,config.houghTransform.minLineLength,config.houghTransform.maxLineGap);
             needToDoHughLines_P = false;
         }
     }
+    @Deprecated
     public Mat getHoughLinesDrawing_P(BackgroundType backgroundType){
         doGaussianFilterIfNecessary();
         doCannyEdgeDetectionIfNecessary();
         doHoughLinesIfNecessary_P();
         return drawHoughLines_P(backgroundType);
     }
+    @Deprecated
     private Mat drawHoughLines_P(BackgroundType backgroundType){
         Mat background = getMatFromBackgroundType(backgroundType);
         for (int x = 0; x < houghLinesP.rows(); x++) {
@@ -369,6 +378,7 @@ public class SetCardFinder {
             }
         }
 
+        @Deprecated
         public static class HoughTransform{
             public int threshold = 100;
             public int minLineLength = 50;
