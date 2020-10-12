@@ -9,16 +9,15 @@ import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
 import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 
 import java.util.Locale;
-
 public class SetCard extends GenericRotatedRectangle {
     private SetCardColor color;
     private SetCardCount count;
     private SetCardFill fill;
     private SetCardShape shape;
 
-    protected SetCard(double centerX, double centerY, double width, double height, double angle,
+    protected SetCard(GenericRotatedRectangle rotatedRect,
             SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape) {
-        super(centerX, centerY, width, height, angle);
+        super(rotatedRect);
         this.color = color;
         this.count = count;
         this.fill = fill;

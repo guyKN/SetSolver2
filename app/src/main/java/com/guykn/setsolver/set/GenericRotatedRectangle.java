@@ -93,16 +93,17 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         );
     }
 
+    //Todo: check if there is a better implementation (Maybe Use a decorator pattern: https://en.wikipedia.org/wiki/Decorator_pattern)
     public SetCard toSetCard(SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape){
-        return new SetCard(centerX, centerY, width, height, angle, color, count, fill, shape);
+        return new SetCard(this, color, count, fill, shape);
     }
 
-    protected GenericRotatedRectangle(double centerX, double centerY, double width, double height, double angle) {
-        this.centerX = centerX;
-        this.centerY = centerY;
-        this.width = width;
-        this.height = height;
-        this.angle = angle;
+    protected GenericRotatedRectangle(GenericRotatedRectangle rotatedRect) {
+        this.centerX = rotatedRect.centerX;
+        this.centerY = rotatedRect.centerY;
+        this.width = rotatedRect.width;
+        this.height = rotatedRect.height;
+        this.angle = rotatedRect.angle;
     }
 
     public GenericRotatedRectangle(RotatedRect rect, int canvasWidth, int canvasHeight){
