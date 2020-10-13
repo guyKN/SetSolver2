@@ -7,7 +7,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.guykn.setsolver.imageprocessing.detect.SetCardFinder;
+import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 import com.guykn.setsolver.set.SetCard;
 
 import org.opencv.core.Mat;
@@ -30,11 +30,11 @@ public class ImageProcessingThreadManager {
         this.handler = handler;
     }
 
-    public boolean runImageProcessingThread(Uri imageUri, SetCardFinder.Config config){
+    public boolean runImageProcessingThread(Uri imageUri, ContourBasedCardDetector.Config config){
         String imagePath = imageUri.getPath();
         return runImageProcessingThread(imagePath, config);
     }
-    public boolean runImageProcessingThread(String imagePath, SetCardFinder.Config config){ // returns true of the thread has been started sucsessfully, returns false if the thread is already running.
+    public boolean runImageProcessingThread(String imagePath, ContourBasedCardDetector.Config config){ // returns true of the thread has been started sucsessfully, returns false if the thread is already running.
         if(!isImageProcessingThreadRunning()) {
             Log.i(TAG, "inside of if statement");
             mImageProcessingThread = new Thread(new ImageProcessingThread(imagePath, config));
@@ -51,18 +51,18 @@ public class ImageProcessingThreadManager {
     private class ImageProcessingThread implements Runnable{
         //todo: implement some sort of timeout, and allow interuptions from the outside
         private String imagePath;
-        private SetCardFinder.Config config;
+        private ContourBasedCardDetector.Config config;
 
-        public ImageProcessingThread(String imagePath, SetCardFinder.Config config){
+        public ImageProcessingThread(String imagePath, ContourBasedCardDetector.Config config){
             this.imagePath = imagePath;
             this.config = config;
         }
         @Override
         public void run(){
             try {
-                SetCardFinder setCardFinder = new SetCardFinder(imagePath, config, context);
-                Mat drawing = setCardFinder.getContourBoxDrawing(SetCardFinder.BackgroundType.ORIGINAL_IMAGE);
-                SetCard card = setCardFinder.getCardClassifications();
+                ContourBasedCardDetector cardDetector = new ContourBasedCardDetector(imagePath, config, context);
+                Mat drawing = cardDetector.getContourBoxDrawing(ContourBasedCardDetector.BackgroundType.ORIGINAL_IMAGE);
+                SetCard card = cardDetector.getCardClassifications();
 
                 //saves the image
                 ImageFileManager imageFileManager = new ImageFileManager(context);

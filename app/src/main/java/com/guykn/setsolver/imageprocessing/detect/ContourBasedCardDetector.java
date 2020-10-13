@@ -4,10 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.guykn.setsolver.imageprocessing.classify.CardAction;
-import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
-import com.guykn.setsolver.set.SetCard;
-import com.guykn.setsolver.set.GenericRotatedRectangle;
+import com.guykn.setsolver.drawing.RotatedRectangleList;
+import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -26,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class SetCardFinder {
+public class ContourBasedCardDetector implements CardDetector{
     //todo: manage memory: make sure only things that are necessary are loaded into memory.
     //todo: make an interface to encompass important things about this class, and implement that interface here
     //todo: replace needToDoX booleans with having or not having null as a value
@@ -35,9 +33,9 @@ public class SetCardFinder {
     private Mat blurredMat = new Mat(); //same as initialMat, but in greyscale and with a gausian filter
     private Mat hierarchy = new Mat();
     private Mat cannyOutput = new Mat();
-    private Bitmap originalImageBitmap;
 
     List<MatOfPoint> contours = new ArrayList<>();
+
     @Deprecated
     private Mat houghLinesP = new Mat(); //lines after the P hough transform
     @Deprecated
@@ -57,19 +55,15 @@ public class SetCardFinder {
     @Deprecated
     private boolean needToDoHughLines;
     private Config config;
-    private CardClassifier classifier;
     private Random rng = new Random(12789);
     private Context context;
 
     public enum BackgroundType {BLACK, ORIGINAL_IMAGE, EDGES}
 
-    public SetCardFinder(Bitmap originalImageBitmap, Config config, Context context) throws IOException {
+    public ContourBasedCardDetector(Bitmap originalImageBitmap, Config config, Context context) {
         this.config = config;
-        this.originalImageBitmap = originalImageBitmap;
         this.context = context;
-
-        loadMat();
-        classifier = new CardClassifier(context, config);
+        loadMatFromBitmap(originalImageBitmap);
 
         needToDoGaussianFilter = true;
         needToDoCanny = true;
@@ -78,28 +72,29 @@ public class SetCardFinder {
         needToDoHughLines = true;
     }
 
-    public SetCardFinder(String imagePath, Config config, Context context) throws IOException {
-        this(BitmapFactory.decodeFile(imagePath),
+    public ContourBasedCardDetector(String imagePath, Config config, Context context) throws IOException {
+        this(BitmapFactory.decodeFile(imagePath), //todo: load directly as Mat, rather than as Bitmap for slightly faster preformance
                 config, context);
     }
-
 
     /**
      * Loads the initialMat by converting originalImageBitmap from Bitmap to Mat, and scaling it down to the correct size. Called by the constructor.
      */
-    private void loadMat(){
+    private void loadMatFromBitmap(Bitmap bmp){
         Mat fullImage = new Mat();
-        Utils.bitmapToMat(originalImageBitmap, fullImage);
+        Utils.bitmapToMat(bmp, fullImage);
         Size scaledDownSize = new Size(config.image.width,config.image.height);
         Imgproc.resize(fullImage, initialMat, scaledDownSize, 0,0, Imgproc.INTER_AREA);
     }
 
 
+    /** This method probably doesn't work
+     * @param newConfig The new config
+     */
     @Deprecated
     public void setConfig(Config newConfig){
         //todo: remove this properly
         if(!newConfig.image.equals(config.image)){
-            loadMat();
             needToDoGaussianFilter = true;
             needToDoCanny = true;
             needToFindContours = true;
@@ -261,9 +256,10 @@ public class SetCardFinder {
 
     /**
      * Calls the doAction method on with a setCardPosition for every card found
-     * @param cardAction implements CardAction. calls the doAction(SetCard card) method on this for every card found.
+     * @param cardAction implements CardAction. calls the doAction(GenericRotatedRectangle position) method on this for every card found.
      */
-    public void doWithEveryCardFound(CardAction cardAction) {
+    public void findAllCardsAndDoAction(CardAction cardAction) {
+        findContoursIfNecessary();
         for (MatOfPoint contour : contours) {
             MatOfPoint2f f_contour = new MatOfPoint2f();
             contour.convertTo(f_contour, CvType.CV_32FC2); //convert to matofpoint2f
@@ -277,15 +273,23 @@ public class SetCardFinder {
                 double rectArea = rotatedRect.size.area();
                 System.out.println(rectArea);
                 if(rectArea > config.contours.minContourArea) {
-                    GenericRotatedRectangle position = new GenericRotatedRectangle(rotatedRect, config.image.width, config.image.height);
-                    cardAction.doAction(position);
+                    GenericRotatedRectangle cardPosition = new GenericRotatedRectangle(rotatedRect, config.image.width, config.image.height);
+                    cardAction.doAction(cardPosition);
                 }
             }
         }
     }
 
-    //here put a function to get all cards
-
+    /**
+     * Returns all cards on the board, as a RotatedRectangleList.
+     * Usually not recommended for use if you are trying to also process or classify those rectangles. For that, use findAllCardsAndDo action
+     * @return RotatedRectangleList: a list containing all rectangles on the image.
+     */
+    public RotatedRectangleList getAllCardRectangles(){
+        RotatedRectangleList allCardRectangles = new RotatedRectangleList();
+        findAllCardsAndDoAction(allCardRectangles);
+        return allCardRectangles;
+    }
 
 
 
@@ -310,12 +314,15 @@ public class SetCardFinder {
         Imgproc.getRectSubPix(rotated, rectSize, rect.center, cropped);
         return cropped;
     }
+    @Deprecated
     public Mat getContourDrawing(BackgroundType backgroundType){
         doGaussianFilterIfNecessary();
         doCannyEdgeDetectionIfNecessary();
         findContoursIfNecessary();
         return drawContours(backgroundType);
     }
+
+    @Deprecated
     private Mat drawContours(BackgroundType backgroundType){
         Mat canvas = getMatFromBackgroundType(backgroundType);
         for (int i = 0; i < contours.size(); i++) {
@@ -325,12 +332,14 @@ public class SetCardFinder {
         return canvas;
     }
 
+    @Deprecated
     public Mat getContourBoxDrawing(BackgroundType backgroundType){
         doGaussianFilterIfNecessary();
         doCannyEdgeDetectionIfNecessary();
         findContoursIfNecessary();
         return drawContourBoxes(backgroundType);
     }
+    @Deprecated
     private Mat drawContourBoxes(BackgroundType backgroundType){
         Mat canvas = getMatFromBackgroundType(backgroundType);
         for(RotatedRect rect:allCardRects){
@@ -343,6 +352,7 @@ public class SetCardFinder {
         }
         return canvas;
     }
+    @Deprecated
     public List<Mat> getCroppedCards(){
         doGaussianFilterIfNecessary();
         doCannyEdgeDetectionIfNecessary();
@@ -350,14 +360,6 @@ public class SetCardFinder {
         return croppedCards;
     }
 
-    /*Card classification*******************************************************************/
-    @Deprecated
-    public SetCard getCardClassifications(){
-        doGaussianFilterIfNecessary();
-        doCannyEdgeDetectionIfNecessary();
-        findContoursIfNecessary();
-        return classifier.classify(croppedCards.get(0));
-    }
 
     /*other functions************************************************************************/
     private Mat getMatFromBackgroundType(BackgroundType backgroundType){

@@ -3,6 +3,7 @@ package com.guykn.setsolver.set;
 
 import androidx.annotation.NonNull;
 
+import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
 import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
@@ -15,13 +16,15 @@ public class SetCard extends GenericRotatedRectangle {
     private SetCardFill fill;
     private SetCardShape shape;
 
-    protected SetCard(GenericRotatedRectangle rotatedRect,
-            SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape) {
+
+    //Todo: check if there is a better implementation (Maybe Use a decorator pattern: https://en.wikipedia.org/wiki/Decorator_pattern)
+    public SetCard(GenericRotatedRectangle rotatedRect,
+            PositionlessSetCard card) {
         super(rotatedRect);
-        this.color = color;
-        this.count = count;
-        this.fill = fill;
-        this.shape = shape;
+        this.color = card.getColor();
+        this.count = card.getCount();
+        this.fill = card.getFill();
+        this.shape = card.getShape();
     }
 
     public double getTotalCertainty(){

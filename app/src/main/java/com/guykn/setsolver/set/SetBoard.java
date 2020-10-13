@@ -1,5 +1,9 @@
 package com.guykn.setsolver.set;
 
-public class SetBoard {
+import com.guykn.setsolver.drawing.DrawableList;
 
+public class SetBoard extends DrawableList<SetCard> {
+    public void addCard(SetCard card){
+        addDrawable(card);
+    }
 }

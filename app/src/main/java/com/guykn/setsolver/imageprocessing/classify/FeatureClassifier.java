@@ -3,7 +3,7 @@ package com.guykn.setsolver.imageprocessing.classify;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import com.guykn.setsolver.imageprocessing.detect.SetCardFinder;
+import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
@@ -28,7 +28,7 @@ public class FeatureClassifier {
     public static final int NUM_CATEGORIES =3;
 
     private Context context;
-    private SetCardFinder.Config config;
+    private ContourBasedCardDetector.Config config;
     private String modelFilePath;
     private String labelsFilePath;
     private ImageProcessor imageProcessor;
@@ -36,7 +36,7 @@ public class FeatureClassifier {
     TensorProcessor probabilityProcessor;
     List<String> labelValues;
 
-    public FeatureClassifier(Context context, SetCardFinder.Config config, String modelDirectory) throws IOException {
+    public FeatureClassifier(Context context, ContourBasedCardDetector.Config config, String modelDirectory) throws IOException {
         this.context = context;
         this.config = config;
         this.modelFilePath = modelDirectory + MODEL_FILE_NAME;

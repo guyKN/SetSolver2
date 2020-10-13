@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.guykn.setsolver.ImageProcessingThreadManager.DisplayImageMessage;
-import com.guykn.setsolver.imageprocessing.detect.SetCardFinder;
+import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 
@@ -33,7 +33,7 @@ import org.opencv.android.OpenCVLoader;
 import java.io.File;
 import java.io.IOException;
 
-import static com.guykn.setsolver.imageprocessing.detect.SetCardFinder.Config.getDefaultConfig;
+import static com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector.Config.getDefaultConfig;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         runImageProceedingThread();
     }
     private void runImageProceedingThread(){
-        SetCardFinder.Config config =getDefaultConfig();
+        ContourBasedCardDetector.Config config =getDefaultConfig();
         //Log.i(TAG, "Min threshold: " + config.threshold1 + "\nMax threshold: " + config.threshold2+ "\nBlur Radius: " + config.gaussianBlurRadius);
         originalImageDisplay.setAlpha(0.5f);
         try {

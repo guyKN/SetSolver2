@@ -1,8 +1,6 @@
-package com.guykn.setsolver.interfaces;
+package com.guykn.setsolver.drawing;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 
 /**

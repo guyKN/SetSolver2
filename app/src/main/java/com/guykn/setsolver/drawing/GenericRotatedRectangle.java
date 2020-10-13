@@ -1,17 +1,10 @@
-package com.guykn.setsolver.set;
+package com.guykn.setsolver.drawing;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
-
-import com.guykn.setsolver.interfaces.DrawableOnCanvas;
-import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
-import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
-import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
-import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 
 import org.opencv.core.RotatedRect;
 
@@ -91,11 +84,6 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                 transformation,
                 true
         );
-    }
-
-    //Todo: check if there is a better implementation (Maybe Use a decorator pattern: https://en.wikipedia.org/wiki/Decorator_pattern)
-    public SetCard toSetCard(SetCardColor color, SetCardCount count, SetCardFill fill, SetCardShape shape){
-        return new SetCard(this, color, count, fill, shape);
     }
 
     protected GenericRotatedRectangle(GenericRotatedRectangle rotatedRect) {
