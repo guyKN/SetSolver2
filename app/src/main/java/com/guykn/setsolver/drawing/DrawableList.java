@@ -3,12 +3,17 @@ package com.guykn.setsolver.drawing;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class DrawableList<Drawable extends DrawableOnCanvas> implements DrawableOnCanvas{
     private static final int DEFAULT_TRIM_SIZE = 30;
 
-    protected List<Drawable> drawables;
+    protected List<Drawable> drawables = new ArrayList<>();
+
+    public List<Drawable> getDrawables(){
+        return drawables;
+    }
 
     protected void addDrawable(Drawable drawable){
         drawables.add(drawable);
@@ -16,6 +21,9 @@ public abstract class DrawableList<Drawable extends DrawableOnCanvas> implements
 
     @Override
     public void drawOnCanvas(Canvas canvas, Paint paint) {
+        if(drawables == null){
+            return;
+        }
         for(Drawable drawable: drawables){
             drawable.drawOnCanvas(canvas, paint);
         }

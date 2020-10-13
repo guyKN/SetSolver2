@@ -2,6 +2,7 @@ package com.guykn.setsolver;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.provider.MediaStore;
 
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -50,5 +51,10 @@ public class ImageFileManager {
     }
     public void saveImage(Mat mat){
         Imgcodecs.imwrite(getCurrentImagePath(), mat);
+    }
+
+
+    public void saveToGallery(Bitmap bmp){
+        MediaStore.Images.Media.insertImage(context.getContentResolver(), bmp, "An image", "longer description");
     }
 }

@@ -4,6 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,7 +28,9 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.guykn.setsolver.ImageProcessingThreadManager.DisplayImageMessage;
+import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
+import com.guykn.setsolver.test.GenericRotatedRectangleTest;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 
@@ -61,14 +67,23 @@ public class MainActivity extends AppCompatActivity {
                 case ImageProcessingThreadManager.MessageConstants.MESSAGE_SUCCESS:
                     Log.i(TAG, "msg has been recieved.");
                     DisplayImageMessage message = (DisplayImageMessage) msg.obj;
-                    String filePath = message.imagePath;
+                    DrawableOnCanvas drawable = message.drawable;
+                    Bitmap bitmapToDisplay = message.bitmap;
                     String stringToDisplay = message.stringToDisplay;
                     try {
-                        //recalculate.setVisibility(View.INVISIBLE); //todo: re-add
+                        recalculate.setVisibility(View.INVISIBLE);
                         imageLoadingProgressBar.setVisibility(View.GONE);
                         originalImageDisplay.setAlpha(1.0f);
-                        if(filePath != null) {
-                            displayImage(filePath, originalImageDisplay);
+                        if(drawable != null && bitmapToDisplay != null) {
+                            Canvas canvas = new Canvas(bitmapToDisplay);
+
+                            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                            paint.setColor(Color.RED);
+                            paint.setStyle(Paint.Style.FILL);
+                            paint.setStrokeWidth(100f);
+
+                            drawable.drawOnCanvas(canvas, paint);
+                            originalImageDisplay.setImageBitmap(bitmapToDisplay);
                         }else{
                             originalImageDisplay.setImageDrawable(null);
                         }
@@ -78,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
 
-                    } catch (IOException e) {
+                    } catch (NullPointerException e) {
                         e.printStackTrace();
                         showImageErrorMessage();
                         Log.i(TAG,"0");
@@ -109,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "Hello world");
+        runTest();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -264,8 +280,6 @@ public class MainActivity extends AppCompatActivity {
 
     /* UI Stuff -----------------------------------------------------------------------------------*/
 
-
-
     private void displayImage(String filePath, ImageView display) throws IOException{
         File im = new File(filePath);
         if(im.exists()){
@@ -289,6 +303,10 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getTransformation(CharSequence source, View view) {
             return source;
         }
+    }
+
+    private void runTest(){
+        GenericRotatedRectangleTest.test();
     }
 
 

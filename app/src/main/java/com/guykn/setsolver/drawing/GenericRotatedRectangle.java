@@ -5,16 +5,21 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.util.Log;
+
+import com.guykn.setsolver.MainActivity;
 
 import org.opencv.core.RotatedRect;
+
+import java.util.Locale;
 
 /**
  * Stores the location of a rotated rectangle in an image (Primary used to track where set cards are)
  * Is generic, meaning all values are stored as doubles from 0 to 1. This ensures that conversion between different canvases is easy.
  */
 public class GenericRotatedRectangle implements DrawableOnCanvas {
-    //todo: also allow to crop a bitmap to the position
-    //todo: also draw on a canvas in this class.
+
+    //todo: make delete comments completely, or add a boolean to check if they're needed
 
     private double centerX;
     private double centerY;
@@ -25,6 +30,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     @Override
     public void drawOnCanvas(Canvas canvas, Paint paint) {
+        Log.i(DrawableOnCanvas.TAG, "canvas width: " + canvas.getWidth() + "canvas height: " + canvas.getHeight());
         Point[] corners = getCorners(canvas.getWidth(), canvas.getHeight());
         for(int i=0;i<corners.length;i++){
             int iNext = (i+1)%corners.length;
@@ -38,19 +44,29 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         }
     }
 
+    @Deprecated
+    public Point[] getCornersTest(int canvasWidth, int CanvasHeight){
+        return getCorners(canvasWidth, CanvasHeight);
+    }
+
     private Point[] getCorners(int canvasWidth, int canvasHeight){
         double angleRadians = angle/180*Math.PI;
         double sin = Math.sin(angleRadians);
-        double cos = Math.sin(angleRadians);
+        double cos = Math.cos(angleRadians);
 
-        int segment1X = (int) (width / 2 * cos) * canvasWidth;
-        int segment1Y = (int) ((width / 2 * sin) * canvasHeight);
+        int segment1X = (int) ((width / 2 * cos) * canvasWidth);
+        int segment1Y = (int) (((width / 2 * sin) * canvasHeight));
 
         int segment2X = (int) ((height / 2 * (-sin)) * canvasWidth);
         int segment2Y = (int) ((height / 2 * cos) * canvasHeight);
 
         int adjustedCenterX = (int) (centerX * canvasWidth);
         int adjustedCenterY = (int) (centerY * canvasHeight);
+
+        Log.d(MainActivity.TAG,
+                String.format(Locale.US,
+                        "\nangleRadians: %s\nsin: %s\ncos: %s\nsegment1X: %s\nsegment1Y: %s\nsegment2X: %s\nsegment2Y: %s\nadjustedCenterX: %s\nadjustedCenterY: %s",
+                        angleRadians, sin, cos, segment1X, segment1Y, segment2X, segment2Y, adjustedCenterX, adjustedCenterY));
 
         Point p0 = new Point (adjustedCenterX + segment1X + segment2X,
                              adjustedCenterY + segment1Y + segment2Y);
@@ -65,14 +81,28 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     }
 
     public Bitmap cropToRect(Bitmap originalImage){
-        int adjustedCenterX = (int) centerX * originalImage.getWidth();
-        int adjustedCenterY = (int) centerY * originalImage.getHeight();
-        int adjustedWidth = (int) width * originalImage.getWidth();
-        int adjustedHeight = (int) height * originalImage.getHeight();
+        //todo: make sure this is working 100% right
+        /*
+        Log.d(DrawableOnCanvas.TAG,
+                String.format(Locale.US,
+                        "centerX: %s \ncenterY %s\nwidth: %s\nheight: %s",
+                        centerX, centerY, width, height));
+
+        Log.i(DrawableOnCanvas.TAG,
+                String.format(Locale.US,
+                        "Bitmap Width: %s, Bitmap Height: %s",
+                        originalImage.getWidth(), originalImage.getHeight()
+                        ));
+        */
+
+        int adjustedCenterX = (int) (centerX * originalImage.getWidth());
+        int adjustedCenterY = (int) (centerY * originalImage.getHeight());
+        int adjustedWidth = (int) (width * originalImage.getWidth());
+        int adjustedHeight = (int) (height * originalImage.getHeight());
+
 
         int cornerX = adjustedCenterX - (adjustedWidth / 2);
         int cornerY = adjustedCenterY - (adjustedHeight / 2);
-
         Matrix transformation = new Matrix();
         transformation.setRotate((float) angle, adjustedCenterX, adjustedCenterY);
         return Bitmap.createBitmap(
@@ -95,11 +125,28 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     }
 
     public GenericRotatedRectangle(RotatedRect rect, int canvasWidth, int canvasHeight){
-        centerX = rect.center.x / canvasWidth;
-        centerY = rect.center.x / canvasHeight;
-        width = rect.size.width/canvasWidth;
-        height = rect.size.height / canvasHeight;
+        centerX = ( (double) rect.center.x) / ( (double) canvasWidth);
+        centerY = ( (double) rect.center.y) / ( (double) canvasHeight);
+        width = ( (double) rect.size.width )/( (double) canvasWidth);
+        height = ( (double) rect.size.height) / ( (double) canvasHeight);
         angle = rect.angle;
+    }
+
+    public GenericRotatedRectangle(double centerX, double centerY, double width, double height, double angle){
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.width = width;
+        this.height = height;
+        this.angle = angle;
+    }
+
+    @Deprecated
+    public void printState(){
+        Log.d(MainActivity.TAG,
+                String.format(Locale.US,
+                        "\ncenterX: %s \ncenterY %s\nwidth: %s\nheight: %s\nangle: %s",
+                        centerX, centerY, width, height, angle));
+
     }
 
 }

@@ -143,6 +143,7 @@ public class ContourBasedCardDetector implements CardDetector{
     /*Canny Edge Detection************************************************************************/
     private void doCannyEdgeDetectionIfNecessary(){
         if(needToDoCanny){
+            doGaussianFilterIfNecessary();
             Imgproc.Canny(blurredMat, cannyOutput, config.cannyEdgeDetection.threshold, config.cannyEdgeDetection.ratio*config.cannyEdgeDetection.threshold);
             blurredMat.release(); //removes blurredMat from memory in order to save memory.
             needToDoCanny = false;
@@ -246,6 +247,7 @@ public class ContourBasedCardDetector implements CardDetector{
     /*contours************************************************************************/
     private void findContoursIfNecessary(){
         if(needToFindContours){
+            doCannyEdgeDetectionIfNecessary();
             contours = new ArrayList<>();
             Mat reBlurredCanny = new Mat();
             Imgproc.blur(cannyOutput, reBlurredCanny, new Size(config.contours.reBlurRadius, config.contours.reBlurRadius));//re-apply a gausian blur to remove noise in the edges

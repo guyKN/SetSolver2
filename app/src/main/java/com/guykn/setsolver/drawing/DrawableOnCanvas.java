@@ -7,6 +7,7 @@ import android.graphics.Paint;
  * Anything that can be drawn on a canvas implements this interface.
  */
 public interface DrawableOnCanvas {
+    String TAG = "DrawingDebug";
     public default void drawOnCanvas(Canvas canvas){
         drawOnCanvas(canvas, new Paint());
     };
