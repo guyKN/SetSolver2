@@ -82,37 +82,34 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     public Bitmap cropToRect(Bitmap originalImage){
         //todo: make sure this is working 100% right
-        /*
-        Log.d(DrawableOnCanvas.TAG,
-                String.format(Locale.US,
-                        "centerX: %s \ncenterY %s\nwidth: %s\nheight: %s",
-                        centerX, centerY, width, height));
-
-        Log.i(DrawableOnCanvas.TAG,
-                String.format(Locale.US,
-                        "Bitmap Width: %s, Bitmap Height: %s",
-                        originalImage.getWidth(), originalImage.getHeight()
-                        ));
-        */
 
         int adjustedCenterX = (int) (centerX * originalImage.getWidth());
         int adjustedCenterY = (int) (centerY * originalImage.getHeight());
         int adjustedWidth = (int) (width * originalImage.getWidth());
         int adjustedHeight = (int) (height * originalImage.getHeight());
 
-
         int cornerX = adjustedCenterX - (adjustedWidth / 2);
         int cornerY = adjustedCenterY - (adjustedHeight / 2);
+
         Matrix transformation = new Matrix();
         transformation.setRotate((float) angle, adjustedCenterX, adjustedCenterY);
-        return Bitmap.createBitmap(
+
+        Bitmap rotated = Bitmap.createBitmap( //todo: optimize performance by doing 1 transformation
                 originalImage,
+                0,
+                0,
+                originalImage.getWidth(),
+                originalImage.getWidth(),
+                transformation,
+                true
+        );
+
+        return Bitmap.createBitmap(
+                rotated,
                 cornerX,
                 cornerY,
                 adjustedWidth,
-                adjustedHeight,
-                transformation,
-                true
+                adjustedHeight
         );
     }
 
