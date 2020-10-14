@@ -30,7 +30,7 @@ import com.bumptech.glide.Glide;
 import com.guykn.setsolver.ImageProcessingThreadManager.DisplayImageMessage;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
-import com.guykn.setsolver.test.GenericRotatedRectangleTest;
+import com.guykn.setsolver.unittest.GenericRotatedRectangleTest;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 
@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "Hello world");
         runTest();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 

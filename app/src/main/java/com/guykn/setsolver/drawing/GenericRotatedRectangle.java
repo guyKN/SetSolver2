@@ -104,13 +104,14 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                 true
         );
 
-        return Bitmap.createBitmap(
+        Bitmap cropped = Bitmap.createBitmap(
                 rotated,
                 cornerX,
                 cornerY,
                 adjustedWidth,
                 adjustedHeight
         );
+        return cropped;
     }
 
     protected GenericRotatedRectangle(GenericRotatedRectangle rotatedRect) {
@@ -137,7 +138,9 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         this.angle = angle;
     }
 
-    @Deprecated
+    /**
+     * Prints all values in the class for debugging purposes
+     */
     public void printState(){
         Log.d(MainActivity.TAG,
                 String.format(Locale.US,

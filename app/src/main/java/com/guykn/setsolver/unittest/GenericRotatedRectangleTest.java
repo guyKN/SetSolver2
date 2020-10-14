@@ -1,4 +1,4 @@
-package com.guykn.setsolver.test;
+package com.guykn.setsolver.unittest;
 
 import android.graphics.Point;
 import android.util.Log;
