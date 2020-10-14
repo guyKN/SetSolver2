@@ -3,122 +3,138 @@ package com.guykn.setsolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.guykn.setsolver.callback.ImageProcessingThreadCallback;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
-import com.guykn.setsolver.drawing.GenericRotatedRectangle;
-import com.guykn.setsolver.drawing.RotatedRectangleList;
+import com.guykn.setsolver.imageprocessing.ImageProcessingManger;
+import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 
-import org.opencv.core.Mat;
-
-import java.io.IOException;
-
 public class ImageProcessingThreadManager {
-    //todo: move the handler into this class, make it implement an interface, and make MainActivity Implement an interface that this calls.
     public static String TAG = "ImageProcessingThreadManager";
-    public interface MessageConstants{
+    public interface WorkerThreadToUiMessageConstants { //todo: eliminate, and instead use a class for all data sent between thread
         int MESSAGE_HANDLER=0;
         int MESSAGE_SUCCESS=1;
         int MESSAGE_ERROR=2;
     }
+    public interface UiToWorkerThreadMessageConstants{ //todo: eliminate, and instead use a class for all data sent between thread
+        int MESSAGE_PROCESS_BYTE_ARRAY =0;
+        int MESSAGE_PROCESS_BITMAP = 1;
+        int MESSAGE_PROCESS_IMAGE_FILE=2;
+        int MESSAGE_TERMINATE_THREAD =3;
+    }
 
-    private Context context;
     private Thread mImageProcessingThread;
-    private Handler handler;
+    private Context context;
+    private ImageProcessingThreadCallback callback;
 
-    public ImageProcessingThreadManager(Context context, Handler handler){
+    private Handler workerThreadToUiHandler; //todo: make this thread-safe
+    private Handler uiToWorkerThreadHandler;
+
+
+    public ImageProcessingThreadManager(Context context, ImageProcessingThreadCallback callback, ContourBasedCardDetector.Config config){
         this.context = context;
-        this.handler = handler;
+        this.callback = callback;
+        mImageProcessingThread = new Thread(new ImageProcessingThread(config));
+
+        workerThreadToUiHandler = new Handler(Looper.getMainLooper()){
+            @Override
+            public void handleMessage(@NonNull Message msg){ //todo: seperate message and msg
+                ImageProcessingThreadMessage message;
+                switch (msg.what){
+                    case(WorkerThreadToUiMessageConstants.MESSAGE_SUCCESS):
+                        message = (ImageProcessingThreadMessage) msg.obj;
+                        callback.onImageProcessingSuccess(message);
+                        break;
+                    case(WorkerThreadToUiMessageConstants.MESSAGE_ERROR):
+                        message = (ImageProcessingThreadMessage) msg.obj;
+                        callback.onImageProcessingFailure(message);
+                        break;
+                }
+            }
+        };
     }
 
-    public boolean runImageProcessingThread(Uri imageUri, ContourBasedCardDetector.Config config){
-        String imagePath = imageUri.getPath();
-        return runImageProcessingThread(imagePath, config);
+    public void processImage(byte[] originalImageByteArray){
+        uiToWorkerThreadHandler.obtainMessage(UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_BYTE_ARRAY, originalImageByteArray).sendToTarget();
     }
-    public boolean runImageProcessingThread(String imagePath, ContourBasedCardDetector.Config config){ // returns true of the thread has been started sucsessfully, returns false if the thread is already running.
-        if(!isImageProcessingThreadRunning()) {
-            mImageProcessingThread = new Thread(new ImageProcessingThread(imagePath, config));
-            mImageProcessingThread.start();
-            return true;
-        }else{
-            return false;
-        }
+    public void processImage(Bitmap originalImageBitmap){
+        uiToWorkerThreadHandler.obtainMessage(UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_BITMAP, originalImageBitmap).sendToTarget();
     }
-    public boolean isImageProcessingThreadRunning(){
-        return mImageProcessingThread != null && !mImageProcessingThread.isAlive();
+    public void processImage(String imagePath){
+        uiToWorkerThreadHandler.obtainMessage(UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_IMAGE_FILE, imagePath).sendToTarget();
     }
+    //todo: add utilities, like checking if a thread is running, and terminating the thread
+
 
     private class ImageProcessingThread implements Runnable{
         //todo: implement some sort of timeout, and allow interuptions from the outside
-        private String imagePath;
         private ContourBasedCardDetector.Config config;
-
-        public ImageProcessingThread(String imagePath, ContourBasedCardDetector.Config config){
-            this.imagePath = imagePath;
+        public ImageProcessingThread(ContourBasedCardDetector.Config config){ //todo: allow config changes from outside
             this.config = config;
         }
+
         @Override
-        public void run(){
-            try {
-                Bitmap originalImage = BitmapFactory.decodeFile(imagePath);
-                if(originalImage == null){
-                    throw new IOException("The specified file does not exist");
-                }
-                ContourBasedCardDetector cardDetector = new ContourBasedCardDetector(originalImage, config, context);
-                RotatedRectangleList cardLocations = cardDetector.getAllCardRectangles();
-                Bitmap bitmapCopy = copyBitmap(originalImage);
-
-                // Saves every cropped image to the phone's media folder
-                ImageFileManager fileManager = new ImageFileManager(context);
-                for(GenericRotatedRectangle cardRect: cardLocations.getDrawables()){
-                    try {
-                        Bitmap cropped = cardRect.cropToRect(originalImage);
-                        Log.d(TAG, "image cropped");
-                        fileManager.saveToGallery(cropped);
-                    }catch (IllegalArgumentException e){
-                        cardRect.printState();
-                        e.printStackTrace();
+        public void run() {
+            //todo: implement looper and handler
+            Looper.prepare();
+            uiToWorkerThreadHandler = new Handler(Looper.myLooper()){
+                @Override
+                public void handleMessage(Message msg){
+                    Bitmap originalImage;
+                    switch(msg.what){
+                        case UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_BYTE_ARRAY:
+                            byte[] originalImageByteArray = (byte[]) msg.obj;
+                            originalImage = ImageProcessingManger.byteArrayToBitmap(originalImageByteArray);
+                            break;
+                        case UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_BITMAP:
+                            originalImage = (Bitmap) msg.obj;
+                        case(UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_IMAGE_FILE):
+                            String imagePath = (String) msg.obj;
+                            originalImage = BitmapFactory.decodeFile(imagePath);
+                            break;
+                        default:
+                            Log.w(MainActivity.TAG, "The specified message value was not found. "); //todo: better warning?
+                            return;
                     }
+                    processAndSendFromBitmap(originalImage);
                 }
-                originalImage.recycle();
-
-                DisplayImageMessage message = new DisplayImageMessage();
-                message.drawable = cardLocations;
-                message.bitmap = bitmapCopy;
-                handler.obtainMessage(MessageConstants.MESSAGE_SUCCESS, message).sendToTarget(); //sends the location of the current image and its classification to the UI thread
-            }catch (IOException e){
-                e.printStackTrace();
-                handler.obtainMessage(MessageConstants.MESSAGE_ERROR).sendToTarget(); // sends an error message to the current thread
-            }
+            };
+            Looper.loop();
         }
 
-        @Deprecated
-        public String saveImage(Bitmap drawing) throws IOException {
-            ImageFileManager imageFileManager = new ImageFileManager(context);
-            imageFileManager.createTempImage();
-            imageFileManager.saveImage(drawing);
-            return imageFileManager.getCurrentImagePath();
+        private void processAndSendFromBitmap(Bitmap originalImage){
+            CardDetector detector = new ContourBasedCardDetector(originalImage, config, context);
+            ImageProcessingManger manger = new ImageProcessingManger(detector, null);
+            DrawableOnCanvas result = manger.getCardPositions(originalImage);
+            Bitmap originalImageMutable = ImageProcessingManger.copyBitmapAsMutable(originalImage);
+            originalImage.recycle();
 
+            ImageProcessingThreadMessage message = new ImageProcessingThreadMessage();
+            message.drawable = result;
+            message.bitmap = originalImageMutable;
+
+            workerThreadToUiHandler.obtainMessage(WorkerThreadToUiMessageConstants.MESSAGE_SUCCESS, message).sendToTarget(); //sends the location of the current image and its classification to the UI thread
         }
-
-        private Bitmap copyBitmap(Bitmap src){
-            return src.copy(src.getConfig(), true);
-        }
-
-
 
     }
-    public static class DisplayImageMessage{
-        @Nullable
-        public String stringToDisplay = null;
+    public static class ImageProcessingThreadMessage { //todo: implement enum instead of relying on msg.what
         @Nullable
         public DrawableOnCanvas drawable = null;
         @Nullable
         public Bitmap bitmap = null;
+        @Nullable
+        public String messageToDisplay = null;
+        @Nullable
+        String errorMessage = null;
+        @Nullable
+        public Throwable error = null;
     }
 }

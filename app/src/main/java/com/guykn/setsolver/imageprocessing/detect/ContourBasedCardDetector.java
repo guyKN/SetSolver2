@@ -72,11 +72,6 @@ public class ContourBasedCardDetector implements CardDetector{
         needToDoHughLines = true;
     }
 
-    public ContourBasedCardDetector(String imagePath, Config config, Context context) throws IOException {
-        this(BitmapFactory.decodeFile(imagePath), //todo: load directly as Mat, rather than as Bitmap for slightly faster preformance
-                config, context);
-    }
-
     /**
      * Loads the initialMat by converting originalImageBitmap from Bitmap to Mat, and scaling it down to the correct size. Called by the constructor.
      */

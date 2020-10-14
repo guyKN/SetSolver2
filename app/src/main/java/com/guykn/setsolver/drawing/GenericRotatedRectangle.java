@@ -1,5 +1,6 @@
 package com.guykn.setsolver.drawing;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -7,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.util.Log;
 
+import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
 
 import org.opencv.core.RotatedRect;
@@ -42,6 +44,18 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                     paint
             );
         }
+    }
+
+    @Override
+    public void saveToGallery(ImageFileManager fileManager, Bitmap originalImage) {
+            try {
+                Bitmap cropped = cropToRect(originalImage);
+                fileManager.saveToGallery(cropped);
+            }catch (IllegalArgumentException e){
+                printState();
+                e.printStackTrace();
+            }
+
     }
 
     @Deprecated
@@ -80,7 +94,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         return new Point[] {p0,p1,p2,p3};
     }
 
-    public Bitmap cropToRect(Bitmap originalImage){
+    public Bitmap cropToRect(Bitmap originalImage) throws IllegalArgumentException{
         //todo: make sure this is working 100% right
 
         int adjustedCenterX = (int) (centerX * originalImage.getWidth());

@@ -1,7 +1,10 @@
 package com.guykn.setsolver.drawing;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+
+import com.guykn.setsolver.ImageFileManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +29,13 @@ public abstract class DrawableList<Drawable extends DrawableOnCanvas> implements
         }
         for(Drawable drawable: drawables){
             drawable.drawOnCanvas(canvas, paint);
+        }
+    }
+
+    @Override
+    public void saveToGallery(ImageFileManager fileManager, Bitmap originalImage){
+        for(DrawableOnCanvas drawable: drawables){
+            drawable.saveToGallery(fileManager, originalImage);
         }
     }
 

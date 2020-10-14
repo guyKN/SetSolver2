@@ -23,5 +23,9 @@ public abstract class CardClassifier implements CardAction {
         return new SetCard(cardRect, card);
     }
 
+    public SetBoard getBoard(){ //todo: maybe rename the SetBoard class
+        return board;
+    }
+
     protected abstract PositionlessSetCard classify(Bitmap cropped); //todo: figure out a proper type to return here
 }

@@ -27,7 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.guykn.setsolver.ImageProcessingThreadManager.DisplayImageMessage;
+import com.guykn.setsolver.ImageProcessingThreadManager.ImageProcessingThreadMessage;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 import com.guykn.setsolver.unittest.GenericRotatedRectangleTest;
@@ -42,6 +42,8 @@ import java.io.IOException;
 import static com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector.Config.getDefaultConfig;
 
 public class MainActivity extends AppCompatActivity {
+
+    //todo: properly encorperate the new ImageProcessingTHreadManager
 
     static final int REQUEST_TAKE_PHOTO = 1;
     static final int REQUEST_CROP_PHOTO = 2;
@@ -64,12 +66,12 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(Message msg){
             int messageCode = msg.what;
             switch (messageCode){
-                case ImageProcessingThreadManager.MessageConstants.MESSAGE_SUCCESS:
+                case ImageProcessingThreadManager.WorkerThreadToUiMessageConstants.MESSAGE_SUCCESS:
                     Log.i(TAG, "msg has been recieved.");
-                    DisplayImageMessage message = (DisplayImageMessage) msg.obj;
+                    ImageProcessingThreadMessage message = (ImageProcessingThreadMessage) msg.obj;
                     DrawableOnCanvas drawable = message.drawable;
                     Bitmap bitmapToDisplay = message.bitmap;
-                    String stringToDisplay = message.stringToDisplay;
+                    String stringToDisplay = message.messageToDisplay;
                     try {
                         recalculate.setVisibility(View.INVISIBLE);
                         imageLoadingProgressBar.setVisibility(View.GONE);
@@ -99,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.i(TAG,"0");
                     }
                     break;
-                case ImageProcessingThreadManager.MessageConstants.MESSAGE_ERROR:
+                case ImageProcessingThreadManager.WorkerThreadToUiMessageConstants.MESSAGE_ERROR:
                     showImageErrorMessage();
                     Log.i(TAG,"1");
                     break;
