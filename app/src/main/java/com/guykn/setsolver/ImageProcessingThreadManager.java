@@ -22,8 +22,9 @@ public class ImageProcessingThreadManager {
     //todo: move the handler into this class, make it implement an interface, and make MainActivity Implement an interface that this calls.
     public static String TAG = "ImageProcessingThreadManager";
     public interface MessageConstants{
-        int MESSAGE_SUCCESS=0;
-        int MESSAGE_ERROR=1;
+        int MESSAGE_HANDLER=0;
+        int MESSAGE_SUCCESS=1;
+        int MESSAGE_ERROR=2;
     }
 
     private Context context;
