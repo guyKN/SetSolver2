@@ -57,7 +57,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
             }
     }
 
-    private Bitmap cropToRect(Bitmap originalImage){
+    public Bitmap cropToRect(Bitmap originalImage){
         Cropper cropper = new Cropper(originalImage);
         return cropper.cropToRect();
     }
@@ -68,6 +68,8 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     }
 
     private Point[] getCorners(int canvasWidth, int canvasHeight){
+
+        printState();
         double angleRadians = angle/180*Math.PI;
         double sin = Math.sin(angleRadians);
         double cos = Math.cos(angleRadians);
@@ -81,11 +83,12 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         int adjustedCenterX = (int) (centerX * canvasWidth);
         int adjustedCenterY = (int) (centerY * canvasHeight);
 
+        /*
         Log.d(MainActivity.TAG,
                 String.format(Locale.US,
                         "\nangleRadians: %s\nsin: %s\ncos: %s\nsegment1X: %s\nsegment1Y: %s\nsegment2X: %s\nsegment2Y: %s\nadjustedCenterX: %s\nadjustedCenterY: %s",
                         angleRadians, sin, cos, segment1X, segment1Y, segment2X, segment2Y, adjustedCenterX, adjustedCenterY));
-
+        */
         Point p0 = new Point (adjustedCenterX + segment1X + segment2X,
                              adjustedCenterY + segment1Y + segment2Y);
         Point p1 = new Point(adjustedCenterX + segment1X - segment2X,

@@ -11,9 +11,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.callback.ImageProcessingThreadCallback;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
+import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManger;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
@@ -62,8 +64,8 @@ public class ImageProcessingThreadManager {
                 }
             }
         };
-
         mImageProcessingThread = new Thread(new ImageProcessingThread(config));
+        mImageProcessingThread.start();
 
     }
 
@@ -88,12 +90,14 @@ public class ImageProcessingThreadManager {
 
         @Override
         public void run() {
+            Log.i(MainActivity.TAG, "Handler Set Up");
             //todo: implement looper and handler
             Looper.prepare();
             uiToWorkerThreadHandler = new Handler(Objects.requireNonNull(
                     Looper.myLooper(), "Looper has not yet been set up.")){
                 @Override
                 public void handleMessage(@NonNull Message msg){
+                    Log.i(MainActivity.TAG, "Message Received");
                     Bitmap originalImage;
                     switch(msg.what){
                         case UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_BYTE_ARRAY:
@@ -113,19 +117,23 @@ public class ImageProcessingThreadManager {
                     processAndSendFromBitmap(originalImage);
                 }
             };
+            Log.i(MainActivity.TAG, "Handler Set Up");
             Looper.loop();
         }
 
         private void processAndSendFromBitmap(Bitmap originalImage){
             CardDetector detector = new ContourBasedCardDetector(originalImage, config, context);
             ImageProcessingManger manger = new ImageProcessingManger(detector, null);
-            DrawableOnCanvas result = manger.getCardPositions(originalImage);
+            RotatedRectangleList result = manger.getCardPositions(originalImage);
+            result.saveToGallery(new ImageFileManager(context), originalImage);
             Bitmap originalImageMutable = ImageProcessingManger.copyBitmapAsMutable(originalImage);
             originalImage.recycle();
 
             ImageProcessingThreadMessage message = new ImageProcessingThreadMessage();
             message.drawable = result;
             message.bitmap = originalImageMutable;
+            Log.d(MainActivity.TAG, "size of result: " + String.valueOf(result.getDrawables().size()));
+            Log.d(MainActivity.TAG, "amount of bytes: " + String.valueOf(originalImageMutable.getByteCount()));
 
             workerThreadToUiHandler.obtainMessage(WorkerThreadToUiMessageConstants.MESSAGE_SUCCESS, message).sendToTarget(); //sends the location of the current image and its classification to the UI thread
         }
@@ -139,7 +147,7 @@ public class ImageProcessingThreadManager {
         @Nullable
         public String messageToDisplay = null;
         @Nullable
-        String errorMessage = null;
+        public String errorMessage = null;
         @Nullable
         public Throwable error = null;
     }

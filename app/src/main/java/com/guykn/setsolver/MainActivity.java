@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.guykn.setsolver.callback.ImageProcessingThreadCallback;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager.ImageProcessingThreadMessage;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
@@ -42,7 +43,7 @@ import java.io.IOException;
 
 import static com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector.Config.getDefaultConfig;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ImageProcessingThreadCallback {
 
     //todo: properly encorperate the new ImageProcessingTHreadManager
 
@@ -62,72 +63,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView messageDisplay;
 
     private ImageProcessingThreadManager imThreadManager;
-    private Handler imageProcessingHandler = new Handler(Looper.getMainLooper()){
-        @Override
-        public void handleMessage(Message msg){
-            int messageCode = msg.what;
-            switch (messageCode){
-                case ImageProcessingThreadManager.WorkerThreadToUiMessageConstants.MESSAGE_SUCCESS:
-                    Log.i(TAG, "msg has been recieved.");
-                    ImageProcessingThreadMessage message = (ImageProcessingThreadMessage) msg.obj;
-                    DrawableOnCanvas drawable = message.drawable;
-                    Bitmap bitmapToDisplay = message.bitmap;
-                    String stringToDisplay = message.messageToDisplay;
-                    try {
-                        recalculate.setVisibility(View.INVISIBLE);
-                        imageLoadingProgressBar.setVisibility(View.GONE);
-                        originalImageDisplay.setAlpha(1.0f);
-                        if(drawable != null && bitmapToDisplay != null) {
-                            Canvas canvas = new Canvas(bitmapToDisplay);
 
-                            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                            paint.setColor(Color.RED);
-                            paint.setStyle(Paint.Style.FILL);
-                            paint.setStrokeWidth(100f);
-
-                            drawable.drawOnCanvas(canvas, paint);
-                            originalImageDisplay.setImageBitmap(bitmapToDisplay);
-                        }else{
-                            originalImageDisplay.setImageDrawable(null);
-                        }
-
-                        if(stringToDisplay !=null){
-                            messageDisplay.setText(stringToDisplay);
-                        }
-
-
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                        showImageErrorMessage();
-                        Log.i(TAG,"0");
-                    }
-                    break;
-                case ImageProcessingThreadManager.WorkerThreadToUiMessageConstants.MESSAGE_ERROR:
-                    showImageErrorMessage();
-                    Log.i(TAG,"1");
-                    break;
-
-            }
-        }
-    };
-
-    private TextWatcher showButtonOnEdit = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) { }
-        @Override
-        public void afterTextChanged(Editable s) {
-            if(currentCroppedImageFile != null && !imThreadManager.isImageProcessingThreadRunning()){
-                recalculate.setVisibility(View.VISIBLE);
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "Hello world");
-        runTest();
+        //runTest();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -143,13 +84,9 @@ public class MainActivity extends AppCompatActivity {
         minThresholdPicker.setTransformationMethod(new NumericKeyBoardTransformationMethod());
         ratioPicker.setTransformationMethod(new NumericKeyBoardTransformationMethod());
         blurRadiusPicker.setTransformationMethod(new NumericKeyBoardTransformationMethod());
-        //show the update button if the user changes any textbox //todo: make this actually work
-        minThresholdPicker.addTextChangedListener(showButtonOnEdit);
-        ratioPicker.addTextChangedListener(showButtonOnEdit);
-        ratioPicker.addTextChangedListener(showButtonOnEdit);
-
+        //show the update button if the user changes any textbox todo: make this actually work
         imageLoadingProgressBar.setVisibility(View.GONE);//make the progress bar disapear.
-        imThreadManager = new ImageProcessingThreadManager(getApplicationContext(),imageProcessingHandler);//initialize the image processing thread
+        imThreadManager = new ImageProcessingThreadManager(getApplicationContext(), this, getDefaultConfig());//initialize the image processing thread
 
         initOpenCV();
         //todo: save important variables in a bundle
@@ -260,13 +197,13 @@ public class MainActivity extends AppCompatActivity {
         originalImageDisplay.setAlpha(0.5f);
         try {
             displayImage(currentCroppedImageFile.getAbsolutePath(), originalImageDisplay);
+            imThreadManager.processImage(currentCroppedImageFile.getAbsolutePath());
         }catch (IOException e){
             e.printStackTrace();
             showImageErrorMessage();
             return;
         }
         imageLoadingProgressBar.setVisibility(View.VISIBLE);
-        imThreadManager.runImageProcessingThread(Uri.fromFile(currentCroppedImageFile), config);
 
 
     }
@@ -299,6 +236,52 @@ public class MainActivity extends AppCompatActivity {
         int duration = Toast.LENGTH_LONG;
         Toast toast = Toast.makeText(this, text, duration);
         toast.show();
+    }
+
+
+
+
+    @Override
+    public void onImageProcessingSuccess(ImageProcessingThreadMessage message) {
+        DrawableOnCanvas drawable = message.drawable;
+        Bitmap bitmapToDisplay = message.bitmap;
+        String stringToDisplay = message.messageToDisplay;
+        try {
+            recalculate.setVisibility(View.INVISIBLE);
+            imageLoadingProgressBar.setVisibility(View.GONE);
+            originalImageDisplay.setAlpha(1.0f);
+            if(drawable != null && bitmapToDisplay != null) {
+                Bitmap tempBackground = Bitmap.createBitmap(3000,3000, Bitmap.Config.ARGB_8888);
+                Log.d(TAG, "both aren't null!");
+                Canvas canvas = new Canvas(tempBackground);
+                Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                paint.setColor(Color.RED);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setStrokeWidth(20f);
+
+                drawable.drawOnCanvas(canvas, paint);
+                originalImageDisplay.setImageBitmap(tempBackground);
+            }else{
+                originalImageDisplay.setImageDrawable(null);
+            }
+
+            if(stringToDisplay !=null){
+                messageDisplay.setText(stringToDisplay);
+            }
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            showImageErrorMessage();
+            Log.i(TAG,"0");
+        }
+
+    }
+
+    @Override
+    public void onImageProcessingFailure(ImageProcessingThreadMessage message) {
+        showImageErrorMessage();
+        Log.i(TAG,"1");
+        messageDisplay.setText(message.errorMessage);
     }
 
     //class lets you have a textview with only numbers.
