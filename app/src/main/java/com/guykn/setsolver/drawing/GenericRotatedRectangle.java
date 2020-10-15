@@ -1,11 +1,11 @@
 package com.guykn.setsolver.drawing;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.Log;
 
 import com.guykn.setsolver.ImageFileManager;
@@ -55,7 +55,11 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                 printState();
                 e.printStackTrace();
             }
+    }
 
+    private Bitmap cropToRect(Bitmap originalImage){
+        Cropper cropper = new Cropper(originalImage);
+        return cropper.cropToRect();
     }
 
     @Deprecated
@@ -94,39 +98,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         return new Point[] {p0,p1,p2,p3};
     }
 
-    public Bitmap cropToRect(Bitmap originalImage) throws IllegalArgumentException{
-        //todo: make sure this is working 100% right
 
-        int adjustedCenterX = (int) (centerX * originalImage.getWidth());
-        int adjustedCenterY = (int) (centerY * originalImage.getHeight());
-        int adjustedWidth = (int) (width * originalImage.getWidth());
-        int adjustedHeight = (int) (height * originalImage.getHeight());
-
-        int cornerX = adjustedCenterX - (adjustedWidth / 2);
-        int cornerY = adjustedCenterY - (adjustedHeight / 2);
-
-        Matrix transformation = new Matrix();
-        transformation.setRotate((float) angle, adjustedCenterX, adjustedCenterY);
-
-        Bitmap rotated = Bitmap.createBitmap( //todo: optimize performance by doing 1 transformation
-                originalImage,
-                0,
-                0,
-                originalImage.getWidth(),
-                originalImage.getWidth(),
-                transformation,
-                true
-        );
-
-        Bitmap cropped = Bitmap.createBitmap(
-                rotated,
-                cornerX,
-                cornerY,
-                adjustedWidth,
-                adjustedHeight
-        );
-        return cropped;
-    }
 
     protected GenericRotatedRectangle(GenericRotatedRectangle rotatedRect) {
         this.centerX = rotatedRect.centerX;
@@ -160,6 +132,168 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                 String.format(Locale.US,
                         "\ncenterX: %s \ncenterY %s\nwidth: %s\nheight: %s\nangle: %s",
                         centerX, centerY, width, height, angle));
+
+    }
+
+    private class Cropper {
+        private int adjustedHeight;
+        private int adjustedWidth;
+        private Bitmap originalImage;
+
+        Rect originalImageRect;
+
+        Rect targetCropRect;
+        public Cropper(Bitmap originalImage){
+            this.originalImage = originalImage;
+            int originalImageWidth = originalImage.getWidth();
+            int originalImageHeight = originalImage.getHeight();
+
+            originalImageRect = new Rect(
+                    0,
+                    0,
+                    originalImageWidth,
+                    originalImageHeight
+            );
+
+            int adjustedCenterX = (int) (centerX * originalImageWidth);
+            int adjustedCenterY = (int) (centerY * originalImageHeight);
+            adjustedWidth = (int) (width * originalImageWidth);
+            adjustedHeight = (int) (height * originalImageHeight);
+
+            targetCropRect = new Rect(
+                    adjustedCenterX - adjustedWidth/2,
+                    adjustedCenterY - adjustedHeight/2,
+                    adjustedCenterX + adjustedWidth/2,
+                    adjustedCenterY + adjustedHeight/2
+            );
+        }
+
+        public Bitmap cropToRect() throws IllegalArgumentException{
+            //todo: make sure this is working 100% right
+
+            /*
+            To do this, we first crop the bitmap down to a square that contains all possible rotations of the rectangle.
+            If the square is outside of the range of the original bitmap, we fill in all blank spaces with black.
+            Then, we rotate the new bitmap based on the angle.
+            Finally, we crop this new bitmap exactly based on width and heigth.
+             */
+            Bitmap afterFirstCrop = doFirstCrop(originalImage);
+            Bitmap rotated = rotate(afterFirstCrop);
+            afterFirstCrop.recycle();
+            Bitmap out = doSecondCrop(rotated);
+            rotated.recycle(); //todo: make sure we're not recycling badly by accident
+            return out;
+        }
+
+        private Bitmap doFirstCrop(Bitmap src){
+            /*
+             the length of the diagonal is also the "radius" of the bitmap we're cropping to
+             so it's half of it's width/height
+            */
+
+            int diagonalLength = (int) findDiagonalLength(targetCropRect.width()/2, targetCropRect.height()/2);
+
+            Rect firstCropRect = new Rect(
+                    targetCropRect.centerX() - diagonalLength,
+                    targetCropRect.centerY() - diagonalLength,
+                    targetCropRect.centerX() + diagonalLength,
+                    targetCropRect.centerY() + diagonalLength
+            );
+
+            Bitmap cropped;
+
+            /*
+            check if rect we're trying to crop to is all within the image,
+             if not, add a buffer zone, and crop it
+             if yes, just crop it
+            */
+            if (originalImageRect.contains(firstCropRect)) {
+                return Bitmap.createBitmap(
+                        src,
+                        firstCropRect.left,
+                        firstCropRect.top,
+                        firstCropRect.width(),
+                        firstCropRect.height()
+                );
+            } else {
+                Rect firstCropRectInbounds = new Rect();
+                if(!firstCropRectInbounds.setIntersect(firstCropRect, originalImageRect)){
+                    throw new IllegalArgumentException("the rectangles don't intersect, so something must have gone wrong.");
+                }
+
+                int destinationRectLeft = firstCropRectInbounds.left - firstCropRect.left;
+                int destinationRectTop = firstCropRectInbounds.top - firstCropRect.top;
+                Rect destinationRect = new Rect(
+                        destinationRectLeft,
+                        destinationRectTop,
+                        destinationRectLeft+firstCropRectInbounds.width(),
+                        destinationRectTop+firstCropRectInbounds.height()
+                );
+
+                Bitmap canvasBitmap = Bitmap.createBitmap(
+                        diagonalLength*2,
+                        diagonalLength *2,
+                        Bitmap.Config.ARGB_8888
+                ); //creates a blank bitmap to draw into
+
+                Canvas canvas = new Canvas(canvasBitmap);
+                canvas.drawBitmap(
+                        src,
+                        firstCropRectInbounds,
+                        destinationRect,
+                        null
+                );
+                return canvasBitmap;
+            }
+        }
+
+        private Bitmap rotate(Bitmap src){
+            int srcWidth = src.getWidth();
+            int srcHeight = src.getHeight();
+
+            Matrix rotation = new Matrix();
+            rotation.setRotate(
+                    (float) angle,
+                    srcWidth/2f, //since the first crop always returns a bitmap whose center matches the center of the GenericRotatedRect,
+                    srcHeight/2f // our width and height of the center of rotation should be half
+            );
+
+            Bitmap rotated = Bitmap.createBitmap( //todo: optimize performance by doing 1 transformation
+                    originalImage,
+                    0,
+                    0,
+                    srcWidth,
+                    srcHeight,
+                    rotation,
+                    true
+            );
+            return rotated;
+        }
+
+        private Bitmap doSecondCrop(Bitmap src){
+            return Bitmap.createBitmap(
+                    src,
+                    targetCropRect.left,
+                    targetCropRect.top,
+                    targetCropRect.width(),
+                    targetCropRect.height());
+        }
+
+        /**
+         * Finds the diagonal of a rectangle using pythagarous's theorem.
+         * @param width the width of
+         * @param height the height of the rectangle
+         * @return the diagonal of the rectangle
+         */
+        private double findDiagonalLength(int width, int height){
+            return Math.sqrt(
+                    Math.pow(width, 2) +
+                    Math.pow(height, 2)
+            );
+        }
+
+
+
 
     }
 

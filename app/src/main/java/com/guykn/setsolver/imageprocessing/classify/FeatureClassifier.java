@@ -20,7 +20,7 @@ import java.nio.MappedByteBuffer;
 import java.util.List;
 
 public class FeatureClassifier {
-    //todo: create a class that extends this class, that spits out enums instead of ints with it's classify method
+    //todo: maybe use anodroid studio's built in tensorflow lite models
     private static final int MOBILENET_IMAGE_SIZE =224;
     private static final DataType INPUT_DATA_TYPE = DataType.FLOAT32;
     private static final String MODEL_FILE_NAME = "model.tflite";

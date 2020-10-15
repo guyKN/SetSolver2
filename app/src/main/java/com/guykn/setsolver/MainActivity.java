@@ -27,7 +27,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.guykn.setsolver.ImageProcessingThreadManager.ImageProcessingThreadMessage;
+import com.guykn.setsolver.threading.ImageProcessingThreadManager;
+import com.guykn.setsolver.threading.ImageProcessingThreadManager.ImageProcessingThreadMessage;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 import com.guykn.setsolver.unittest.GenericRotatedRectangleTest;

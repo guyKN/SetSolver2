@@ -1,4 +1,4 @@
-package com.guykn.setsolver;
+package com.guykn.setsolver.threading;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,11 +11,14 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.callback.ImageProcessingThreadCallback;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManger;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
+
+import java.util.Objects;
 
 public class ImageProcessingThreadManager {
     public static String TAG = "ImageProcessingThreadManager";
@@ -36,13 +39,12 @@ public class ImageProcessingThreadManager {
     private ImageProcessingThreadCallback callback;
 
     private Handler workerThreadToUiHandler; //todo: make this thread-safe
-    private Handler uiToWorkerThreadHandler;
+    private volatile Handler uiToWorkerThreadHandler; //todo: is the volitile keyword correct here
 
 
     public ImageProcessingThreadManager(Context context, ImageProcessingThreadCallback callback, ContourBasedCardDetector.Config config){
         this.context = context;
         this.callback = callback;
-        mImageProcessingThread = new Thread(new ImageProcessingThread(config));
 
         workerThreadToUiHandler = new Handler(Looper.getMainLooper()){
             @Override
@@ -60,6 +62,9 @@ public class ImageProcessingThreadManager {
                 }
             }
         };
+
+        mImageProcessingThread = new Thread(new ImageProcessingThread(config));
+
     }
 
     public void processImage(byte[] originalImageByteArray){
@@ -85,9 +90,10 @@ public class ImageProcessingThreadManager {
         public void run() {
             //todo: implement looper and handler
             Looper.prepare();
-            uiToWorkerThreadHandler = new Handler(Looper.myLooper()){
+            uiToWorkerThreadHandler = new Handler(Objects.requireNonNull(
+                    Looper.myLooper(), "Looper has not yet been set up.")){
                 @Override
-                public void handleMessage(Message msg){
+                public void handleMessage(@NonNull Message msg){
                     Bitmap originalImage;
                     switch(msg.what){
                         case UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_BYTE_ARRAY:
