@@ -8,4 +8,6 @@
     <string name="blur_radius">Blur Radius:</string>
     <string name="update_photo">update photo</string>
     <string name="recalculate_with_new_parameters">Recalculate With new parameters</string>
+    <string name="capture">Capture</string>
+    <string name="start_camera">Start Camera</string>
 </resources>

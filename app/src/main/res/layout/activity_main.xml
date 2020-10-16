@@ -81,6 +81,11 @@
         android:text="@string/recalculate_with_new_parameters"
         android:onClick="runImageProceedingThread"
         />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/start_camera"
+        android:onClick="startCameraActivity"/>
 
     <TextView
         android:layout_width="match_parent"

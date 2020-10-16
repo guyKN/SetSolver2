@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
-import com.guykn.setsolver.callback.ImageProcessingThreadCallback;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManger;

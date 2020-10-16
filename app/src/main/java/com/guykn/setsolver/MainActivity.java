@@ -10,12 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.provider.MediaStore;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
@@ -27,7 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.guykn.setsolver.callback.ImageProcessingThreadCallback;
+import com.guykn.setsolver.threading.ImageProcessingThreadCallback;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager.ImageProcessingThreadMessage;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
@@ -238,7 +233,10 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
         toast.show();
     }
 
-
+    public void startCameraActivity(View view) {
+        Intent intent = new Intent(this, CameraActivity.class);
+        startActivity(intent);
+    }
 
 
     @Override

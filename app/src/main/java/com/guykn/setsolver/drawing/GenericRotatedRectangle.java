@@ -139,6 +139,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     }
 
     private class Cropper {
+        //todo: optimize performance by doing 1 transformation
         private int adjustedHeight;
         private int adjustedWidth;
         private Bitmap originalImage;
@@ -172,7 +173,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         }
 
         public Bitmap cropToRect() throws IllegalArgumentException{
-            //todo: make sure this is working 100% right
+            //todo: make this work actually
 
             /*
             To do this, we first crop the bitmap down to a square that contains all possible rotations of the rectangle.
@@ -261,7 +262,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                     srcHeight/2f // our width and height of the center of rotation should be half
             );
 
-            Bitmap rotated = Bitmap.createBitmap( //todo: optimize performance by doing 1 transformation
+            Bitmap rotated = Bitmap.createBitmap(
                     originalImage,
                     0,
                     0,
