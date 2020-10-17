@@ -1,7 +1,7 @@
 package com.guykn.setsolver.set.setcardfeatures;
 
 public abstract class SetCardFeature<FeatureEnum extends SetCardFeatureEnum> {
-
+    //todo: implement check for equality with other featureEnums
     protected FeatureEnum getEnumFromId(int id){
         for(FeatureEnum featureEnum : getFeatureEnumValues()){
             if (featureEnum.getId() == id) {

@@ -25,7 +25,6 @@ public class SetCardOutlineView extends View {
     private void init(){
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setColor(Color.YELLOW);
-        mPaint.setStyle(Paint.Style.FILL);
         mPaint.setStrokeWidth(10f);
         mPaint.setStyle(Paint.Style.STROKE);
     }

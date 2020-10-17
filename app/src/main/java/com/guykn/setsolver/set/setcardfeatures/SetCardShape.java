@@ -6,8 +6,6 @@ import com.guykn.setsolver.imageprocessing.classify.FeatureClassifier;
 
 import java.util.Locale;
 
-//todo: make names shorter
-//todo: merge more code into multiple lines
 public class SetCardShape extends SetCardFeature<SetCardShape.SetCardShapeEnum> {
     public enum SetCardShapeEnum implements SetCardFeatureEnum {
             CIRCLE(0, "Circle"), DIAMOND(1, "Diamond"), S_SHAPE(2, "S-Shape");

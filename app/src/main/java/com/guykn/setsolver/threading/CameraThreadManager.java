@@ -1,21 +1,14 @@
 package com.guykn.setsolver.threading;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
-import android.graphics.YuvImage;
 import android.hardware.Camera;
-import android.util.Log;
 
-import com.guykn.setsolver.CameraActivity;
-import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
-import com.guykn.setsolver.ui.main.CameraFragment;
+import com.guykn.setsolver.imageprocessing.Config;
 
 public class CameraThreadManager extends ImageProcessingThreadManager implements Camera.PreviewCallback {
     private DelayChecker delayChecker;
     public CameraThreadManager(Context context, Callback callback,
-                               ContourBasedCardDetector.Config config, DelayChecker delayChecker) {
+                               Config config, DelayChecker delayChecker) {
         super(context, callback, config);
         this.delayChecker = delayChecker;
     }

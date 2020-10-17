@@ -17,7 +17,8 @@ import org.tensorflow.lite.Tensor;
 import java.nio.FloatBuffer;
 
 import static org.opencv.core.CvType.CV_32F;
-
+//todo: try using javaCv instead of opencv
+//todo: add static class that converts from types
 public class ImageProcessingManger {
     private CardDetector detector;
     private CardClassifier classifier;
@@ -48,7 +49,6 @@ public class ImageProcessingManger {
         return rgbMat;
     }
 
-    //todo: try javacv
 
     public static Bitmap matToBitmap(Mat mat){
         Bitmap bmp = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);

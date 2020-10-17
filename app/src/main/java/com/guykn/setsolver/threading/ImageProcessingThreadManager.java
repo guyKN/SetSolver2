@@ -10,11 +10,13 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManger;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
+import com.guykn.setsolver.imageprocessing.Config;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 
 import org.opencv.android.Utils;
@@ -26,18 +28,18 @@ import java.util.Objects;
 public class ImageProcessingThreadManager {
     public static String TAG = "ImageProcessingThreadManager";
 
-
-
+    //todo: make sure everything's thread safe
+    //todo: send config through the Handler rather than the constrocutor
     private Thread mImageProcessingThread;
     private Context context;
     private Callback callback;
     private ThreadSynchronized<Boolean> threadBusy = new ThreadSynchronized<>();
 
-    private Handler workerThreadToUiHandler; //todo: make this thread-safe
-    private volatile Handler uiToWorkerThreadHandler; //todo: is the volitile keyword correct here
+    private Handler workerThreadToUiHandler;
+    private volatile Handler uiToWorkerThreadHandler;
 
 
-    public ImageProcessingThreadManager(Context context, Callback callback, ContourBasedCardDetector.Config config){
+    public ImageProcessingThreadManager(Context context, Callback callback, Config config){
         this.context = context;
         this.callback = callback;
         threadBusy.set(false);
@@ -88,8 +90,8 @@ public class ImageProcessingThreadManager {
 
     private class ImageProcessingThread implements Runnable{
         //todo: implement some sort of timeout, and allow interuptions from the outside
-        private ContourBasedCardDetector.Config config;
-        public ImageProcessingThread(ContourBasedCardDetector.Config config){ //todo: allow config changes from outside
+        private Config config;
+        public ImageProcessingThread(Config config){ //todo: allow config changes from outside
             this.config = config;
         }
 
@@ -137,6 +139,7 @@ public class ImageProcessingThreadManager {
             CardDetector detector = new ContourBasedCardDetector(originalImage, config, context);
             ImageProcessingManger manger = new ImageProcessingManger(detector, null);
             RotatedRectangleList result = manger.getCardPositions();
+            result.saveToGallery(new ImageFileManager(context), originalImage);
             //result.saveToGallery(new ImageFileManager(context), originalImage);
             //Bitmap originalImageMutable = ImageProcessingManger.copyBitmapAsMutable(originalImage);
             //originalImage.recycle();
@@ -172,12 +175,18 @@ public class ImageProcessingThreadManager {
     }
 
     public static class UiToWorkerThreadMessage {
+        public UiToWorkerThreadMessage(@NonNull Config config) {
+            this.config = config;
+        }
+
         public interface MessageCodes{
             int PROCESS_BYTE_ARRAY =0;
             int PROCESS_BITMAP = 1;
             int PROCESS_IMAGE_fILE =2;
             int TERMINATE_THREAD =3;
         }
+        @NonNull
+        public Config config;
         @Nullable
         public byte[] imageByteArray;
         @Nullable

@@ -56,12 +56,18 @@ public class ImageFileManager {
 
 
     public void saveToGallery(Bitmap bmp){
-        MediaStore.Images.Media.insertImage(context.getContentResolver(), bmp, "An image", "longer description");
+        MediaStore.Images.Media.insertImage(context.getContentResolver(), bmp, getUniqueFileName(), "A longer description");
     }
 
     public void saveToGallery(Mat mat){
         Bitmap bmp = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(mat, bmp);
         saveToGallery(bmp);
+    }
+
+    private static String getUniqueFileName(){
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        return imageFileName;
     }
 }

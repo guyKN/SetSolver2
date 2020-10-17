@@ -2,11 +2,11 @@ package com.guykn.setsolver.imageprocessing.detect;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
+import com.guykn.setsolver.imageprocessing.Config;
 import com.guykn.setsolver.ui.main.CameraFragment;
 
 import org.opencv.android.Utils;
@@ -23,15 +23,15 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class ContourBasedCardDetector implements CardDetector{
     //todo: manage memory: make sure only things that are necessary are loaded into memory.
-    //todo: make an interface to encompass important things about this class, and implement that interface here
     //todo: replace needToDoX booleans with having or not having null as a value
+    //todo: remove @Deprecated functions and variables
+    //todo: use ML to check that cards are actually cards
 
     private Mat initialMat;
     private Mat blurredMat = new Mat(); //same as initialMat, but in greyscale and with a gausian filter
@@ -99,41 +99,6 @@ public class ContourBasedCardDetector implements CardDetector{
 
 
 
-    /** This method probably doesn't work
-     * @param newConfig The new config
-     */
-    @Deprecated
-    public void setConfig(Config newConfig){
-        //todo: remove this properly
-        if(!newConfig.image.equals(config.image)){
-            needToDoGaussianFilter = true;
-            needToDoCanny = true;
-            needToFindContours = true;
-            needToDoHughLines_P = true;
-            needToDoHughLines = true;
-        }
-        if(!newConfig.gaussianBlur.equals(config.gaussianBlur)){
-            needToDoGaussianFilter = true;
-            needToDoCanny = true;
-            needToFindContours = true;
-            needToDoHughLines_P = true;
-            needToDoHughLines = true;
-        }
-        if(!newConfig.cannyEdgeDetection.equals(config.cannyEdgeDetection)){
-            needToDoCanny = true;
-            needToFindContours=true;
-            needToDoHughLines_P = true;
-            needToDoHughLines = true;
-        }
-        if(!newConfig.contours.equals(config.contours)){
-            needToFindContours=true;
-        }
-        if(!newConfig.houghTransform.equals(config.houghTransform)){
-            needToDoHughLines = true;
-            needToDoHughLines_P = true;
-        }
-        config = newConfig;
-    }
 
 
     /*Gausinan Filter************************************************************************/
@@ -172,7 +137,7 @@ public class ContourBasedCardDetector implements CardDetector{
         if(needToDoHughLines){
             System.out.println("inside function. RhoJump=" + config.houghTransform.rhoJump );
             Imgproc.HoughLines(cannyOutput, houghLines, config.houghTransform.rhoJump, config.houghTransform.thetaJump, config.houghTransform.threshold);
-            //houghTransformRemoveSimilarLines(); //todo: add back
+            //houghTransformRemoveSimilarLines();
             needToDoHughLines = false;
         }
     }
@@ -394,84 +359,6 @@ public class ContourBasedCardDetector implements CardDetector{
     private Scalar randomColor(){
         return new Scalar(rng.nextInt(256), rng.nextInt(256), rng.nextInt(256));
     }
-
-    public static class Config {
-
-        public static class Image{
-            public int width =1000;
-            public int height = width*16/9;
-            public boolean equals(Image image){
-                return this.height == image.height && this.width == image.width;
-            }
-        }
-        public static class GaussianBlur{
-            public int radius = 3;
-            public boolean equals(GaussianBlur gaussianBlur){
-                return this.radius == gaussianBlur.radius;
-            }
-
-        }
-        public static class CannyEdgeDetection{
-            public int threshold = 50;
-            public float ratio = 2.0f;
-            public boolean equals(CannyEdgeDetection cannyEdgeDetection){
-                return this.threshold == cannyEdgeDetection.threshold && this.ratio == cannyEdgeDetection.ratio;
-            }
-
-        }
-
-        public static class Contours{
-            public int minContourPerimeter = 50;
-            public int minContourArea = 200;
-            public int reBlurRadius = 5;
-            public double epsilonMultiplier = 0.1;
-            public boolean useEpsilon = true;
-            public int hierarchyType = Imgproc.RETR_EXTERNAL;
-            public boolean equals(Contours contours){
-                return this.minContourPerimeter == contours.minContourPerimeter && this.reBlurRadius == contours.reBlurRadius && this.epsilonMultiplier == contours.epsilonMultiplier && this.useEpsilon == contours.useEpsilon;
-            }
-        }
-
-        @Deprecated
-        public static class HoughTransform{
-            public int threshold = 100;
-            public int minLineLength = 50;
-            public int maxLineGap = 10;
-            public double rhoSimilarityThreshold=30.0;
-            public int rhoJump =1;
-            public double thetaSimilarityThreshold = Math.PI/10;
-            public double thetaJump = Math.PI/180;
-            public boolean equals(HoughTransform houghTransform){ //todo: make it count other changed stuff
-                return this.threshold == houghTransform.threshold && this.minLineLength == houghTransform.minLineLength && this.maxLineGap == houghTransform.maxLineGap;
-            }
-        }
-        public Image image = new Image();
-        public GaussianBlur gaussianBlur = new GaussianBlur();
-        public CannyEdgeDetection cannyEdgeDetection = new CannyEdgeDetection();
-        public Contours contours = new Contours();
-        @Deprecated
-        public HoughTransform houghTransform = new HoughTransform();
-
-        public static Config  getDefaultConfig(){
-            Config cfg = new Config();
-            cfg.image.height=1000;
-            cfg.image.width = 1000;
-
-            cfg.gaussianBlur.radius = 7;
-            cfg.cannyEdgeDetection.threshold = 50;
-            cfg.cannyEdgeDetection.ratio = 2.0f;
-
-            cfg.contours.useEpsilon = false;
-            cfg.contours.reBlurRadius = 11;
-            cfg.contours.minContourPerimeter = 200;
-            cfg.contours.minContourArea = 1000;
-            cfg.contours.hierarchyType = Imgproc.RETR_EXTERNAL;
-
-            return cfg;
-        }
-
-    }
-
 
 
 }

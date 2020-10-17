@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProviders;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.hardware.Camera;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -21,7 +20,7 @@ import android.widget.Toast;
 
 import com.guykn.setsolver.R;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
-import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
+import com.guykn.setsolver.imageprocessing.Config;
 import com.guykn.setsolver.threading.CameraThreadManager;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
 import com.guykn.setsolver.threading.SimpleDelayChecker;
@@ -44,7 +43,7 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
         Log.d(TAG,"inside of updated program");
         super.onAttach(context);
         CameraThreadManager.DelayChecker delayChecker = new SimpleDelayChecker(200,50);
-        cameraThreadManager = new CameraThreadManager(context, this, ContourBasedCardDetector.Config.getDefaultConfig(), delayChecker);
+        cameraThreadManager = new CameraThreadManager(context, this, Config.getDefaultConfig(), delayChecker);
     }
 
 

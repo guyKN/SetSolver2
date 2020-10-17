@@ -24,17 +24,17 @@ import java.util.Locale;
  */
 public class GenericRotatedRectangle implements DrawableOnCanvas {
 
-    //todo: make delete comments completely, or add a boolean to check if they're needed
-
     private double centerX;
     private double centerY;
     private double width;
     private double height;
     private double angle;
 
-    //todo: implement a function that finds the dimensions of the actual rect for me
+    private static final boolean writeToConsole = false;
+
     @Override
     public void drawOnCanvas(Canvas canvas, Paint paint) {
+        //todo: make sure this works. It currently doesn't work completely and sometimes draws wierdly
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
@@ -53,8 +53,14 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         canvas.drawRect(rect, paint);
         canvas.restore();
 
-        /* todo: remove completely
-        Log.i(DrawableOnCanvas.TAG, "canvas width: " + canvas.getWidth() + "canvas height: " + canvas.getHeight());
+        if(writeToConsole) Log.i(DrawableOnCanvas.TAG, "canvas width: " + canvas.getWidth() + "canvas height: " + canvas.getHeight());
+
+
+    }
+
+    //todo: remove
+    @Deprecated
+    private  void oldDrawOnCanvas(Canvas canvas, Paint paint){
         Point[] corners = getCorners(canvas.getWidth(), canvas.getHeight());
         for(int i=0;i<corners.length;i++){
             int iNext = (i+1)%corners.length;
@@ -66,7 +72,6 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                     paint
             );
         }
-           */
 
     }
 
@@ -77,12 +82,12 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                 fileManager.saveToGallery(cropped);
             }catch (IllegalArgumentException e){
                 printState();
-                e.printStackTrace();
+                throw e;
             }
     }
 
     public Mat cropToRect(Mat initialMat){
-        //todo: remove unnecessary math, and use the mat directly from rotatedRect.
+        //todo: remove unnecessary math, by using the RotatedRect from OpenCv
         Size originalImageSize = initialMat.size();
         int originalImageWidth = (int) originalImageSize.width;
         int originalImageHeight = (int) originalImageSize.height;
@@ -132,12 +137,12 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         int adjustedCenterX = (int) (centerX * canvasWidth);
         int adjustedCenterY = (int) (centerY * canvasHeight);
 
-        /*
-        Log.d(MainActivity.TAG,
+
+        if(writeToConsole) Log.d(MainActivity.TAG,
                 String.format(Locale.US,
                         "\nangleRadians: %s\nsin: %s\ncos: %s\nsegment1X: %s\nsegment1Y: %s\nsegment2X: %s\nsegment2Y: %s\nadjustedCenterX: %s\nadjustedCenterY: %s",
                         angleRadians, sin, cos, segment1X, segment1Y, segment2X, segment2Y, adjustedCenterX, adjustedCenterY));
-        */
+
         Point p0 = new Point (adjustedCenterX + segment1X + segment2X,
                              adjustedCenterY + segment1Y + segment2Y);
         Point p1 = new Point(adjustedCenterX + segment1X - segment2X,
@@ -190,10 +195,10 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     /**
      * Currently doesn't work
+     * todo: remove
      */
     @Deprecated
     private class Cropper {
-        //todo: optimize performance by doing 1 transformation
         private int adjustedHeight;
         private int adjustedWidth;
         private Bitmap originalImage;
@@ -227,7 +232,6 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         }
 
         public Bitmap cropToRect() throws IllegalArgumentException{
-            //todo: make this work actually
 
             /*
             To do this, we first crop the bitmap down to a square that contains all possible rotations of the rectangle.
@@ -239,7 +243,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
             Bitmap rotated = rotate(afterFirstCrop);
             afterFirstCrop.recycle();
             Bitmap out = doSecondCrop(rotated);
-            rotated.recycle(); //todo: make sure we're not recycling badly by accident
+            rotated.recycle();
             return out;
         }
 

@@ -22,10 +22,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.guykn.setsolver.imageprocessing.Config;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager.WorkerThreadToUiMessage;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
-import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 import com.guykn.setsolver.unittest.GenericRotatedRectangleTest;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
@@ -35,7 +35,7 @@ import org.opencv.android.OpenCVLoader;
 import java.io.File;
 import java.io.IOException;
 
-import static com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector.Config.getDefaultConfig;
+import static com.guykn.setsolver.imageprocessing.Config.getDefaultConfig;
 
 public class MainActivity extends AppCompatActivity implements ImageProcessingThreadManager.Callback {
 
@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
         runImageProceedingThread();
     }
     private void runImageProceedingThread(){
-        ContourBasedCardDetector.Config config =getDefaultConfig();
+        Config config =getDefaultConfig();
         //Log.i(TAG, "Min threshold: " + config.threshold1 + "\nMax threshold: " + config.threshold2+ "\nBlur Radius: " + config.gaussianBlurRadius);
         originalImageDisplay.setAlpha(0.5f);
         try {

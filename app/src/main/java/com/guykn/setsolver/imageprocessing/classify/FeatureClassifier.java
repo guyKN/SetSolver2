@@ -3,7 +3,7 @@ package com.guykn.setsolver.imageprocessing.classify;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
+import com.guykn.setsolver.imageprocessing.Config;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
@@ -21,6 +21,7 @@ import java.util.List;
 
 public class FeatureClassifier {
     //todo: maybe use anodroid studio's built in tensorflow lite models
+    //todo: make this implement an interface for better functionality
     private static final int MOBILENET_IMAGE_SIZE =224;
     private static final DataType INPUT_DATA_TYPE = DataType.FLOAT32;
     private static final String MODEL_FILE_NAME = "model.tflite";
@@ -28,7 +29,7 @@ public class FeatureClassifier {
     public static final int NUM_CATEGORIES =3;
 
     private Context context;
-    private ContourBasedCardDetector.Config config;
+    private Config config;
     private String modelFilePath;
     private String labelsFilePath;
     private ImageProcessor imageProcessor;
@@ -36,7 +37,7 @@ public class FeatureClassifier {
     TensorProcessor probabilityProcessor;
     List<String> labelValues;
 
-    public FeatureClassifier(Context context, ContourBasedCardDetector.Config config, String modelDirectory) throws IOException {
+    public FeatureClassifier(Context context, Config config, String modelDirectory) throws IOException {
         this.context = context;
         this.config = config;
         this.modelFilePath = modelDirectory + MODEL_FILE_NAME;
