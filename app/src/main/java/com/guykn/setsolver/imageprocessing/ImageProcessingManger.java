@@ -8,6 +8,10 @@ import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.imageprocessing.detect.CardAction;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
 public class ImageProcessingManger {
     private CardDetector detector;
     private CardClassifier classifier;
@@ -17,7 +21,7 @@ public class ImageProcessingManger {
     }
 
 
-    public RotatedRectangleList getCardPositions(Bitmap originalImage){
+    public RotatedRectangleList getCardPositions(){
         return detector.getAllCardRectangles();
     }
 
@@ -32,6 +36,14 @@ public class ImageProcessingManger {
      */
     public static Bitmap copyBitmapAsMutable(Bitmap src){
         return src.copy(src.getConfig(), true);
+    }
+
+    public static Mat nv21ToRgbMat(byte[] data, int width, int height){
+        Mat nv21Mat = new Mat(height+height/2, width, CvType.CV_8UC1);
+        Mat rgbMat = new Mat(nv21Mat.height(), nv21Mat.width(), CvType.CV_8UC1);
+        nv21Mat.put(0,0, data);
+        Imgproc.cvtColor(nv21Mat, rgbMat, Imgproc.COLOR_YUV2RGB_NV21);
+        return rgbMat;
     }
 
 

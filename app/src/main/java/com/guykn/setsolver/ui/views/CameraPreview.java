@@ -2,21 +2,27 @@ package com.guykn.setsolver.ui.views;
 
 import android.content.Context;
 import android.hardware.Camera;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.guykn.setsolver.CameraActivity;
+import com.guykn.setsolver.MainActivity;
+import com.guykn.setsolver.ui.main.CameraFragment;
 
 import java.io.IOException;
 
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;
+    private Camera.PreviewCallback cameraPreviewCallback;
 
-    public CameraPreview(Context context, Camera camera) {
+    public CameraPreview(Context context, Camera.PreviewCallback cameraPreviewCallback) {
         super(context);
-        mCamera = camera;
-
+        this.cameraPreviewCallback = cameraPreviewCallback;
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
         mHolder = getHolder();
@@ -25,9 +31,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
-    public void surfaceCreated(SurfaceHolder holder) {
+    public void surfaceCreated(@NonNull SurfaceHolder holder) {
         // The Surface has been created, now tell the camera where to draw the preview.
         try {
+            mCamera = getCameraInstance();
+            if(mCamera == null){
+                Log.w(CameraFragment.TAG, "couldn't open camera");
+                return;
+            }
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
         } catch (IOException e) {
@@ -36,7 +47,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-        // empty. Take care of releasing the Camera preview in your activity.
+        if(mCamera == null){
+            return;
+        }
+        mCamera.release();
+        mCamera = null;
     }
 
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int w, int h) {
@@ -61,6 +76,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // start preview with new settings
         try {
             mCamera.setPreviewDisplay(mHolder);
+            mCamera.setPreviewCallback(cameraPreviewCallback);
             mCamera.startPreview();
 
         } catch (Exception e){
@@ -68,5 +84,17 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
+    @Nullable
+    private Camera getCameraInstance(){
+        Camera c = null;
+        try {
+            c = Camera.open(); // attempt to get a Camera instance
+        }
+        catch (Exception e){
+            // Camera is not available (in use or does not exist)
+            e.printStackTrace();
+        }
+        return c; // returns null if camera is unavailable
+    }
 
 }

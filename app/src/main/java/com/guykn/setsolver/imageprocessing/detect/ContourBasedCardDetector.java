@@ -3,20 +3,24 @@ package com.guykn.setsolver.imageprocessing.detect;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
+import com.guykn.setsolver.ui.main.CameraFragment;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
@@ -29,7 +33,7 @@ public class ContourBasedCardDetector implements CardDetector{
     //todo: make an interface to encompass important things about this class, and implement that interface here
     //todo: replace needToDoX booleans with having or not having null as a value
 
-    private Mat initialMat = new Mat();
+    private Mat initialMat;
     private Mat blurredMat = new Mat(); //same as initialMat, but in greyscale and with a gausian filter
     private Mat hierarchy = new Mat();
     private Mat cannyOutput = new Mat();
@@ -60,10 +64,14 @@ public class ContourBasedCardDetector implements CardDetector{
 
     public enum BackgroundType {BLACK, ORIGINAL_IMAGE, EDGES}
 
-    public ContourBasedCardDetector(Bitmap originalImageBitmap, Config config, Context context) {
+    public ContourBasedCardDetector(Mat mat, Config config, Context context){
         this.config = config;
         this.context = context;
-        loadMatFromBitmap(originalImageBitmap);
+
+        initialMat = new Mat();
+        Size scaledDownSize = new Size(config.image.width,config.image.height);
+        Log.d(CameraFragment.TAG, "h: " + scaledDownSize.height + " w: " + scaledDownSize.width);
+        Imgproc.resize(mat, initialMat, scaledDownSize, 0,0, Imgproc.INTER_AREA);
 
         needToDoGaussianFilter = true;
         needToDoCanny = true;
@@ -72,15 +80,23 @@ public class ContourBasedCardDetector implements CardDetector{
         needToDoHughLines = true;
     }
 
-    /**
-     * Loads the initialMat by converting originalImageBitmap from Bitmap to Mat, and scaling it down to the correct size. Called by the constructor.
-     */
-    private void loadMatFromBitmap(Bitmap bmp){
-        Mat fullImage = new Mat();
-        Utils.bitmapToMat(bmp, fullImage);
-        Size scaledDownSize = new Size(config.image.width,config.image.height);
-        Imgproc.resize(fullImage, initialMat, scaledDownSize, 0,0, Imgproc.INTER_AREA);
+
+
+    public static ContourBasedCardDetector fromBitmap(Bitmap originalImageBitmap, Config config, Context context) {
+        Mat initial = new Mat();
+        Utils.bitmapToMat(originalImageBitmap, initial);
+        return new ContourBasedCardDetector(initial, config, context);
     }
+    public static ContourBasedCardDetector fromFile(String filePath, Config config, Context context) {
+        Mat fileMat = Imgcodecs.imread(filePath);
+        return new ContourBasedCardDetector(fileMat, config, context);
+    }
+    public static ContourBasedCardDetector fromByteArray(byte[] imageByteArray, Config config, Context context){
+        Mat mat = Imgcodecs.imdecode(new MatOfByte(imageByteArray), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+        return new ContourBasedCardDetector(mat, config, context);
+    }
+
+
 
 
     /** This method probably doesn't work

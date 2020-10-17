@@ -22,9 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.guykn.setsolver.threading.ImageProcessingThreadCallback;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
-import com.guykn.setsolver.threading.ImageProcessingThreadManager.ImageProcessingThreadMessage;
+import com.guykn.setsolver.threading.ImageProcessingThreadManager.WorkerThreadToUiMessage;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 import com.guykn.setsolver.unittest.GenericRotatedRectangleTest;
@@ -38,7 +37,7 @@ import java.io.IOException;
 
 import static com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector.Config.getDefaultConfig;
 
-public class MainActivity extends AppCompatActivity implements ImageProcessingThreadCallback {
+public class MainActivity extends AppCompatActivity implements ImageProcessingThreadManager.Callback {
 
     //todo: properly encorperate the new ImageProcessingTHreadManager
 
@@ -240,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
 
 
     @Override
-    public void onImageProcessingSuccess(ImageProcessingThreadMessage message) {
+    public void onImageProcessingSuccess(WorkerThreadToUiMessage message) {
         DrawableOnCanvas drawable = message.drawable;
         Bitmap bitmapToDisplay = message.bitmap;
         String stringToDisplay = message.messageToDisplay;
@@ -276,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
     }
 
     @Override
-    public void onImageProcessingFailure(ImageProcessingThreadMessage message) {
+    public void onImageProcessingFailure(WorkerThreadToUiMessage message) {
         showImageErrorMessage();
         Log.i(TAG,"1");
         messageDisplay.setText(message.errorMessage);

@@ -8,6 +8,7 @@ android {
         noCompress "tflite"
     }
 
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -20,8 +21,11 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        renderscriptTargetApi 16
+        renderscriptSupportModeEnabled true
+
     }
 
     buildTypes {
@@ -49,4 +53,5 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite-task-vision:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-task-text:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-support:0.0.0-nightly'
+    //implementation 'io.github.silvaren:easyrs:0.5.3'
 }

@@ -17,18 +17,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.guykn.setsolver.R;
-import com.guykn.setsolver.threading.ImageProcessingThreadCallback;
+import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
+import com.guykn.setsolver.threading.CameraThreadManager;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
+import com.guykn.setsolver.threading.SimpleDelayChecker;
 import com.guykn.setsolver.ui.views.CameraPreview;
+import com.guykn.setsolver.ui.views.SetCardOutlineView;
 
-public class CameraFragment extends Fragment implements ImageProcessingThreadCallback {
-    private static final String TAG = "CameraFragment";
+public class CameraFragment extends Fragment implements ImageProcessingThreadManager.Callback {
+    public static final String TAG = "CameraFragment";
     private MainViewModel mViewModel;
-    private ImageProcessingThreadManager mThreadManager;
+    private CameraThreadManager cameraThreadManager;
     private CameraPreview mCameraPreview;
+    private SetCardOutlineView setCardOutlineView;
 
     public static CameraFragment newInstance() {
         return new CameraFragment();
@@ -36,8 +41,10 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadCal
 
     @Override
     public void onAttach(@NonNull Context context) {
+        Log.d(TAG,"inside of updated program");
         super.onAttach(context);
-        mThreadManager = new ImageProcessingThreadManager(context, this, ContourBasedCardDetector.Config.getDefaultConfig());
+        CameraThreadManager.DelayChecker delayChecker = new SimpleDelayChecker(200,50);
+        cameraThreadManager = new CameraThreadManager(context, this, ContourBasedCardDetector.Config.getDefaultConfig(), delayChecker);
     }
 
 
@@ -47,17 +54,18 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadCal
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.camera_fragment, container, false);
-        Camera camera = getCameraInstance();
         Context context = getContextFromParentActivity();
-        Log.d(TAG, "Creating camera.");
-        if(camera !=null && context != null){
+        if(context != null){
             Log.d(TAG, "both context and camera aren't null.");
-            mCameraPreview = new CameraPreview(context, camera);
+
+            mCameraPreview = new CameraPreview(context, cameraThreadManager);
             FrameLayout cameraFrame =  view.findViewById(R.id.camera_preview_frame);
             cameraFrame.addView(mCameraPreview);
+
+            setCardOutlineView = new SetCardOutlineView(context, null);
+            cameraFrame.addView(setCardOutlineView);
         }
         return view;
-
     }
 
 
@@ -69,27 +77,12 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadCal
     }
 
     private boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
-            // this device has a camera
-            return true;
-        } else {
-            // no camera on this device
-            return false;
-        }
+        // this device has a camera
+        // no camera on this device
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
 
-    /** A safe way to get an instance of the Camera object. */
-    public Camera getCameraInstance(){
-        Camera c = null;
-        try {
-            c = Camera.open(); // attempt to get a Camera instance
-        }
-        catch (Exception e){
-            // Camera is not available (in use or does not exist)
-            e.printStackTrace();
-        }
-        return c; // returns null if camera is unavailable
-    }
+
 
     @Nullable
     private Context getContextFromParentActivity(){
@@ -102,12 +95,15 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadCal
 
 
     @Override
-    public void onImageProcessingSuccess(ImageProcessingThreadManager.ImageProcessingThreadMessage message) {
-
+    public void onImageProcessingSuccess(ImageProcessingThreadManager.WorkerThreadToUiMessage message) {
+        DrawableOnCanvas drawable = message.drawable;
+        setCardOutlineView.setDrawable(drawable);
     }
 
     @Override
-    public void onImageProcessingFailure(ImageProcessingThreadManager.ImageProcessingThreadMessage message) {
-
+    public void onImageProcessingFailure(ImageProcessingThreadManager.WorkerThreadToUiMessage message) {
+        Activity parent = getActivity();
+        if(parent == null) return;
+        Toast.makeText(parent, "there was an error.", Toast.LENGTH_LONG).show();
     }
 }

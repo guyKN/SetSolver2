@@ -1,8 +1,7 @@
-package com.guykn.setsolver.threading;
+    package com.guykn.setsolver.threading;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -11,7 +10,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
@@ -19,45 +17,40 @@ import com.guykn.setsolver.imageprocessing.ImageProcessingManger;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
+
 import java.util.Objects;
 
 public class ImageProcessingThreadManager {
     public static String TAG = "ImageProcessingThreadManager";
-    public interface WorkerThreadToUiMessageConstants { //todo: eliminate, and instead use a class for all data sent between thread
-        int MESSAGE_HANDLER=0;
-        int MESSAGE_SUCCESS=1;
-        int MESSAGE_ERROR=2;
-    }
-    public interface UiToWorkerThreadMessageConstants{ //todo: eliminate, and instead use a class for all data sent between thread
-        int MESSAGE_PROCESS_BYTE_ARRAY =0;
-        int MESSAGE_PROCESS_BITMAP = 1;
-        int MESSAGE_PROCESS_IMAGE_FILE=2;
-        int MESSAGE_TERMINATE_THREAD =3;
-    }
+
+
 
     private Thread mImageProcessingThread;
     private Context context;
-    private ImageProcessingThreadCallback callback;
+    private Callback callback;
+    private ThreadSynchronized<Boolean> threadBusy = new ThreadSynchronized<>();
 
     private Handler workerThreadToUiHandler; //todo: make this thread-safe
     private volatile Handler uiToWorkerThreadHandler; //todo: is the volitile keyword correct here
 
 
-    public ImageProcessingThreadManager(Context context, ImageProcessingThreadCallback callback, ContourBasedCardDetector.Config config){
+    public ImageProcessingThreadManager(Context context, Callback callback, ContourBasedCardDetector.Config config){
         this.context = context;
         this.callback = callback;
+        threadBusy.set(false);
 
         workerThreadToUiHandler = new Handler(Looper.getMainLooper()){
             @Override
             public void handleMessage(@NonNull Message msg){ //todo: seperate message and msg
-                ImageProcessingThreadMessage message;
+                WorkerThreadToUiMessage message = (WorkerThreadToUiMessage) msg.obj;
                 switch (msg.what){
-                    case(WorkerThreadToUiMessageConstants.MESSAGE_SUCCESS):
-                        message = (ImageProcessingThreadMessage) msg.obj;
+                    case(WorkerThreadToUiMessage.MessageCodes.SUCCESS):
                         callback.onImageProcessingSuccess(message);
                         break;
-                    case(WorkerThreadToUiMessageConstants.MESSAGE_ERROR):
-                        message = (ImageProcessingThreadMessage) msg.obj;
+                    case(WorkerThreadToUiMessage.MessageCodes.ERROR):
                         callback.onImageProcessingFailure(message);
                         break;
                 }
@@ -68,15 +61,28 @@ public class ImageProcessingThreadManager {
 
     }
 
-    public void processImage(byte[] originalImageByteArray){
-        uiToWorkerThreadHandler.obtainMessage(UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_BYTE_ARRAY, originalImageByteArray).sendToTarget();
+    public void processImage(byte[] data, int width, int height){
+        UiToWorkerThreadMessage message = new UiToWorkerThreadMessage();
+        message.imageWidth = width;
+        message.imageHeight = height;
+        message.imageByteArray = data;
+        uiToWorkerThreadHandler.obtainMessage(UiToWorkerThreadMessage.MessageCodes.PROCESS_BYTE_ARRAY, message).sendToTarget();
     }
-    public void processImage(Bitmap originalImageBitmap){
-        uiToWorkerThreadHandler.obtainMessage(UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_BITMAP, originalImageBitmap).sendToTarget();
+    public void processImage(Bitmap bitmap){
+        UiToWorkerThreadMessage message = new UiToWorkerThreadMessage();
+        message.imageBitmap = bitmap;
+        uiToWorkerThreadHandler.obtainMessage(UiToWorkerThreadMessage.MessageCodes.PROCESS_BITMAP, message).sendToTarget();
     }
     public void processImage(String imagePath){
-        uiToWorkerThreadHandler.obtainMessage(UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_IMAGE_FILE, imagePath).sendToTarget();
+        UiToWorkerThreadMessage message = new UiToWorkerThreadMessage();
+        message.imagePath = imagePath;
+        uiToWorkerThreadHandler.obtainMessage(UiToWorkerThreadMessage.MessageCodes.PROCESS_IMAGE_fILE, message).sendToTarget();
     }
+
+    public boolean isThreadBusy(){
+        return threadBusy.get();
+    }
+
     //todo: add utilities, like checking if a thread is running, and terminating the thread
 
 
@@ -96,49 +102,63 @@ public class ImageProcessingThreadManager {
                     Looper.myLooper(), "Looper has not yet been set up.")){
                 @Override
                 public void handleMessage(@NonNull Message msg){
-                    Log.i(MainActivity.TAG, "Message Received");
-                    Bitmap originalImage;
-                    switch(msg.what){
-                        case UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_BYTE_ARRAY:
-                            byte[] originalImageByteArray = (byte[]) msg.obj;
-                            originalImage = ImageProcessingManger.byteArrayToBitmap(originalImageByteArray);
-                            break;
-                        case UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_BITMAP:
-                            originalImage = (Bitmap) msg.obj;
-                        case(UiToWorkerThreadMessageConstants.MESSAGE_PROCESS_IMAGE_FILE):
-                            String imagePath = (String) msg.obj;
-                            originalImage = BitmapFactory.decodeFile(imagePath);
-                            break;
-                        default:
-                            Log.w(MainActivity.TAG, "The specified message value was not found. "); //todo: better warning?
-                            return;
+                    try {
+                        threadBusy.set(true);
+                        Log.i(MainActivity.TAG, "Message Received");
+                        Mat originalImageMat;
+                        UiToWorkerThreadMessage message = (UiToWorkerThreadMessage) msg.obj;
+                        switch (msg.what) {
+                            case UiToWorkerThreadMessage.MessageCodes.PROCESS_BYTE_ARRAY:
+                                //Bitmap originalImageConvertedToBitmap = Nv21Image.nv21ToBitmap(rs,originalImageByteArray, 1000,1000);
+                                originalImageMat = ImageProcessingManger.nv21ToRgbMat(message.imageByteArray, message.imageWidth, message.imageHeight);
+                                break;
+                            case UiToWorkerThreadMessage.MessageCodes.PROCESS_BITMAP:
+                                originalImageMat = new Mat();
+                                Utils.bitmapToMat(message.imageBitmap, originalImageMat);
+                                break;
+                            case (UiToWorkerThreadMessage.MessageCodes.PROCESS_IMAGE_fILE):
+                                originalImageMat = Imgcodecs.imread(message.imagePath);
+                                break;
+                            default:
+                                Log.w(MainActivity.TAG, "The specified message value was not found. "); //todo: better warning?
+                                return;
+                        }
+                        processAndSendFromMat(originalImageMat);
+                    }finally {
+                        threadBusy.set(false);
                     }
-                    processAndSendFromBitmap(originalImage);
                 }
             };
             Log.i(MainActivity.TAG, "Handler Set Up");
             Looper.loop();
         }
 
-        private void processAndSendFromBitmap(Bitmap originalImage){
+        private void processAndSendFromMat(Mat originalImage){
             CardDetector detector = new ContourBasedCardDetector(originalImage, config, context);
             ImageProcessingManger manger = new ImageProcessingManger(detector, null);
-            RotatedRectangleList result = manger.getCardPositions(originalImage);
-            result.saveToGallery(new ImageFileManager(context), originalImage);
-            Bitmap originalImageMutable = ImageProcessingManger.copyBitmapAsMutable(originalImage);
-            originalImage.recycle();
+            RotatedRectangleList result = manger.getCardPositions();
+            //result.saveToGallery(new ImageFileManager(context), originalImage);
+            //Bitmap originalImageMutable = ImageProcessingManger.copyBitmapAsMutable(originalImage);
+            //originalImage.recycle();
 
-            ImageProcessingThreadMessage message = new ImageProcessingThreadMessage();
+            WorkerThreadToUiMessage message = new WorkerThreadToUiMessage();
             message.drawable = result;
-            message.bitmap = originalImageMutable;
-            Log.d(MainActivity.TAG, "size of result: " + String.valueOf(result.getDrawables().size()));
-            Log.d(MainActivity.TAG, "amount of bytes: " + String.valueOf(originalImageMutable.getByteCount()));
-
-            workerThreadToUiHandler.obtainMessage(WorkerThreadToUiMessageConstants.MESSAGE_SUCCESS, message).sendToTarget(); //sends the location of the current image and its classification to the UI thread
+            //message.bitmap = originalImageMutable;
+            workerThreadToUiHandler.obtainMessage(WorkerThreadToUiMessage.MessageCodes.SUCCESS, message).sendToTarget(); //sends the location of the current image and its classification to the UI thread
         }
 
     }
-    public static class ImageProcessingThreadMessage { //todo: implement enum instead of relying on msg.what
+
+
+
+
+    public static class WorkerThreadToUiMessage {
+        public interface MessageCodes {
+            int MESSAGE_HANDLER=0;
+            int SUCCESS =1;
+            int ERROR =2;
+        }
+
         @Nullable
         public DrawableOnCanvas drawable = null;
         @Nullable
@@ -150,4 +170,31 @@ public class ImageProcessingThreadManager {
         @Nullable
         public Throwable error = null;
     }
+
+    public static class UiToWorkerThreadMessage {
+        public interface MessageCodes{
+            int PROCESS_BYTE_ARRAY =0;
+            int PROCESS_BITMAP = 1;
+            int PROCESS_IMAGE_fILE =2;
+            int TERMINATE_THREAD =3;
+        }
+        @Nullable
+        public byte[] imageByteArray;
+        @Nullable
+        public Bitmap imageBitmap;
+        @Nullable
+        public String imagePath;
+        @Nullable
+        public Integer imageHeight;
+        @Nullable
+        public Integer imageWidth;
+
+
+    }
+
+    public static interface Callback {
+        public void onImageProcessingSuccess(WorkerThreadToUiMessage message);
+        public void onImageProcessingFailure(WorkerThreadToUiMessage message);
+    }
+
 }
