@@ -16,6 +16,7 @@ import com.guykn.setsolver.ui.main.CameraFragment;
 
 import java.io.IOException;
 
+//todo: handle exceptions and errors better
 @SuppressWarnings("deprecation")
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;

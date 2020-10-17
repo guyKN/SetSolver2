@@ -21,7 +21,7 @@ import java.util.List;
 
 public class FeatureClassifier {
     //todo: maybe use anodroid studio's built in tensorflow lite models
-    //todo: make this implement an interface for better functionality
+    //todo: make this implement an interface for better functionality, and then pass that interface into MachineLearningCardClassifier
     private static final int MOBILENET_IMAGE_SIZE =224;
     private static final DataType INPUT_DATA_TYPE = DataType.FLOAT32;
     private static final String MODEL_FILE_NAME = "model.tflite";
@@ -54,6 +54,7 @@ public class FeatureClassifier {
 
     }
 
+    //todo: convert to a tensorImage earlier, in order to be more efficent
     ClassificationResult classify(Bitmap image){
         TensorBuffer probabilityBuffer = TensorBuffer.createFixedSize(new int[]{1, NUM_CATEGORIES}, INPUT_DATA_TYPE);
         TensorImage tImage = new TensorImage(INPUT_DATA_TYPE);

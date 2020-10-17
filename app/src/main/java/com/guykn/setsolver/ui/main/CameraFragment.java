@@ -28,6 +28,7 @@ import com.guykn.setsolver.ui.views.CameraPreview;
 import com.guykn.setsolver.ui.views.SetCardOutlineView;
 
 public class CameraFragment extends Fragment implements ImageProcessingThreadManager.Callback {
+    //todo: allow user to take picture, and save that
     public static final String TAG = "CameraFragment";
     private MainViewModel mViewModel;
     private CameraThreadManager cameraThreadManager;

@@ -14,5 +14,6 @@ public class GenericRotatedRectangleTest {
         GenericRotatedRectangle rect = new GenericRotatedRectangle(0.5,0.5,0.25,0.25, 0);
         Point[] corners = rect.getCornersTest(100, 100);
         Log.d(TAG, Arrays.toString(corners));
+
     }
 }
