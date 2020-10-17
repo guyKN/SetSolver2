@@ -1,5 +1,6 @@
 package com.guykn.setsolver.ui.views;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.Camera;
 import android.util.Log;
@@ -15,6 +16,7 @@ import com.guykn.setsolver.ui.main.CameraFragment;
 
 import java.io.IOException;
 
+@SuppressWarnings("deprecation")
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;

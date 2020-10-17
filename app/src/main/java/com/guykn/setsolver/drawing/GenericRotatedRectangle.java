@@ -11,7 +11,10 @@ import android.util.Log;
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
 
+import org.opencv.core.Mat;
 import org.opencv.core.RotatedRect;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.Locale;
 
@@ -29,9 +32,28 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     private double height;
     private double angle;
 
-
+    //todo: implement a function that finds the dimensions of the actual rect for me
     @Override
     public void drawOnCanvas(Canvas canvas, Paint paint) {
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
+
+        int adjustedCenterX = (int) (centerX * canvasWidth);
+        int adjustedCenterY = (int) (centerY * canvasHeight);
+        int adjustedWidth = (int) (canvasWidth * width);
+        int adjustedHeight = (int) (canvasHeight * height);
+        Rect rect = new Rect(
+                adjustedCenterX - adjustedWidth/2,
+                adjustedCenterY - adjustedHeight/2,
+                adjustedCenterX + adjustedWidth/2,
+                adjustedCenterY + adjustedHeight/2
+        );
+        canvas.save();
+        canvas.rotate((float)angle, adjustedCenterX, adjustedCenterY);
+        canvas.drawRect(rect, paint);
+        canvas.restore();
+
+        /* todo: remove completely
         Log.i(DrawableOnCanvas.TAG, "canvas width: " + canvas.getWidth() + "canvas height: " + canvas.getHeight());
         Point[] corners = getCorners(canvas.getWidth(), canvas.getHeight());
         for(int i=0;i<corners.length;i++){
@@ -44,12 +66,14 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                     paint
             );
         }
+           */
+
     }
 
     @Override
-    public void saveToGallery(ImageFileManager fileManager, Bitmap originalImage) {
+    public void saveToGallery(ImageFileManager fileManager, Mat originalImage) {
             try {
-                Bitmap cropped = cropToRect(originalImage);
+                Mat cropped = cropToRect(originalImage);
                 fileManager.saveToGallery(cropped);
             }catch (IllegalArgumentException e){
                 printState();
@@ -57,10 +81,35 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
             }
     }
 
-    public Bitmap cropToRect(Bitmap originalImage){
-        Cropper cropper = new Cropper(originalImage);
-        return cropper.cropToRect();
+    public Mat cropToRect(Mat initialMat){
+        //todo: remove unnecessary math, and use the mat directly from rotatedRect.
+        Size originalImageSize = initialMat.size();
+        int originalImageWidth = (int) originalImageSize.width;
+        int originalImageHeight = (int) originalImageSize.height;
+
+        int adjustedWidth = (int) (originalImageWidth * width);
+        int adjustedHeight = (int) (originalImageHeight * height);
+        int adjustedCenterX = (int) (originalImageWidth*centerX);
+        int adjustedCenterY = (int) (originalImageHeight*centerY);
+        Size rectSize = new Size(adjustedWidth, adjustedHeight);
+        org.opencv.core.Point center = new org.opencv.core.Point(adjustedCenterX, adjustedCenterY);
+
+        Mat M = new Mat();
+        Mat rotated = new Mat();
+        Mat cropped = new Mat();
+        if(angle<-45.0){
+            angle+=90;
+            //swap the width and height
+            double temp = rectSize.width;
+            rectSize.width = rectSize.height;
+            rectSize.height = temp;
+        }
+        M = Imgproc.getRotationMatrix2D(center, angle, 1.0);
+        Imgproc.warpAffine(initialMat, rotated,M, initialMat.size(), Imgproc.INTER_CUBIC);
+        Imgproc.getRectSubPix(rotated, rectSize, center, cropped);
+        return cropped;
     }
+
 
     @Deprecated
     public Point[] getCornersTest(int canvasWidth, int CanvasHeight){
@@ -138,6 +187,11 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     }
 
+
+    /**
+     * Currently doesn't work
+     */
+    @Deprecated
     private class Cropper {
         //todo: optimize performance by doing 1 transformation
         private int adjustedHeight;

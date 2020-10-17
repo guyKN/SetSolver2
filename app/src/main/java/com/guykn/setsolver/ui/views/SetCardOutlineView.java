@@ -27,6 +27,7 @@ public class SetCardOutlineView extends View {
         mPaint.setColor(Color.YELLOW);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setStrokeWidth(10f);
+        mPaint.setStyle(Paint.Style.STROKE);
     }
 
     public void setDrawable(DrawableOnCanvas drawable){

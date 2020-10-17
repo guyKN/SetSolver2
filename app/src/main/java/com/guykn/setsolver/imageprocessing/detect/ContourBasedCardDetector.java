@@ -319,6 +319,7 @@ public class ContourBasedCardDetector implements CardDetector{
             angle+=90;
             //swap the width and height
             double temp = rectSize.width;
+            //noinspection SuspiciousNameCombination
             rectSize.width = rectSize.height;
             rectSize.height = temp;
         }

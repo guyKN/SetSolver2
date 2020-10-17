@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.provider.MediaStore;
 
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
@@ -56,5 +57,11 @@ public class ImageFileManager {
 
     public void saveToGallery(Bitmap bmp){
         MediaStore.Images.Media.insertImage(context.getContentResolver(), bmp, "An image", "longer description");
+    }
+
+    public void saveToGallery(Mat mat){
+        Bitmap bmp = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mat, bmp);
+        saveToGallery(bmp);
     }
 }

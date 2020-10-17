@@ -7,6 +7,8 @@ import android.graphics.Paint;
 
 import com.guykn.setsolver.ImageFileManager;
 
+import org.opencv.core.Mat;
+
 /**
  * Anything that can be drawn on a canvas implements this interface.
  */
@@ -16,6 +18,6 @@ public interface DrawableOnCanvas { //todo: find a better class name
         drawOnCanvas(canvas, new Paint());
     };
     public void drawOnCanvas(Canvas canvas, Paint paint);
-    public void saveToGallery(ImageFileManager fileManager, Bitmap originalImage);
+    public void saveToGallery(ImageFileManager fileManager, Mat originalImage);
 
 }

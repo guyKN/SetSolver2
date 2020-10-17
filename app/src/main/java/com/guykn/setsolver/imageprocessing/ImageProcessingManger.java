@@ -8,9 +8,15 @@ import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.imageprocessing.detect.CardAction;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 
+import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+import org.tensorflow.lite.Tensor;
+
+import java.nio.FloatBuffer;
+
+import static org.opencv.core.CvType.CV_32F;
 
 public class ImageProcessingManger {
     private CardDetector detector;
@@ -23,10 +29,6 @@ public class ImageProcessingManger {
 
     public RotatedRectangleList getCardPositions(){
         return detector.getAllCardRectangles();
-    }
-
-    public static Bitmap byteArrayToBitmap(byte[] imageByteArray){
-        return BitmapFactory.decodeByteArray(imageByteArray , 0, imageByteArray.length);
     }
 
     /**
@@ -44,6 +46,14 @@ public class ImageProcessingManger {
         nv21Mat.put(0,0, data);
         Imgproc.cvtColor(nv21Mat, rgbMat, Imgproc.COLOR_YUV2RGB_NV21);
         return rgbMat;
+    }
+
+    //todo: try javacv
+
+    public static Bitmap matToBitmap(Mat mat){
+        Bitmap bmp = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mat, bmp);
+        return bmp;
     }
 
 

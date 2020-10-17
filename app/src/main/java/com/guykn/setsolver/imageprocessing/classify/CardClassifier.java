@@ -3,13 +3,16 @@ package com.guykn.setsolver.imageprocessing.classify;
 import android.graphics.Bitmap;
 
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
+import com.guykn.setsolver.imageprocessing.ImageProcessingManger;
 import com.guykn.setsolver.imageprocessing.detect.CardAction;
 import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.SetBoard;
 import com.guykn.setsolver.set.SetCard;
 
+import org.opencv.core.Mat;
+
 public abstract class CardClassifier implements CardAction {
-    protected Bitmap originalImageBitmap;
+    protected Mat originalImageMat;
     private SetBoard board;
     @Override
     public void doAction(GenericRotatedRectangle cardRect) {
@@ -18,8 +21,9 @@ public abstract class CardClassifier implements CardAction {
     }
 
     public SetCard classify(GenericRotatedRectangle cardRect){
-        Bitmap cropped = cardRect.cropToRect(originalImageBitmap);//crops the bitmap to contain just the rectangle specified
-        PositionlessSetCard card = classify(cropped);
+        Mat cropped = cardRect.cropToRect(originalImageMat);//crops the bitmap to contain just the rectangle specified
+        Bitmap croppedBitmap = ImageProcessingManger.matToBitmap(cropped);
+        PositionlessSetCard card = classify(croppedBitmap);
         return new SetCard(cardRect, card);
     }
 
