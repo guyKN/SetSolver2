@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.R;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.imageprocessing.Config;
@@ -28,7 +29,8 @@ import com.guykn.setsolver.ui.views.CameraPreview;
 import com.guykn.setsolver.ui.views.SetCardOutlineView;
 
 public class CameraFragment extends Fragment implements ImageProcessingThreadManager.Callback {
-    //todo: allow user to take picture, and save that
+    //todo: allow user to take picture, and save the sections of the picture
+    //todo: use the MainViewModel for config
     public static final String TAG = "CameraFragment";
     private MainViewModel mViewModel;
     private CameraThreadManager cameraThreadManager;
@@ -44,7 +46,7 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
         Log.d(TAG,"inside of updated program");
         super.onAttach(context);
         CameraThreadManager.DelayChecker delayChecker = new SimpleDelayChecker(200,50);
-        cameraThreadManager = new CameraThreadManager(context, this, Config.getDefaultConfig(), delayChecker);
+        cameraThreadManager = new CameraThreadManager(context, this, delayChecker);
     }
 
 
@@ -95,15 +97,16 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
 
 
     @Override
-    public void onImageProcessingSuccess(ImageProcessingThreadManager.WorkerThreadToUiMessage message) {
-        DrawableOnCanvas drawable = message.drawable;
+    public void onImageProcessingSuccess(DrawableOnCanvas drawable) {
+        Log.i(MainActivity.TAG, "Message recieved in CameraFragment.");
         setCardOutlineView.setDrawable(drawable);
     }
 
     @Override
-    public void onImageProcessingFailure(ImageProcessingThreadManager.WorkerThreadToUiMessage message) {
+    public void onImageProcessingFailure(Exception e) {
         Activity parent = getActivity();
         if(parent == null) return;
         Toast.makeText(parent, "there was an error.", Toast.LENGTH_LONG).show();
+        e.printStackTrace();
     }
 }

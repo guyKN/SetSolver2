@@ -24,7 +24,6 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.guykn.setsolver.imageprocessing.Config;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
-import com.guykn.setsolver.threading.ImageProcessingThreadManager.WorkerThreadToUiMessage;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.unittest.GenericRotatedRectangleTest;
 import com.yalantis.ucrop.UCrop;
@@ -38,8 +37,7 @@ import java.io.IOException;
 import static com.guykn.setsolver.imageprocessing.Config.getDefaultConfig;
 
 public class MainActivity extends AppCompatActivity implements ImageProcessingThreadManager.Callback {
-
-    //todo: properly encorperate the new ImageProcessingTHreadManager
+    //todo: remove most stuff from this activity and move it to CameraActivity
 
     static final int REQUEST_TAKE_PHOTO = 1;
     static final int REQUEST_CROP_PHOTO = 2;
@@ -78,9 +76,9 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
         minThresholdPicker.setTransformationMethod(new NumericKeyBoardTransformationMethod());
         ratioPicker.setTransformationMethod(new NumericKeyBoardTransformationMethod());
         blurRadiusPicker.setTransformationMethod(new NumericKeyBoardTransformationMethod());
-        //show the update button if the user changes any textbox todo: make this actually work
+        //show the update button if the user changes any textbox
         imageLoadingProgressBar.setVisibility(View.GONE);//make the progress bar disapear.
-        imThreadManager = new ImageProcessingThreadManager(getApplicationContext(), this, getDefaultConfig());//initialize the image processing thread
+        imThreadManager = new ImageProcessingThreadManager(getApplicationContext(), this);//initialize the image processing thread
 
         initOpenCV();
         //todo: save important variables in a bundle
@@ -191,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
         originalImageDisplay.setAlpha(0.5f);
         try {
             displayImage(currentCroppedImageFile.getAbsolutePath(), originalImageDisplay);
-            imThreadManager.processImage(currentCroppedImageFile.getAbsolutePath());
+            //imThreadManager.processImage(currentCroppedImageFile.getAbsolutePath());
         }catch (IOException e){
             e.printStackTrace();
             showImageErrorMessage();
@@ -239,15 +237,12 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
 
 
     @Override
-    public void onImageProcessingSuccess(WorkerThreadToUiMessage message) {
-        DrawableOnCanvas drawable = message.drawable;
-        Bitmap bitmapToDisplay = message.bitmap;
-        String stringToDisplay = message.messageToDisplay;
+    public void onImageProcessingSuccess(DrawableOnCanvas drawable) {
         try {
             recalculate.setVisibility(View.INVISIBLE);
             imageLoadingProgressBar.setVisibility(View.GONE);
             originalImageDisplay.setAlpha(1.0f);
-            if(drawable != null && bitmapToDisplay != null) {
+            if(drawable != null) {
                 Bitmap tempBackground = Bitmap.createBitmap(3000,3000, Bitmap.Config.ARGB_8888);
                 Log.d(TAG, "both aren't null!");
                 Canvas canvas = new Canvas(tempBackground);
@@ -262,10 +257,6 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
                 originalImageDisplay.setImageDrawable(null);
             }
 
-            if(stringToDisplay !=null){
-                messageDisplay.setText(stringToDisplay);
-            }
-
         } catch (NullPointerException e) {
             e.printStackTrace();
             showImageErrorMessage();
@@ -275,10 +266,11 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
     }
 
     @Override
-    public void onImageProcessingFailure(WorkerThreadToUiMessage message) {
+    public void onImageProcessingFailure(Exception e) {
         showImageErrorMessage();
         Log.i(TAG,"1");
-        messageDisplay.setText(message.errorMessage);
+        messageDisplay.setText(e.getLocalizedMessage());
+        e.printStackTrace();
     }
 
     //class lets you have a textview with only numbers.

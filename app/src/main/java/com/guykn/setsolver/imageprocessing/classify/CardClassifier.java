@@ -3,7 +3,7 @@ package com.guykn.setsolver.imageprocessing.classify;
 import android.graphics.Bitmap;
 
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
-import com.guykn.setsolver.imageprocessing.ImageProcessingManger;
+import com.guykn.setsolver.imageprocessing.ImageTypeConverter;
 import com.guykn.setsolver.imageprocessing.detect.CardAction;
 import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.SetBoardPosition;
@@ -22,7 +22,7 @@ public abstract class CardClassifier implements CardAction {
 
     public SetCard classify(GenericRotatedRectangle cardRect){
         Mat cropped = cardRect.cropToRect(originalImageMat);//crops the bitmap to contain just the rectangle specified
-        Bitmap croppedBitmap = ImageProcessingManger.matToBitmap(cropped);
+        Bitmap croppedBitmap = ImageTypeConverter.matToBitmap(cropped);
         PositionlessSetCard card = classify(croppedBitmap);
         return new SetCard(cardRect, card);
     }

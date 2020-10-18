@@ -53,9 +53,9 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         canvas.drawRect(rect, paint);
         canvas.restore();
 
-        if(writeToConsole) Log.i(DrawableOnCanvas.TAG, "canvas width: " + canvas.getWidth() + "canvas height: " + canvas.getHeight());
-
-
+        if(writeToConsole)
+            Log.i(DrawableOnCanvas.TAG, "canvas width: " + canvas.getWidth()
+                    + "canvas height: " + canvas.getHeight());
     }
 
     //todo: remove

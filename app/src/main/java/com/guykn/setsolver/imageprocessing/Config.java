@@ -1,5 +1,7 @@
 package com.guykn.setsolver.imageprocessing;
 
+import com.guykn.setsolver.threading.ImageProcessingThreadManager.ImageProcessingAction;
+
 import org.opencv.imgproc.Imgproc;
 
 public class Config {
@@ -26,6 +28,28 @@ public class Config {
         public int hierarchyType = Imgproc.RETR_EXTERNAL;
     }
 
+    public enum ShouldSaveToGallery {
+        ALWAYS{
+            @Override
+            public boolean shouldSaveToGallery(ImageProcessingAction action) {
+                return true;
+            }
+        },
+        ONLY_WHEN_PICTURE_IS_TAKEN{
+            @Override
+            public boolean shouldSaveToGallery(ImageProcessingAction action) {
+                return action == ImageProcessingAction.DETECT_AND_CLASSIFY_CARDS;
+            }
+        },
+        NEVER{
+            @Override
+            public boolean shouldSaveToGallery(ImageProcessingAction action) {
+                return false;
+            }
+        };
+        public abstract boolean shouldSaveToGallery(ImageProcessingAction action);
+    }
+
     @Deprecated
     public static class HoughTransform{
         public int threshold = 100;
@@ -40,6 +64,7 @@ public class Config {
     public GaussianBlur gaussianBlur = new GaussianBlur();
     public CannyEdgeDetection cannyEdgeDetection = new CannyEdgeDetection();
     public Contours contours = new Contours();
+    public ShouldSaveToGallery shouldSaveToGallery = ShouldSaveToGallery.NEVER;
     @Deprecated
     public HoughTransform houghTransform = new HoughTransform();
 
@@ -57,7 +82,7 @@ public class Config {
         cfg.contours.minContourPerimeter = 200;
         cfg.contours.minContourArea = 1000;
         cfg.contours.hierarchyType = Imgproc.RETR_EXTERNAL;
-
+        cfg.shouldSaveToGallery = ShouldSaveToGallery.ONLY_WHEN_PICTURE_IS_TAKEN;
         return cfg;
     }
 

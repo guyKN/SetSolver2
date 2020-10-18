@@ -47,7 +47,7 @@ public class ImageFileManager {
 
     public void saveImage(Bitmap bmp) throws IOException {
         try (FileOutputStream out = new FileOutputStream(currentImage)) { // a try is need in order to automatic close the outputStream in case of failure
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out); //todo: check what quality does
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
         }
     }
     public void saveImage(Mat mat){
