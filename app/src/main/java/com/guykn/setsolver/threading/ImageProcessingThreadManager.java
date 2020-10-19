@@ -13,13 +13,12 @@ import androidx.annotation.Nullable;
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
-import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManger;
 import com.guykn.setsolver.imageprocessing.ImageTypeConverter;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.Config;
-import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
+import com.guykn.setsolver.imageprocessing.detect.ContourCardDetectorWrapper;
 
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -110,7 +109,7 @@ public class ImageProcessingThreadManager {
                         Config config = message.getConfig();
                         ImageProcessingAction action = message.getAction();
 
-                        CardDetector detector = new ContourBasedCardDetector(
+                        CardDetector detector = new ContourCardDetectorWrapper.ContourBasedCardDetector(
                                 originalImageMat, config, context);
                         ImageProcessingManger manger = new ImageProcessingManger(detector, null);
                         RotatedRectangleList result = manger.getCardPositions();
