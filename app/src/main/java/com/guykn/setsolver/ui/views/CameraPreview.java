@@ -88,11 +88,18 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         Camera c = null;
         try {
             c = Camera.open(); // attempt to get a Camera instance
-        }
-        catch (Exception e){
+        }catch (Exception e){
             // Camera is not available (in use or does not exist)
             e.printStackTrace();
         }
+
+        /* //todo: figure out how to match resolution exactly
+        Camera.Parameters parameters = c.getParameters();
+        parameters.setPictureSize(getWidth(),getHeight());
+        c.setParameters(parameters);
+
+         */
+
         return c; // returns null if camera is unavailable
     }
 
