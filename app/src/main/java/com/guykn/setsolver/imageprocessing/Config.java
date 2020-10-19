@@ -7,8 +7,7 @@ import org.opencv.imgproc.Imgproc;
 public class Config {
 
     public static class Image{
-        public int width =1000;
-        public int height = width*16/9;
+        public int totalPixels = 1000000;
     }
     public static class GaussianBlur{
         public int radius = 3;
@@ -70,8 +69,7 @@ public class Config {
 
     public static Config getDefaultConfig(){
         Config cfg = new Config();
-        cfg.image.height=1000;
-        cfg.image.width = 1000;
+        cfg.image.totalPixels = 1000000;
 
         cfg.gaussianBlur.radius = 7;
         cfg.cannyEdgeDetection.threshold = 50;

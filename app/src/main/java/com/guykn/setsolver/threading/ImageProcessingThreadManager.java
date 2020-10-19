@@ -14,11 +14,9 @@ import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
-import com.guykn.setsolver.imageprocessing.ImageProcessingManger;
+import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
 import com.guykn.setsolver.imageprocessing.ImageTypeConverter;
-import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.Config;
-import com.guykn.setsolver.imageprocessing.detect.ContourCardDetectorWrapper;
 
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -86,9 +84,12 @@ public class ImageProcessingThreadManager {
 
     private class ImageProcessingThread implements Runnable{
         //todo: implement timeout
+        private ImageProcessingManager imageProcessingManager;
 
         @Override
         public void run() {
+            imageProcessingManager = ImageProcessingManager.getDefaultManager(context);
+
             Looper.prepare();
             uiToWorkerThreadHandler = new Handler(Objects.requireNonNull(
                     Looper.myLooper(), "Looper has not yet been set up.")){
@@ -101,6 +102,7 @@ public class ImageProcessingThreadManager {
                                 (UiToWorkerThreadMessage) handlerMessage.obj;
 
                         if(message.shouldTerminateThread()){
+                            //todo: close all resources not needed
                             getLooper().quit();
                             return;
                         }
@@ -109,11 +111,11 @@ public class ImageProcessingThreadManager {
                         Config config = message.getConfig();
                         ImageProcessingAction action = message.getAction();
 
-                        CardDetector detector = new ContourCardDetectorWrapper.ContourBasedCardDetector(
-                                originalImageMat, config, context);
-                        ImageProcessingManger manger = new ImageProcessingManger(detector, null);
-                        RotatedRectangleList result = manger.getCardPositions();
-                        //result.trimToSize(1);
+
+                        RotatedRectangleList result = imageProcessingManager.getCardPositions(
+                                originalImageMat, config);
+
+                        //result.trimToSize(1); //todo: remove
                         //save to the gallery if necessary
                         if(config.shouldSaveToGallery.shouldSaveToGallery(action)){
                             result.saveToGallery(new ImageFileManager(context), originalImageMat);
@@ -123,15 +125,17 @@ public class ImageProcessingThreadManager {
                         new WorkerThreadToUiSuccessMessage(result).send();
 
                     }catch (Exception e){
-                        e.printStackTrace();
-                        new WorkerThreadToUiErrorMessage(e).send();
+                        //e.printStackTrace();
+                        throw e;
+                        //new WorkerThreadToUiErrorMessage(e).send();
                     }finally {
                         threadBusy.set(false);
                     }
                 }
             };
             Log.i(MainActivity.TAG, "Handler Set Up");
-            Looper.loop();
+            Looper.loop(); //continously listens for messages, and upon recieving a message, acts based on the handler
+            imageProcessingManager.close();
         }
 
     }

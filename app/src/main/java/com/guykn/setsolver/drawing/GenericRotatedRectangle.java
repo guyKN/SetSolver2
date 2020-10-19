@@ -50,7 +50,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
         Log.d(TAG, angle > -45.0 ? "angle>-45":"-45>angle");
         Log.d(TAG, (height>width ? "h>w": "w>h"));
-        boolean doAngleAdjustment = true;
+        boolean doAngleAdjustment = false;
         if(adjustableAngle<-45.0 && doAngleAdjustment){
             adjustableAngle+=90;
         }
