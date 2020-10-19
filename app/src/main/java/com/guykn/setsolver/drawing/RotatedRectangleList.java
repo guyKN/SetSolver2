@@ -10,4 +10,5 @@ public class RotatedRectangleList extends DrawableList<GenericRotatedRectangle> 
     public void doAction(GenericRotatedRectangle position) {
         addDrawable(position);
     }
+
 }

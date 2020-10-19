@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
+import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManger;
 import com.guykn.setsolver.imageprocessing.ImageTypeConverter;
@@ -113,7 +114,7 @@ public class ImageProcessingThreadManager {
                                 originalImageMat, config, context);
                         ImageProcessingManger manger = new ImageProcessingManger(detector, null);
                         RotatedRectangleList result = manger.getCardPositions();
-
+                        //result.trimToSize(1);
                         //save to the gallery if necessary
                         if(config.shouldSaveToGallery.shouldSaveToGallery(action)){
                             result.saveToGallery(new ImageFileManager(context), originalImageMat);

@@ -25,7 +25,6 @@ import com.bumptech.glide.Glide;
 import com.guykn.setsolver.imageprocessing.Config;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
-import com.guykn.setsolver.unittest.GenericRotatedRectangleTest;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 
@@ -279,10 +278,6 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
         public CharSequence getTransformation(CharSequence source, View view) {
             return source;
         }
-    }
-
-    private void runTest(){
-        GenericRotatedRectangleTest.test();
     }
 
 

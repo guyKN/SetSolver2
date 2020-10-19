@@ -20,13 +20,12 @@ import static org.opencv.core.CvType.CV_32F;
 //todo: try using javaCv instead of opencv
 //todo: add static class that converts from types
 public class ImageProcessingManger {
-    private CardDetector detector;
-    private CardClassifier classifier;
+    private final CardDetector detector;
+    private final CardClassifier classifier;
     public ImageProcessingManger(CardDetector detector, CardClassifier classifier){
         this.detector = detector;
         this.classifier = classifier;
     }
-
 
     public RotatedRectangleList getCardPositions(){
         return detector.getAllCardRectangles();

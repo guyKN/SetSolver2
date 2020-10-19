@@ -82,22 +82,6 @@ public class ContourBasedCardDetector implements CardDetector{
 
 
 
-    public static ContourBasedCardDetector fromBitmap(Bitmap originalImageBitmap, Config config, Context context) {
-        Mat initial = new Mat();
-        Utils.bitmapToMat(originalImageBitmap, initial);
-        return new ContourBasedCardDetector(initial, config, context);
-    }
-    public static ContourBasedCardDetector fromFile(String filePath, Config config, Context context) {
-        Mat fileMat = Imgcodecs.imread(filePath);
-        return new ContourBasedCardDetector(fileMat, config, context);
-    }
-    public static ContourBasedCardDetector fromByteArray(byte[] imageByteArray, Config config, Context context){
-        Mat mat = Imgcodecs.imdecode(new MatOfByte(imageByteArray), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
-        return new ContourBasedCardDetector(mat, config, context);
-    }
-
-
-
 
 
 

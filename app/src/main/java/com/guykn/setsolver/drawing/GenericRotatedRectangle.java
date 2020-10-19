@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 
@@ -12,6 +11,8 @@ import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
 
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -24,51 +25,96 @@ import java.util.Locale;
  */
 public class GenericRotatedRectangle implements DrawableOnCanvas {
 
+    public static final String TAG = "GenericRotatedRectangle";
+
     private double centerX;
     private double centerY;
     private double width;
     private double height;
     private double angle;
 
+    private static int lastHeight = 0;
+    private static int lastWidth = 0;
+
     private static final boolean writeToConsole = false;
 
-    @Override
-    public void drawOnCanvas(Canvas canvas, Paint paint) {
+    public void drawOnCanvas2(Canvas canvas, Paint paint) {
         //todo: make sure this works. It currently doesn't work completely and sometimes draws wierdly
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
+        if(writeToConsole) Log.d(TAG, "Width: " + canvasWidth + " Height  " + canvasHeight);
 
-        int adjustedCenterX = (int) (centerX * canvasWidth);
-        int adjustedCenterY = (int) (centerY * canvasHeight);
-        int adjustedWidth = (int) (canvasWidth * width);
-        int adjustedHeight = (int) (canvasHeight * height);
+        float adjustableAngle = (float) angle;
+        double adjustableWidth = width;
+        double adjustableHeight = height;
+
+        Log.d(TAG, angle > -45.0 ? "angle>-45":"-45>angle");
+        Log.d(TAG, (height>width ? "h>w": "w>h"));
+        boolean doAngleAdjustment = true;
+        if(adjustableAngle<-45.0 && doAngleAdjustment){
+            adjustableAngle+=90;
+        }
+        if(adjustableWidth>adjustableHeight && doAngleAdjustment){
+            double temp = width;
+            //noinspection SuspiciousNameCombination
+            adjustableWidth = adjustableHeight;
+            adjustableHeight = temp;
+        }
+
         Rect rect = new Rect(
-                adjustedCenterX - adjustedWidth/2,
-                adjustedCenterY - adjustedHeight/2,
-                adjustedCenterX + adjustedWidth/2,
-                adjustedCenterY + adjustedHeight/2
+                (int) ((centerX - adjustableWidth/2)*canvasWidth),
+                (int) ((centerY - adjustableHeight/2)*canvasHeight),
+                (int) ((centerX + adjustableWidth/2)*canvasWidth),
+                (int) ((centerY + adjustableHeight/2)*canvasHeight)
         );
         canvas.save();
-        canvas.rotate((float)angle, adjustedCenterX, adjustedCenterY);
+        canvas.rotate(adjustableAngle, (int)(centerX*canvasWidth), (int)(centerY*canvasHeight));
+
+        checkWH(canvasWidth, canvasHeight);
+        checkWH(canvas.getWidth(), canvas.getHeight());
+
+
         canvas.drawRect(rect, paint);
         canvas.restore();
 
+        checkWH(canvasWidth, canvasHeight);
+        checkWH(canvas.getWidth(), canvas.getHeight());
+
+
         if(writeToConsole)
-            Log.i(DrawableOnCanvas.TAG, "canvas width: " + canvas.getWidth()
+            Log.i(TAG, "canvas width: " + canvas.getWidth()
                     + "canvas height: " + canvas.getHeight());
     }
-
-    //todo: remove
     @Deprecated
-    private  void oldDrawOnCanvas(Canvas canvas, Paint paint){
-        Point[] corners = getCorners(canvas.getWidth(), canvas.getHeight());
+    private void checkWH(int width, int height){
+        if(lastWidth == 0){
+            lastWidth = width;
+            Log.d(TAG, "init");
+        }
+        if(lastHeight == 0){
+            lastHeight = height;
+            Log.d(TAG, "init");
+        }
+
+        if(lastHeight != height || lastWidth != width){
+            Log.d(TAG, "width or height changed");
+        }
+    }
+
+    @Override
+    public void drawOnCanvas(Canvas canvas, Paint paint){
+        drawOnCanvas2(canvas, paint);
+    }
+
+    public  void drawOnCanvas3(Canvas canvas, Paint paint){
+        Point[] corners = getCorners2();
         for(int i=0;i<corners.length;i++){
             int iNext = (i+1)%corners.length;
             canvas.drawLine(
-                    corners[i].x,
-                    corners[i].y,
-                    corners[iNext].x,
-                    corners[iNext].y,
+                    (float) (corners[i].x*canvas.getWidth()),
+                    (float) (corners[i].y*canvas.getHeight()),
+                    (float)(corners[iNext].x * canvas.getWidth()),
+                    (float) (corners[iNext].y*canvas.getHeight()),
                     paint
             );
         }
@@ -102,8 +148,10 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         Mat M = new Mat();
         Mat rotated = new Mat();
         Mat cropped = new Mat();
-        if(angle<-45.0){
-            angle+=90;
+
+        double adjustedAngle = angle;
+        if(adjustedAngle<-45.0){
+            adjustedAngle+=90;
             //swap the width and height
             double temp = rectSize.width;
             rectSize.width = rectSize.height;
@@ -121,8 +169,53 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         return getCorners(canvasWidth, CanvasHeight);
     }
 
-    private Point[] getCorners(int canvasWidth, int canvasHeight){
+    private static double findAngle(Point A, Point B, Point C){
+        double AB;
+        double AC;
+        double BC;
+        AB = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
+        AC = Math.sqrt(Math.pow(C.x - A.x, 2) + Math.pow(C.y - A.y, 2));
+        BC = Math.sqrt(Math.pow(C.x - B.x, 2) + Math.pow(C.y - B.y, 2));
+        double ratio = (AB * AB + AC * AC - BC * BC) /( 2 * AC * AB);
+        double degrees = Math.acos(ratio)*(180/Math.PI);
+        return degrees;
 
+    }
+
+    private Point[] getCorners2(){
+        double _angle = angle/180*Math.PI;
+
+        double b = (double) Math.cos(_angle) * 0.5;
+        double a = (double) Math.sin(_angle) * 0.5;
+
+        Point p0 = new Point(
+                centerX - a * height - b * width,
+                centerY + b * height - a * width
+        );
+        Point p1 = new Point(
+                centerX + a * height - b * width,
+                centerY - b * height - a * width
+        );
+        Point p2 = new Point(
+                2 * centerX - p0.x,
+                2 * centerY - p0.y
+        );
+
+        Point p3 = new Point(
+                2 * centerX - p1.x,
+                2 * centerY - p1.y
+        );
+        Log.d(TAG, "angle1: " + findAngle(p0,p1,p2) +
+                "\nangle2: " + findAngle(p1,p2,p3) +
+                "\nangle3: " + findAngle(p2,p3,p0) +
+                "\nangle4: " + findAngle(p3,p0,p1) +
+                "\ntest: " + findAngle(new Point(0,1),new Point(0,0),new Point(1,0))
+        );
+        return new Point[]{p0, p1, p2, p3};
+
+    }
+
+    private Point[] getCorners(int canvasWidth, int canvasHeight){
         printState();
         double angleRadians = angle/180*Math.PI;
         double sin = Math.sin(angleRadians);
@@ -138,7 +231,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         int adjustedCenterY = (int) (centerY * canvasHeight);
 
 
-        if(writeToConsole) Log.d(MainActivity.TAG,
+        if(writeToConsole) Log.d(TAG,
                 String.format(Locale.US,
                         "\nangleRadians: %s\nsin: %s\ncos: %s\nsegment1X: %s\nsegment1Y: %s\nsegment2X: %s\nsegment2Y: %s\nadjustedCenterX: %s\nadjustedCenterY: %s",
                         angleRadians, sin, cos, segment1X, segment1Y, segment2X, segment2Y, adjustedCenterX, adjustedCenterY));
@@ -185,7 +278,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
      * Prints all values in the class for debugging purposes
      */
     public void printState(){
-        Log.d(MainActivity.TAG,
+        Log.d(TAG,
                 String.format(Locale.US,
                         "\ncenterX: %s \ncenterY %s\nwidth: %s\nheight: %s\nangle: %s",
                         centerX, centerY, width, height, angle));

@@ -5,7 +5,11 @@ import android.graphics.Bitmap;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
+import static org.opencv.imgproc.Imgproc.INTER_AREA;
+import static org.opencv.imgproc.Imgproc.INTER_LINEAR;
 
 public final class ImageTypeConverter {
 
@@ -41,6 +45,38 @@ public final class ImageTypeConverter {
         Mat mat = new Mat();
         Utils.bitmapToMat(bitmap, mat);
         return mat;
+    }
+
+    /**
+     * Downscales a Mat so that it has the specified total number of pixels,
+     * while still maintaining its aspect ratio.
+     * @param src the Mat that needs to be scaled down.
+     * @param targetTotalPixels How many total pixels the returned Mat should have.
+     * @return a scaled down version of src.
+     */
+    public static Mat scaleDown(Mat src, int targetTotalPixels) {
+        return scaleDown(src, targetTotalPixels, INTER_AREA);
+    }
+
+    /**
+     * Downscales a Mat so that it has the specified total number of pixels,
+     * while still maintaining its aspect ratio.
+     * @param src the Mat that needs to be scaled down.
+     * @param targetTotalPixels How many total pixels the returned Mat should have.
+     * @return a scaled down version of src.
+     */
+    public static Mat scaleDown(Mat src, int targetTotalPixels, int interpolation ){
+        double area = src.size().area();
+        double areaScaleFactor = targetTotalPixels/area;
+        //since we're adjusting both sides evenly, we need to scale based on the square root.
+        double sideLengthScaleFactor = Math.sqrt(areaScaleFactor);
+
+        int scaledDownRows = (int) (src.rows()*sideLengthScaleFactor);
+        int scaledDownCols = (int) (src.cols()*sideLengthScaleFactor);
+
+        Mat scaledDown = new Mat(scaledDownRows, scaledDownCols, src.type());
+        Imgproc.resize(src, scaledDown, scaledDown.size(),0,0, interpolation);
+        return scaledDown;
     }
 
 

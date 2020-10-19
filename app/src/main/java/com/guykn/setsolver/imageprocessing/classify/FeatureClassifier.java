@@ -51,7 +51,6 @@ public class FeatureClassifier {
         MappedByteBuffer buffer = FileUtil.loadMappedFile(context, modelFilePath);
         interpreter = new Interpreter(buffer, options);
         probabilityProcessor = new TensorProcessor.Builder().add(new NormalizeOp(0, 1)).build();
-
     }
 
     //todo: convert to a tensorImage earlier, in order to be more efficent
@@ -65,8 +64,8 @@ public class FeatureClassifier {
     }
 
     static public class ClassificationResult {
-        private int resultID;
-        private double resultProbability;
+        private final int resultID;
+        private final double resultProbability;
         public int getResultID() {
             return resultID;
         }
