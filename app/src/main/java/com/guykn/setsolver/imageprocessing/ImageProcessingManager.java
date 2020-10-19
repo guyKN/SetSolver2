@@ -2,6 +2,7 @@ package com.guykn.setsolver.imageprocessing;
 
 import android.content.Context;
 
+import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
@@ -33,9 +34,11 @@ public class ImageProcessingManager {
         return new ImageProcessingManager(detector,classifier, preProcessor);
     }
 
-    public RotatedRectangleList getCardPositions(Mat image, Config config){
+    //todo: remove context
+    public RotatedRectangleList getCardPositions(Mat image, Config config, Context context){
         Mat scaledDown = preProcessor.preProcess(image, config);
         image.release();
+        new ImageFileManager(context).saveToGallery(scaledDown); //todo: remove
         return detector.getAllCardRectangles(scaledDown, config);
     }
 

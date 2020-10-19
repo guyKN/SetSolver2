@@ -21,12 +21,11 @@ import android.widget.Toast;
 import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.R;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
-import com.guykn.setsolver.imageprocessing.Config;
 import com.guykn.setsolver.threading.CameraThreadManager;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
 import com.guykn.setsolver.threading.SimpleDelayChecker;
 import com.guykn.setsolver.ui.views.CameraPreview;
-import com.guykn.setsolver.ui.views.SetCardOutlineView;
+import com.guykn.setsolver.ui.views.CameraOverlay;
 
 public class CameraFragment extends Fragment implements ImageProcessingThreadManager.Callback {
     //todo: allow user to take picture, and save the sections of the picture
@@ -35,7 +34,7 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
     private MainViewModel mViewModel;
     private CameraThreadManager cameraThreadManager;
     private CameraPreview mCameraPreview;
-    private SetCardOutlineView setCardOutlineView;
+    private CameraOverlay cameraOverlay;
 
     public static CameraFragment newInstance() {
         return new CameraFragment();
@@ -64,8 +63,8 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
             FrameLayout cameraFrame =  view.findViewById(R.id.camera_preview_frame);
             cameraFrame.addView(mCameraPreview);
 
-            setCardOutlineView = new SetCardOutlineView(context, null);
-            cameraFrame.addView(setCardOutlineView);
+            cameraOverlay = new CameraOverlay(context, null);
+            cameraFrame.addView(cameraOverlay);
         }
         return view;
     }
@@ -99,7 +98,7 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
     @Override
     public void onImageProcessingSuccess(DrawableOnCanvas drawable) {
         Log.i(MainActivity.TAG, "Message recieved in CameraFragment.");
-        setCardOutlineView.setDrawable(drawable);
+        cameraOverlay.setDrawable(drawable);
     }
 
     @Override

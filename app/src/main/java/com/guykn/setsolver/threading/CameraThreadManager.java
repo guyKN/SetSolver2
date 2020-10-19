@@ -5,6 +5,7 @@ import android.hardware.Camera;
 import android.util.Log;
 
 import com.guykn.setsolver.MainActivity;
+import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.imageprocessing.Config;
 
 public class CameraThreadManager extends ImageProcessingThreadManager implements Camera.PreviewCallback {
@@ -17,7 +18,6 @@ public class CameraThreadManager extends ImageProcessingThreadManager implements
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        Log.i(MainActivity.TAG, "Frame. ");
         //Log.d(CameraFragment.TAG, "previewing frame");
         if(delayChecker.shouldStartProcessing()){
             //Log.d(CameraFragment.TAG, "timer told me to go");
@@ -26,6 +26,7 @@ public class CameraThreadManager extends ImageProcessingThreadManager implements
                 Camera.Size size = camera.getParameters().getPreviewSize();
                 int width = size.width;
                 int height = size.height;
+                Log.i(GenericRotatedRectangle.TAG, "very original aspect ratio: " + ((float)width)/((float)height));
                 new UiToWorkerThreadByteArrayMessage(ImageProcessingAction.DETECT_CARDS,
                         Config.getDefaultConfig(),data, width, height)
                             .send();

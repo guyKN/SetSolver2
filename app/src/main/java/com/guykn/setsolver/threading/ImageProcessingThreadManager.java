@@ -113,7 +113,7 @@ public class ImageProcessingThreadManager {
 
 
                         RotatedRectangleList result = imageProcessingManager.getCardPositions(
-                                originalImageMat, config);
+                                originalImageMat, config, context);
 
                         //result.trimToSize(1); //todo: remove
                         //save to the gallery if necessary

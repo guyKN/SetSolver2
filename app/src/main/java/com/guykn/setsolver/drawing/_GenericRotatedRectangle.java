@@ -272,7 +272,6 @@ public class _GenericRotatedRectangle implements DrawableOnCanvas {
         double ratio = (AB * AB + AC * AC - BC * BC) /( 2 * AC * AB);
         double degrees = Math.acos(ratio)*(180/Math.PI);
         return degrees;
-
     }
 
 

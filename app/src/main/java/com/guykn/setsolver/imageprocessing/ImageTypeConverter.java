@@ -1,6 +1,9 @@
 package com.guykn.setsolver.imageprocessing;
 
 import android.graphics.Bitmap;
+import android.util.Log;
+
+import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -79,6 +82,13 @@ public final class ImageTypeConverter {
 
         Mat scaledDown = new Mat(scaledDownRows, scaledDownCols, src.type());
         Imgproc.resize(src, scaledDown, scaledDown.size(),0,0, interpolation);
+        Log.d(GenericRotatedRectangle.TAG, "target area: " + targetTotalPixels + "\nactual area: " + scaledDown.size().area());
+        Log.d(GenericRotatedRectangle.TAG,
+                "original aspect ratio: " +
+                src.size().width/src.size().height
+                + "\nnew aspect ratio: " +
+                scaledDown.size().width/scaledDown.size().height);
+
         return scaledDown;
     }
 

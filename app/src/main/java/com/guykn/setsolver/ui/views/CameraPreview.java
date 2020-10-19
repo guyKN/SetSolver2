@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 
 import com.guykn.setsolver.CameraActivity;
 import com.guykn.setsolver.MainActivity;
+import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.ui.main.CameraFragment;
 
 import java.io.IOException;
@@ -34,8 +35,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
+    @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         // The Surface has been created, now tell the camera where to draw the preview.
+
+        Log.d(GenericRotatedRectangle.TAG,
+                "Camera View aspect ratio: " + String.valueOf(((float) getWidth())/((float) getHeight())));
+
+
         try {
             mCamera = getCameraInstance();
             if(mCamera == null){
@@ -49,6 +56,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
+    @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
         if(mCamera == null){
             return;
@@ -56,7 +64,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mCamera.release();
         mCamera = null;
     }
-
+    @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int w, int h) {
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
