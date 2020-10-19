@@ -114,7 +114,11 @@ public class ContourCardDetectorWrapper implements CardDetector{
                     System.out.println(rectArea);
                     if(rectArea > config.contours.minContourArea) {
                         GenericRotatedRectangle cardPosition = new GenericRotatedRectangle(
+<<<<<<< HEAD
                                 rotatedRect, initialMat.size());
+=======
+                                rotatedRect, config.image.width, config.image.height);
+>>>>>>> parent of 6c8959f... Scale down images with a consistent aspect ratio
                         cardAction.doAction(cardPosition);
                     }
                 }
