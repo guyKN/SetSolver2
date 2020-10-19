@@ -113,7 +113,7 @@ public class ContourCardDetectorWrapper implements CardDetector{
                     System.out.println(rectArea);
                     if(rectArea > config.contours.minContourArea) {
                         GenericRotatedRectangle cardPosition = new GenericRotatedRectangle(
-                                rotatedRect, initialMat.width(), initialMat.height());
+                                rotatedRect, initialMat.size());
                         cardAction.doAction(cardPosition);
                     }
                 }

@@ -18,9 +18,9 @@ public class SetCard extends GenericRotatedRectangle {
 
 
     //Todo: check if there is a better implementation (Maybe Use a decorator pattern: https://en.wikipedia.org/wiki/Decorator_pattern)
-    public SetCard(GenericRotatedRectangle rotatedRect,
+    public SetCard(GenericRotatedRectangle genericRotatedRect,
             PositionlessSetCard card) {
-        super(rotatedRect);
+        super(genericRotatedRect);
         this.color = card.getColor();
         this.count = card.getCount();
         this.fill = card.getFill();

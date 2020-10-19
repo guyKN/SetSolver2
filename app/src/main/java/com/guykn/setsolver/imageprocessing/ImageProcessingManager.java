@@ -15,6 +15,7 @@ public class ImageProcessingManager {
     private final CardDetector detector;
     private final CardClassifier classifier;
     private final MatPreProcessor preProcessor;
+
     public ImageProcessingManager(CardDetector detector,
                                   CardClassifier classifier, MatPreProcessor preProcessor){
         this.detector = detector;
@@ -33,9 +34,10 @@ public class ImageProcessingManager {
     }
 
     public RotatedRectangleList getCardPositions(Mat image, Config config){
-        return detector.getAllCardRectangles(image, config);
+        Mat scaledDown = preProcessor.preProcess(image, config);
+        image.release();
+        return detector.getAllCardRectangles(scaledDown, config);
     }
-
 
     public void close() {
         //todo: implement method

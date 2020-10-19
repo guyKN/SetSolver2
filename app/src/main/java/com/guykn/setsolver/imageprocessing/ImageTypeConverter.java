@@ -58,11 +58,14 @@ public final class ImageTypeConverter {
         return scaleDown(src, targetTotalPixels, INTER_AREA);
     }
 
+
+    //todo: test that this works 100%.
     /**
      * Downscales a Mat so that it has the specified total number of pixels,
      * while still maintaining its aspect ratio.
      * @param src the Mat that needs to be scaled down.
      * @param targetTotalPixels How many total pixels the returned Mat should have.
+     * @param interpolation An interpolation for Opencv. Determines how the image should be scaled
      * @return a scaled down version of src.
      */
     public static Mat scaleDown(Mat src, int targetTotalPixels, int interpolation ){
