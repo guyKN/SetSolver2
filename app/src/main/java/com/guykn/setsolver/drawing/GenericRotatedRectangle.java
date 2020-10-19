@@ -25,6 +25,9 @@ import java.util.Locale;
  */
 public class GenericRotatedRectangle implements DrawableOnCanvas {
 
+    //todo: debug more: sometimes rectangles are clearly not quite right
+    //todo: restructure to save the width and height of the Mat properly
+
     public static final String TAG = "GenericRotatedRectangle";
 
     private double centerX;

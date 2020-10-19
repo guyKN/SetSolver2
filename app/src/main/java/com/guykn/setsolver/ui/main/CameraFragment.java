@@ -30,7 +30,9 @@ import com.guykn.setsolver.ui.views.SetCardOutlineView;
 
 public class CameraFragment extends Fragment implements ImageProcessingThreadManager.Callback {
     //todo: allow user to take picture, and save the sections of the picture
-    //todo: use the MainViewModel for config
+    //todo: use the MainViewModel for config, and add a config fragment
+    //todo: prevent random crashes
+    //todo: make screen stay awake
     public static final String TAG = "CameraFragment";
     private MainViewModel mViewModel;
     private CameraThreadManager cameraThreadManager;

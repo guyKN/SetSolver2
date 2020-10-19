@@ -9,8 +9,7 @@ import com.guykn.setsolver.imageprocessing.detect.ContourCardDetectorWrapper;
 
 import org.opencv.core.Mat;
 
-//todo: try using javaCv instead of opencv
-//todo: add static class that converts from types
+//todo: Look into moving the pre-processor into inside of this class
 public class ImageProcessingManager {
     private final CardDetector detector;
     private final CardClassifier classifier;
@@ -30,6 +29,8 @@ public class ImageProcessingManager {
     public RotatedRectangleList getCardPositions(Mat image, Config config){
         return detector.getAllCardRectangles(image, config);
     }
+
+
 
 
     public void close() {
