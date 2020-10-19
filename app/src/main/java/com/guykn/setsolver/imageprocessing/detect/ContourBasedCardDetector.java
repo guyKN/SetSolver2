@@ -40,24 +40,10 @@ public class ContourBasedCardDetector implements CardDetector{
 
     List<MatOfPoint> contours = new ArrayList<>();
 
-    @Deprecated
-    private Mat houghLinesP = new Mat(); //lines after the P hough transform
-    @Deprecated
-    private Mat houghLines = new Mat();
-    @Deprecated
-    private List<Integer> indexOfNonSimilarHoughLines;
-    @Deprecated
-    private List<RotatedRect> allCardRects;
-    @Deprecated
-    private List<Mat> croppedCards;
 
     private boolean needToDoGaussianFilter;
     private boolean needToDoCanny;
     private boolean needToFindContours;
-    @Deprecated
-    private boolean needToDoHughLines_P;
-    @Deprecated
-    private boolean needToDoHughLines;
     private Config config;
     private Random rng = new Random(12789);
     private Context context;
@@ -76,13 +62,7 @@ public class ContourBasedCardDetector implements CardDetector{
         needToDoGaussianFilter = true;
         needToDoCanny = true;
         needToFindContours = true;
-        needToDoHughLines_P = true;
-        needToDoHughLines = true;
     }
-
-
-
-
 
 
     /*Gausinan Filter************************************************************************/
@@ -115,94 +95,7 @@ public class ContourBasedCardDetector implements CardDetector{
         return cannyOutput;
     }
 
-    /*HoughLines************************************************************************/
-    @Deprecated
-    private void doHoughLinesIfNecessary(){
-        if(needToDoHughLines){
-            System.out.println("inside function. RhoJump=" + config.houghTransform.rhoJump );
-            Imgproc.HoughLines(cannyOutput, houghLines, config.houghTransform.rhoJump, config.houghTransform.thetaJump, config.houghTransform.threshold);
-            //houghTransformRemoveSimilarLines();
-            needToDoHughLines = false;
-        }
-    }
-    @Deprecated
-    private void houghTransformRemoveSimilarLines(){
-        indexOfNonSimilarHoughLines = new ArrayList<>();
-        for(int i=0;i<houghLines.rows();i++){
-            double rho0 = houghLines.get(i, 0)[0],
-                    theta0 = houghLines.get(i, 0)[1];
-            boolean matchFound = false;
-            for(int j=0;j<i;j++){
-                double rho1 = houghLines.get(j, 0)[0],
-                        theta1 = houghLines.get(j, 0)[1];
-                //System.out.println("\n\n\n\n\ni: " + i + "\nj: " + j + "\nrho0: " + rho0 + "\nrho1: " + rho1 + "\ntheta0: " + theta0+ "\ntheta1: " + theta1);
-                if(houghTransformCheckIfLinesAreNear(rho0, rho1, theta0, theta1)){
-                    matchFound = true;
-                    break;
-                }
-            }
-            if(!matchFound){
-                indexOfNonSimilarHoughLines.add(i);
-            }
-        }
-    }
-    @Deprecated
-    private  boolean houghTransformCheckIfLinesAreNear(double rho0, double rho1, double theta0, double theta1){
-        double dRho = rho0 - rho1;
-        double dTheta = theta1 - theta0;
-        return dRho < config.houghTransform.rhoSimilarityThreshold && dRho > -config.houghTransform.rhoSimilarityThreshold && dTheta < config.houghTransform.thetaSimilarityThreshold && dTheta > - config.houghTransform.thetaSimilarityThreshold;
-    }
 
-    @Deprecated
-    public Mat getHoughLinesDrawing(BackgroundType backgroundType){
-        doGaussianFilterIfNecessary();
-        doCannyEdgeDetectionIfNecessary();
-        doHoughLinesIfNecessary();
-        return drawHoughLines(backgroundType);
-    }
-    @Deprecated
-    private Mat drawHoughLines(BackgroundType backgroundType){
-        Mat background = getMatFromBackgroundType(backgroundType);
-        //for (int x : indexOfNonSimilarHoughLines) {
-        for(int x=0;x<houghLines.rows();x++){
-            double rho = houghLines.get(x, 0)[0],
-                    theta = houghLines.get(x, 0)[1];
-            double a = Math.cos(theta), b = Math.sin(theta);
-            double x0 = a*rho, y0 = b*rho;
-            Point pt1 = new Point(Math.round(x0 + 10000*(-b)), Math.round(y0 + 10000*(a)));
-            Point pt2 = new Point(Math.round(x0 - 10000*(-b)), Math.round(y0 - 10000*(a)));
-            Imgproc.line(background, pt1, pt2, new Scalar(255, 0, 0), 3, Imgproc.LINE_AA, 0);
-        }
-        System.out.println();
-        return background;
-
-    }
-
-    /*HoughLines_P************************************************************************/
-    @Deprecated
-    private void doHoughLinesIfNecessary_P(){
-        if(needToDoHughLines_P){
-            Imgproc.HoughLinesP(cannyOutput, houghLinesP, config.houghTransform.rhoJump, config.houghTransform.thetaJump,config.houghTransform.threshold,config.houghTransform.minLineLength,config.houghTransform.maxLineGap);
-            needToDoHughLines_P = false;
-        }
-    }
-    @Deprecated
-    public Mat getHoughLinesDrawing_P(BackgroundType backgroundType){
-        doGaussianFilterIfNecessary();
-        doCannyEdgeDetectionIfNecessary();
-        doHoughLinesIfNecessary_P();
-        return drawHoughLines_P(backgroundType);
-    }
-    @Deprecated
-    private Mat drawHoughLines_P(BackgroundType backgroundType){
-        Mat background = getMatFromBackgroundType(backgroundType);
-        for (int x = 0; x < houghLinesP.rows(); x++) {
-            double[] l = houghLinesP.get(x, 0);
-            Imgproc.line(background, new Point(l[0], l[1]), new Point(l[2], l[3]), randomColor(), 3, Imgproc.LINE_AA, 0);
-        }
-        return background;
-
-    }
 
     /*contours************************************************************************/
     private void findContoursIfNecessary(){
@@ -256,93 +149,8 @@ public class ContourBasedCardDetector implements CardDetector{
 
 
 
-    //http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/, https://answers.opencv.org/question/497/extract-a-rotatedrect-area/
-    @Deprecated
-    private Mat cropToRotatedRect(RotatedRect rect){
-        Mat M = new Mat();
-        Mat rotated = new Mat();
-        Mat cropped = new Mat();
-        double angle = rect.angle;
-        Size rectSize = rect.size;
-        if(angle<-45.0){
-            angle+=90;
-            //swap the width and height
-            double temp = rectSize.width;
-            //noinspection SuspiciousNameCombination
-            rectSize.width = rectSize.height;
-            rectSize.height = temp;
-        }
-        M = Imgproc.getRotationMatrix2D(rect.center, angle, 1.0);
-        Imgproc.warpAffine(initialMat, rotated,M, initialMat.size(), Imgproc.INTER_CUBIC);
-        Imgproc.getRectSubPix(rotated, rectSize, rect.center, cropped);
-        return cropped;
-    }
-    @Deprecated
-    public Mat getContourDrawing(BackgroundType backgroundType){
-        doGaussianFilterIfNecessary();
-        doCannyEdgeDetectionIfNecessary();
-        findContoursIfNecessary();
-        return drawContours(backgroundType);
-    }
-
-    @Deprecated
-    private Mat drawContours(BackgroundType backgroundType){
-        Mat canvas = getMatFromBackgroundType(backgroundType);
-        for (int i = 0; i < contours.size(); i++) {
-            Scalar color = randomColor();
-            Imgproc.drawContours(canvas, contours, i, color, 2, Core.LINE_8, hierarchy, 0, new Point());
-        }
-        return canvas;
-    }
-
-    @Deprecated
-    public Mat getContourBoxDrawing(BackgroundType backgroundType){
-        doGaussianFilterIfNecessary();
-        doCannyEdgeDetectionIfNecessary();
-        findContoursIfNecessary();
-        return drawContourBoxes(backgroundType);
-    }
-    @Deprecated
-    private Mat drawContourBoxes(BackgroundType backgroundType){
-        Mat canvas = getMatFromBackgroundType(backgroundType);
-        for(RotatedRect rect:allCardRects){
-            Scalar color = randomColor();
-            Point[] points = new Point[4];
-            rect.points(points);
-            for(int i=0; i<4; ++i){
-                Imgproc.line(canvas, points[i], points[(i+1)%4], color,3);
-            }
-        }
-        return canvas;
-    }
-    @Deprecated
-    public List<Mat> getCroppedCards(){
-        doGaussianFilterIfNecessary();
-        doCannyEdgeDetectionIfNecessary();
-        findContoursIfNecessary();
-        return croppedCards;
-    }
 
 
-    /*other functions************************************************************************/
-    private Mat getMatFromBackgroundType(BackgroundType backgroundType){
-        Size size = cannyOutput.size();
-        switch (backgroundType){
-            case EDGES:
-                Mat colorClone = new Mat();
-                Imgproc.cvtColor(cannyOutput, colorClone, Imgproc.COLOR_GRAY2BGR);
-                return colorClone;
-            case ORIGINAL_IMAGE:
-                return initialMat.clone();
-            case BLACK:
-            default:
-                return Mat.zeros(size, CvType.CV_8UC3);
-
-        }
-    }
-    private Scalar randomColor(){
-        return new Scalar(rng.nextInt(256), rng.nextInt(256), rng.nextInt(256));
-    }
 
 
 }
