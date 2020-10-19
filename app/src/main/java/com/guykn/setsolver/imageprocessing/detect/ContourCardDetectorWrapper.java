@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
+import com.guykn.setsolver.drawing._GenericRotatedRectangle;
 import com.guykn.setsolver.imageprocessing.Config;
 
 import org.opencv.core.CvType;

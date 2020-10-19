@@ -2,6 +2,7 @@ package com.guykn.setsolver.imageprocessing.detect;
 
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
+import com.guykn.setsolver.drawing._GenericRotatedRectangle;
 import com.guykn.setsolver.imageprocessing.Config;
 
 import org.opencv.core.Mat;
