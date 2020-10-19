@@ -14,22 +14,17 @@ import org.opencv.core.Mat;
 public class ImageProcessingManager {
     private final CardDetector detector;
     private final CardClassifier classifier;
-    private final MatPreProcessor preProcessor;
     public ImageProcessingManager(CardDetector detector,
-                                  CardClassifier classifier, MatPreProcessor preProcessor){
+                                  CardClassifier classifier){
         this.detector = detector;
         this.classifier = classifier;
-        this.preProcessor = preProcessor;
     }
 
     public static ImageProcessingManager getDefaultManager(Context context){
         CardDetector detector = new ContourCardDetectorWrapper(context);
         CardClassifier classifier = null;//todo: actually implement
-        MatPreProcessor preProcessor =
-                (Mat src, Config config) ->
-                        ImageTypeConverter.scaleDown(src, config.image.totalPixels);
 
-        return new ImageProcessingManager(detector,classifier, preProcessor);
+        return new ImageProcessingManager(detector,classifier);
     }
 
     public RotatedRectangleList getCardPositions(Mat image, Config config){
@@ -41,7 +36,4 @@ public class ImageProcessingManager {
         //todo: implement method
     }
 
-    interface MatPreProcessor{
-        public Mat preProcess(Mat src, Config config);
-    }
 }

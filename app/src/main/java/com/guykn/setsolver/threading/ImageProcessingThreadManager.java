@@ -111,14 +111,18 @@ public class ImageProcessingThreadManager {
                         Config config = message.getConfig();
                         ImageProcessingAction action = message.getAction();
 
+                        Mat scaleDown = ImageTypeConverter.scaleDown(
+                                originalImageMat, config.image.totalPixels);
+                        originalImageMat.release();
+
 
                         RotatedRectangleList result = imageProcessingManager.getCardPositions(
-                                originalImageMat, config);
+                                scaleDown, config);
 
                         //result.trimToSize(1); //todo: remove
                         //save to the gallery if necessary
                         if(config.shouldSaveToGallery.shouldSaveToGallery(action)){
-                            result.saveToGallery(new ImageFileManager(context), originalImageMat);
+                            result.saveToGallery(new ImageFileManager(context), scaleDown);
                         }
 
                         //sends the result to the UI thread

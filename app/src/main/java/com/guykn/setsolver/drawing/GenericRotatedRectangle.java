@@ -38,7 +38,8 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     private static final boolean writeToConsole = false;
 
-    public void drawOnCanvas2(Canvas canvas, Paint paint) {
+    @Override
+    public void drawOnCanvas(Canvas canvas, Paint paint) {
         //todo: make sure this works. It currently doesn't work completely and sometimes draws wierdly
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
@@ -48,18 +49,8 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         double adjustableWidth = width;
         double adjustableHeight = height;
 
-        Log.d(TAG, angle > -45.0 ? "angle>-45":"-45>angle");
-        Log.d(TAG, (height>width ? "h>w": "w>h"));
-        boolean doAngleAdjustment = false;
-        if(adjustableAngle<-45.0 && doAngleAdjustment){
-            adjustableAngle+=90;
-        }
-        if(adjustableWidth>adjustableHeight && doAngleAdjustment){
-            double temp = width;
-            //noinspection SuspiciousNameCombination
-            adjustableWidth = adjustableHeight;
-            adjustableHeight = temp;
-        }
+        if(writeToConsole) Log.d(TAG, angle > -45.0 ? "angle>-45":"-45>angle");
+        if(writeToConsole) Log.d(TAG, (height>width ? "h>w": "w>h"));
 
         Rect rect = new Rect(
                 (int) ((centerX - adjustableWidth/2)*canvasWidth),
@@ -70,55 +61,12 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         canvas.save();
         canvas.rotate(adjustableAngle, (int)(centerX*canvasWidth), (int)(centerY*canvasHeight));
 
-        checkWH(canvasWidth, canvasHeight);
-        checkWH(canvas.getWidth(), canvas.getHeight());
-
-
         canvas.drawRect(rect, paint);
         canvas.restore();
-
-        checkWH(canvasWidth, canvasHeight);
-        checkWH(canvas.getWidth(), canvas.getHeight());
-
 
         if(writeToConsole)
             Log.i(TAG, "canvas width: " + canvas.getWidth()
                     + "canvas height: " + canvas.getHeight());
-    }
-    @Deprecated
-    private void checkWH(int width, int height){
-        if(lastWidth == 0){
-            lastWidth = width;
-            Log.d(TAG, "init");
-        }
-        if(lastHeight == 0){
-            lastHeight = height;
-            Log.d(TAG, "init");
-        }
-
-        if(lastHeight != height || lastWidth != width){
-            Log.d(TAG, "width or height changed");
-        }
-    }
-
-    @Override
-    public void drawOnCanvas(Canvas canvas, Paint paint){
-        drawOnCanvas2(canvas, paint);
-    }
-
-    public  void drawOnCanvas3(Canvas canvas, Paint paint){
-        Point[] corners = getCorners2();
-        for(int i=0;i<corners.length;i++){
-            int iNext = (i+1)%corners.length;
-            canvas.drawLine(
-                    (float) (corners[i].x*canvas.getWidth()),
-                    (float) (corners[i].y*canvas.getHeight()),
-                    (float)(corners[iNext].x * canvas.getWidth()),
-                    (float) (corners[iNext].y*canvas.getHeight()),
-                    paint
-            );
-        }
-
     }
 
     @Override
@@ -164,11 +112,54 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     }
 
 
+    protected GenericRotatedRectangle(GenericRotatedRectangle rotatedRect) {
+        this.centerX = rotatedRect.centerX;
+        this.centerY = rotatedRect.centerY;
+        this.width = rotatedRect.width;
+        this.height = rotatedRect.height;
+        this.angle = rotatedRect.angle;
+    }
+
+    public GenericRotatedRectangle(RotatedRect rect, int canvasWidth, int canvasHeight){
+        centerX = ( (double) rect.center.x) / ( (double) canvasWidth);
+        centerY = ( (double) rect.center.y) / ( (double) canvasHeight);
+        width = ( (double) rect.size.width )/( (double) canvasWidth);
+        height = ( (double) rect.size.height) / ( (double) canvasHeight);
+        angle = rect.angle;
+    }
+
+    public GenericRotatedRectangle(double centerX, double centerY, double width, double height, double angle){
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.width = width;
+        this.height = height;
+        this.angle = angle;
+    }
+
+
+
+    @Deprecated
+    public  void drawOnCanvas3(Canvas canvas, Paint paint){
+        Point[] corners = getCorners2();
+        for(int i=0;i<corners.length;i++){
+            int iNext = (i+1)%corners.length;
+            canvas.drawLine(
+                    (float) (corners[i].x*canvas.getWidth()),
+                    (float) (corners[i].y*canvas.getHeight()),
+                    (float)(corners[iNext].x * canvas.getWidth()),
+                    (float) (corners[iNext].y*canvas.getHeight()),
+                    paint
+            );
+        }
+
+    }
+
     @Deprecated
     public Point[] getCornersTest(int canvasWidth, int CanvasHeight){
         return getCorners(canvasWidth, CanvasHeight);
     }
 
+    @Deprecated
     private static double findAngle(Point A, Point B, Point C){
         double AB;
         double AC;
@@ -182,6 +173,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     }
 
+    @Deprecated
     private Point[] getCorners2(){
         double _angle = angle/180*Math.PI;
 
@@ -215,6 +207,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     }
 
+    @Deprecated
     private Point[] getCorners(int canvasWidth, int canvasHeight){
         printState();
         double angleRadians = angle/180*Math.PI;
@@ -237,41 +230,15 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                         angleRadians, sin, cos, segment1X, segment1Y, segment2X, segment2Y, adjustedCenterX, adjustedCenterY));
 
         Point p0 = new Point (adjustedCenterX + segment1X + segment2X,
-                             adjustedCenterY + segment1Y + segment2Y);
+                adjustedCenterY + segment1Y + segment2Y);
         Point p1 = new Point(adjustedCenterX + segment1X - segment2X,
-                             adjustedCenterY + segment1Y - segment2Y);
+                adjustedCenterY + segment1Y - segment2Y);
         Point p2 = new Point(adjustedCenterX - segment1X - segment2X,
-                             adjustedCenterY - segment1Y - segment2Y);
+                adjustedCenterY - segment1Y - segment2Y);
         Point p3 = new Point(adjustedCenterX - segment1X + segment2X,
-                             adjustedCenterY - segment1Y + segment2Y);
+                adjustedCenterY - segment1Y + segment2Y);
 
         return new Point[] {p0,p1,p2,p3};
-    }
-
-
-
-    protected GenericRotatedRectangle(GenericRotatedRectangle rotatedRect) {
-        this.centerX = rotatedRect.centerX;
-        this.centerY = rotatedRect.centerY;
-        this.width = rotatedRect.width;
-        this.height = rotatedRect.height;
-        this.angle = rotatedRect.angle;
-    }
-
-    public GenericRotatedRectangle(RotatedRect rect, int canvasWidth, int canvasHeight){
-        centerX = ( (double) rect.center.x) / ( (double) canvasWidth);
-        centerY = ( (double) rect.center.y) / ( (double) canvasHeight);
-        width = ( (double) rect.size.width )/( (double) canvasWidth);
-        height = ( (double) rect.size.height) / ( (double) canvasHeight);
-        angle = rect.angle;
-    }
-
-    public GenericRotatedRectangle(double centerX, double centerY, double width, double height, double angle){
-        this.centerX = centerX;
-        this.centerY = centerY;
-        this.width = width;
-        this.height = height;
-        this.angle = angle;
     }
 
     /**
