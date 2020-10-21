@@ -15,15 +15,19 @@ import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.ui.main.CameraFragment;
 
 import java.io.IOException;
+import java.util.List;
 
 //todo: handle exceptions and errors better
+//todo: ensure that you are opening back facing camera
+//todo: loop through resolutions and find the one closest to the actual preview, for better sync
 @SuppressWarnings("deprecation")
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;
     private Camera.PreviewCallback cameraPreviewCallback;
 
-    public CameraPreview(Context context, Camera.PreviewCallback cameraPreviewCallback) {
+    public CameraPreview(Context context,
+                         Camera.PreviewCallback cameraPreviewCallback) {
         super(context);
         this.cameraPreviewCallback = cameraPreviewCallback;
         // Install a SurfaceHolder.Callback so we get notified when the
@@ -36,6 +40,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         // The Surface has been created, now tell the camera where to draw the preview.
+        Log.d(CameraFragment.TAG, "surfaceCreated()");
         try {
             mCamera = getCameraInstance();
             if(mCamera == null){
@@ -50,14 +55,19 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+        Log.d(CameraFragment.TAG, "onSurfaceDestroyed()");
         if(mCamera == null){
             return;
         }
+        mCamera.stopPreview();
+        mCamera.setPreviewCallback(null);
         mCamera.release();
         mCamera = null;
+        Log.d(CameraFragment.TAG, "onSurfaceDestroyed() finished");
     }
 
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int w, int h) {
+        Log.d(CameraFragment.TAG, "surfaceChanged()");
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
 
@@ -92,13 +102,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             // Camera is not available (in use or does not exist)
             e.printStackTrace();
         }
-
-        /* //todo: figure out how to match resolution exactly
-        Camera.Parameters parameters = c.getParameters();
-        parameters.setPictureSize(getWidth(),getHeight());
-        c.setParameters(parameters);
-
-         */
 
         return c; // returns null if camera is unavailable
     }

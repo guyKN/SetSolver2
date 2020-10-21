@@ -80,7 +80,7 @@ public class Config {
         cfg.contours.minContourPerimeter = 200;
         cfg.contours.minContourArea = 1000;
         cfg.contours.hierarchyType = Imgproc.RETR_EXTERNAL;
-        cfg.shouldSaveToGallery = ShouldSaveToGallery.ALWAYS;
+        cfg.shouldSaveToGallery = ShouldSaveToGallery.NEVER;
         return cfg;
     }
 
