@@ -3,7 +3,7 @@ package com.guykn.setsolver.imageprocessing.classify;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import com.guykn.setsolver.imageprocessing.Config;
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
@@ -29,7 +29,7 @@ public class FeatureClassifier {
     public static final int NUM_CATEGORIES =3;
 
     private Context context;
-    private Config config;
+    private ImageProcessingConfig config;
     private String modelFilePath;
     private String labelsFilePath;
     private ImageProcessor imageProcessor;
@@ -37,7 +37,7 @@ public class FeatureClassifier {
     TensorProcessor probabilityProcessor;
     List<String> labelValues;
 
-    public FeatureClassifier(Context context, Config config, String modelDirectory) throws IOException {
+    public FeatureClassifier(Context context, ImageProcessingConfig config, String modelDirectory) throws IOException {
         this.context = context;
         this.config = config;
         this.modelFilePath = modelDirectory + MODEL_FILE_NAME;

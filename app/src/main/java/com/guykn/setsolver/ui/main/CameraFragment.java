@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProviders;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.hardware.Camera;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,10 +18,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.R;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
-import com.guykn.setsolver.imageprocessing.Config;
 import com.guykn.setsolver.threading.CameraPreviewThreadManager;
 import com.guykn.setsolver.threading.CameraThreadManager;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;

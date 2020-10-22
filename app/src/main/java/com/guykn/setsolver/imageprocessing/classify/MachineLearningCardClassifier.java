@@ -3,7 +3,7 @@ package com.guykn.setsolver.imageprocessing.classify;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import com.guykn.setsolver.imageprocessing.Config;
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
@@ -21,14 +21,14 @@ public class MachineLearningCardClassifier extends CardClassifier {
     private static final String COUNT_MODEL_PATH = "Models/Count/";
 
     private Context context;
-    private Config config;
+    private ImageProcessingConfig config;
 
     private final FeatureClassifier countClassifier;
     private final FeatureClassifier colorClassifier;
     private final FeatureClassifier fillClassifier;
     private final FeatureClassifier shapeClassifier;
 
-    public MachineLearningCardClassifier(Context context, Config config) throws IOException{
+    public MachineLearningCardClassifier(Context context, ImageProcessingConfig config) throws IOException{
         this.context = context;
         this.config = config;
         countClassifier = new FeatureClassifier(context, config, COUNT_MODEL_PATH);

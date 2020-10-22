@@ -22,7 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.guykn.setsolver.imageprocessing.Config;
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.yalantis.ucrop.UCrop;
@@ -33,7 +33,7 @@ import org.opencv.android.OpenCVLoader;
 import java.io.File;
 import java.io.IOException;
 
-import static com.guykn.setsolver.imageprocessing.Config.getDefaultConfig;
+import static com.guykn.setsolver.imageprocessing.ImageProcessingConfig.getDefaultConfig;
 
 public class MainActivity extends AppCompatActivity implements ImageProcessingThreadManager.Callback {
     //todo: remove most stuff from this activity and move it to CameraActivity
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements ImageProcessingTh
         runImageProceedingThread();
     }
     private void runImageProceedingThread(){
-        Config config =getDefaultConfig();
+        ImageProcessingConfig config =getDefaultConfig();
         //Log.i(TAG, "Min threshold: " + config.threshold1 + "\nMax threshold: " + config.threshold2+ "\nBlur Radius: " + config.gaussianBlurRadius);
         originalImageDisplay.setAlpha(0.5f);
         try {

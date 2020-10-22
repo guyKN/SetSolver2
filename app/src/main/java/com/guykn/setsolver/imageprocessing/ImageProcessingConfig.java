@@ -4,7 +4,7 @@ import com.guykn.setsolver.threading.ImageProcessingThreadManager.ImageProcessin
 
 import org.opencv.imgproc.Imgproc;
 
-public class Config {
+public class ImageProcessingConfig {
 
     public static class Image{
         public int totalPixels = 1000000;
@@ -25,6 +25,10 @@ public class Config {
         public double epsilonMultiplier = 0.1;
         public boolean useEpsilon = true;
         public int hierarchyType = Imgproc.RETR_EXTERNAL;
+    }
+
+    public static class MemoryManagement {
+        public boolean shouldReleaseUnprocessedImage = true;
     }
 
     public enum ShouldSaveToGallery {
@@ -49,26 +53,17 @@ public class Config {
         public abstract boolean shouldSaveToGallery(ImageProcessingAction action);
     }
 
-    @Deprecated
-    public static class HoughTransform{
-        public int threshold = 100;
-        public int minLineLength = 50;
-        public int maxLineGap = 10;
-        public double rhoSimilarityThreshold=30.0;
-        public int rhoJump =1;
-        public double thetaSimilarityThreshold = Math.PI/10;
-        public double thetaJump = Math.PI/180;
-    }
+
+
     public Image image = new Image();
     public GaussianBlur gaussianBlur = new GaussianBlur();
     public CannyEdgeDetection cannyEdgeDetection = new CannyEdgeDetection();
     public Contours contours = new Contours();
     public ShouldSaveToGallery shouldSaveToGallery = ShouldSaveToGallery.NEVER;
-    @Deprecated
-    public HoughTransform houghTransform = new HoughTransform();
+    public MemoryManagement memoryManagement= new MemoryManagement();
 
-    public static Config getDefaultConfig(){
-        Config cfg = new Config();
+    public static ImageProcessingConfig getDefaultConfig(){
+        ImageProcessingConfig cfg = new ImageProcessingConfig();
         cfg.image.totalPixels = 1000000;
 
         cfg.gaussianBlur.radius = 7;

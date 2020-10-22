@@ -5,7 +5,7 @@ import android.hardware.Camera;
 import android.util.Log;
 
 import com.guykn.setsolver.MainActivity;
-import com.guykn.setsolver.imageprocessing.Config;
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 
 public class CameraThreadManager extends ImageProcessingThreadManager implements Camera.PreviewCallback {
     private DelayChecker delayChecker;
@@ -27,7 +27,7 @@ public class CameraThreadManager extends ImageProcessingThreadManager implements
                 int width = size.width;
                 int height = size.height;
                 new UiToWorkerThreadByteArrayMessage(ImageProcessingAction.DETECT_CARDS,
-                        Config.getDefaultConfig(),data, width, height)
+                        ImageProcessingConfig.getDefaultConfig(),data, width, height)
                             .send();
                 Log.i(MainActivity.TAG, "Message sent. ");
                 delayChecker.startedProcessing();

@@ -10,6 +10,10 @@ import android.view.SurfaceHolder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.guykn.setsolver.drawing.RotatedRectangleList;
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
+import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
+import com.guykn.setsolver.imageprocessing.image.ByteArrayImage;
 import com.guykn.setsolver.ui.main.CameraFragment;
 
 import java.io.IOException;
@@ -63,14 +67,18 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
     private class CameraPreviewThread extends Thread implements SurfaceHolder.Callback, Camera.PreviewCallback{
 
         private Camera mCamera;
-
+        private ImageProcessingManager manager;
         @Override
         public void run() {
+            manager = ImageProcessingManager.getDefaultManager(
+                    ImageProcessingConfig.getDefaultConfig());
+
             Looper.prepare();
             uiToWorkerThreadHandler = new Handler(Objects.requireNonNull(Looper.myLooper()));
             Looper.loop();
         }
 
+        @Override
         public void surfaceCreated(@NonNull SurfaceHolder holder) {
             // The Surface has been created, now tell the camera where to draw the preview.
             Log.d(CameraFragment.TAG, "surfaceCreated()");
@@ -80,6 +88,7 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
             }
         }
 
+        @Override
         public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
             Log.d(CameraFragment.TAG, "onSurfaceDestroyed()");
             if(mCamera == null){
@@ -97,6 +106,7 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
             Log.d(CameraFragment.TAG, "onSurfaceDestroyed() finished");
         }
 
+        @Override
         public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int w, int h) {
             Log.d(CameraFragment.TAG, "surfaceChanged()");
             if (holder.getSurface() == null){
@@ -113,7 +123,7 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
 
             try {
                 mCamera.setPreviewDisplay(holder);
-                mCamera.setPreviewCallback(null);//todo: implement CameraPreviewCallback
+                mCamera.setPreviewCallback(this);//todo: implement CameraPreviewCallback
                 mCamera.startPreview();
             } catch (Exception e){
                 e.printStackTrace();
@@ -122,7 +132,13 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
 
         @Override
         public void onPreviewFrame(byte[] data, Camera camera) {
-
+            Camera.Size imageSize = camera.getParameters().getPictureSize();
+            int width = imageSize.width;
+            int height = imageSize.height;
+            ByteArrayImage byteImage = new ByteArrayImage(data, width, height);
+            manager.setImage(byteImage);
+            RotatedRectangleList cardPositions = manager.getCardPositions();
+            manager.finish();
         }
 
         @Nullable

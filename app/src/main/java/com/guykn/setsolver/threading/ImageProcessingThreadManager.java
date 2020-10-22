@@ -12,12 +12,13 @@ import androidx.annotation.Nullable;
 
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
+import com.guykn.setsolver.imageprocessing.StandardImagePreprocessor;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
-import com.guykn.setsolver.imageprocessing.ImageTypeConverter;
-import com.guykn.setsolver.imageprocessing.Config;
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
@@ -109,10 +110,10 @@ public class ImageProcessingThreadManager {
                         }
 
                         Mat originalImageMat = message.getMat();
-                        Config config = message.getConfig();
+                        ImageProcessingConfig config = message.getConfig();
                         ImageProcessingAction action = message.getAction();
 
-                        Mat scaleDown = ImageTypeConverter.scaleDown(
+                        Mat scaleDown = StandardImagePreprocessor.scaleDown(
                                 originalImageMat, config.image.totalPixels);
                         originalImageMat.release();
 
@@ -214,10 +215,10 @@ public class ImageProcessingThreadManager {
         @NonNull
         private final ImageProcessingAction action;
         @NonNull
-        private final Config config;
+        private final ImageProcessingConfig config;
 
         protected UiToWorkerThreadMessage(@NonNull ImageProcessingAction action,
-                                          @NonNull Config config){
+                                          @NonNull ImageProcessingConfig config){
             this.action = action;
             this.config = config;
         }
@@ -227,7 +228,7 @@ public class ImageProcessingThreadManager {
             return action;
         }
         @NonNull
-        public Config getConfig(){
+        public ImageProcessingConfig getConfig(){
             return config;
         }
 
@@ -248,14 +249,16 @@ public class ImageProcessingThreadManager {
     protected final class UiToWorkerThreadBitmapMessage extends UiToWorkerThreadMessage{
         @NonNull
         private final Bitmap bitmap;
-        public UiToWorkerThreadBitmapMessage(@NonNull ImageProcessingAction action, @NonNull Config config, @NonNull Bitmap bitmap){
+        public UiToWorkerThreadBitmapMessage(@NonNull ImageProcessingAction action, @NonNull ImageProcessingConfig config, @NonNull Bitmap bitmap){
             super(action, config);
             this.bitmap = bitmap;
         }
         @NonNull
         @Override
         public Mat getMat(){
-            return ImageTypeConverter.bitmapToMat(bitmap);
+            Mat mat = new Mat();
+            Utils.bitmapToMat(bitmap, mat);
+            return mat;
         }
     }
 
@@ -264,7 +267,7 @@ public class ImageProcessingThreadManager {
         private final byte[] binaryData;
         private final int width;
         private final int height;
-        public UiToWorkerThreadByteArrayMessage(@NonNull ImageProcessingAction action, @NonNull Config config, @NonNull byte[] binaryData, int width, int height){
+        public UiToWorkerThreadByteArrayMessage(@NonNull ImageProcessingAction action, @NonNull ImageProcessingConfig config, @NonNull byte[] binaryData, int width, int height){
             super(action, config);
             this.binaryData = binaryData;
             this.width = width;
@@ -273,7 +276,7 @@ public class ImageProcessingThreadManager {
         @Override
         @NonNull
         public Mat getMat(){
-            return ImageTypeConverter.nv21ToRgbMat(binaryData, width, height);
+            return StandardImagePreprocessor.nv21ToRgbMat(binaryData, width, height);
         }
     }
 
@@ -281,7 +284,7 @@ public class ImageProcessingThreadManager {
         @NonNull
         private final String filePath;
         public UiToWorkerThreadFileMessage(@NonNull ImageProcessingAction action,
-                                           @NonNull Config config, @NonNull String filePath){
+                                           @NonNull ImageProcessingConfig config, @NonNull String filePath){
             super(action, config);
             this.filePath = filePath;
         }
