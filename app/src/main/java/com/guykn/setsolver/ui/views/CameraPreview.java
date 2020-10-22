@@ -17,93 +17,21 @@ import com.guykn.setsolver.ui.main.CameraFragment;
 import java.io.IOException;
 import java.util.List;
 
-//todo: handle exceptions and errors better, add on onCameraErrorListener
-//todo: ensure that you are opening back facing camera
-//todo: loop through resolutions and find the one closest to the actual preview, for better sync
+/**
+ * This class extends the SurfaceView class, and simply forwards oll SurfaceHolder Callbacks to CameraPreviewThreadManager
+ */
 @SuppressWarnings("deprecation")
-public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
-    private final SurfaceHolder mHolder;
-    private Camera mCamera;
-    private final Camera.PreviewCallback cameraPreviewCallback;
-
-    public CameraPreview(Context context,
-                         Camera.PreviewCallback cameraPreviewCallback) {
+public class CameraPreview extends SurfaceView {
+    public CameraPreview(Context context, SurfaceHolder.Callback callback) {
         super(context);
-        this.cameraPreviewCallback = cameraPreviewCallback;
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
-        mHolder = getHolder();
-        mHolder.addCallback(this);
+        SurfaceHolder holder = getHolder();
+        holder.addCallback(callback);
         // deprecated setting, but required on Android versions prior to 3.0
-        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
-    public void surfaceCreated(@NonNull SurfaceHolder holder) {
-        // The Surface has been created, now tell the camera where to draw the preview.
-        Log.d(CameraFragment.TAG, "surfaceCreated()");
-        try {
-            mCamera = getCameraInstance();
-            if(mCamera == null){
-                Log.w(CameraFragment.TAG, "couldn't open camera");
-                return;
-            }
-            mCamera.setPreviewDisplay(holder);
-            mCamera.startPreview();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-        Log.d(CameraFragment.TAG, "onSurfaceDestroyed()");
-        if(mCamera == null){
-            return;
-        }
-        mCamera.stopPreview();
-        mCamera.setPreviewCallback(null);
-        mCamera.release();
-        mCamera = null;
-        Log.d(CameraFragment.TAG, "onSurfaceDestroyed() finished");
-    }
-
-    public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int w, int h) {
-        Log.d(CameraFragment.TAG, "surfaceChanged()");
-        // If your preview can change or rotate, take care of those events here.
-        // Make sure to stop the preview before resizing or reformatting it.
-
-        if (mHolder.getSurface() == null){
-            // preview surface does not exist
-            return;
-        }
-
-        // stop preview before making changes
-        try {
-            mCamera.stopPreview();
-        } catch (Exception e){
-            // ignore: tried to stop a non-existent preview
-        }
-
-        try {
-            mCamera.setPreviewDisplay(mHolder);
-            mCamera.setPreviewCallback(cameraPreviewCallback);
-            mCamera.startPreview();
-
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    @Nullable
-    private Camera getCameraInstance(){
-        Camera c = null;
-        try {
-            c = Camera.open(); // attempt to get a Camera instance
-        }catch (Exception e){
-            // Camera is not available (in use or does not exist)
-            e.printStackTrace();
-        }
-
-        return c; // returns null if camera is unavailable
-    }
 
 }

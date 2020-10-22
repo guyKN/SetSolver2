@@ -23,6 +23,7 @@ import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.R;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.imageprocessing.Config;
+import com.guykn.setsolver.threading.CameraPreviewThreadManager;
 import com.guykn.setsolver.threading.CameraThreadManager;
 import com.guykn.setsolver.threading.ImageProcessingThreadManager;
 import com.guykn.setsolver.threading.SimpleDelayChecker;
@@ -63,11 +64,11 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
 
         View view = inflater.inflate(R.layout.camera_fragment, container, false);
         cameraFrame = view.findViewById(R.id.camera_preview_frame);
-
-        Context context = getContextFromParentActivity();
+        Context context = getActivity();
         if(context != null) {
             Log.d(TAG, "onCreateView(), context isn't null");
-            mCameraPreview = new CameraPreview(context, cameraThreadManager);
+            CameraPreviewThreadManager threadManager = new CameraPreviewThreadManager();
+            mCameraPreview = new CameraPreview(context, threadManager);
             setCardOutlineView = new SetCardOutlineView(context, null);
         }
 
