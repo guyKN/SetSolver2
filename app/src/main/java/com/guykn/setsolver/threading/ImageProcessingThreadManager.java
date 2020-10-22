@@ -27,8 +27,9 @@ import java.util.Objects;
 public class ImageProcessingThreadManager {
     public static String TAG = "ImageProcessingThreadManager";
     //todo: make sure everything's thread safe
-    //todo: send config through the Handler rather than the constrocutor
     //todo: make fields final
+    //todo: reduce use of context from memory leaks
+    //todo: use view model to communicate with activity, rather than callback
     private Thread mImageProcessingThread;
     private Context context;
     private ThreadSynchronized<Boolean> threadBusy = new ThreadSynchronized<>();

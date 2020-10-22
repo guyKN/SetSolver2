@@ -17,14 +17,14 @@ import com.guykn.setsolver.ui.main.CameraFragment;
 import java.io.IOException;
 import java.util.List;
 
-//todo: handle exceptions and errors better
+//todo: handle exceptions and errors better, add on onCameraErrorListener
 //todo: ensure that you are opening back facing camera
 //todo: loop through resolutions and find the one closest to the actual preview, for better sync
 @SuppressWarnings("deprecation")
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
-    private SurfaceHolder mHolder;
+    private final SurfaceHolder mHolder;
     private Camera mCamera;
-    private Camera.PreviewCallback cameraPreviewCallback;
+    private final Camera.PreviewCallback cameraPreviewCallback;
 
     public CameraPreview(Context context,
                          Camera.PreviewCallback cameraPreviewCallback) {
