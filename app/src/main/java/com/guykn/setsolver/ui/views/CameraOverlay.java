@@ -11,12 +11,12 @@ import androidx.annotation.Nullable;
 
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 
-public class SetCardOutlineView extends View {
+public class CameraOverlay extends View {
 
     private DrawableOnCanvas drawable;
     private Paint mPaint;
 
-    public SetCardOutlineView(Context context, @Nullable AttributeSet attrs) {
+    public CameraOverlay(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         drawable = null;
         init();

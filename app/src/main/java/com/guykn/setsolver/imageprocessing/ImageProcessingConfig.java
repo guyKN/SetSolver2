@@ -1,6 +1,6 @@
 package com.guykn.setsolver.imageprocessing;
 
-import com.guykn.setsolver.threading.ImageProcessingThreadManager.ImageProcessingAction;
+import com.guykn.setsolver.threading.deprecated.ImageProcessingThreadManager.ImageProcessingAction;
 
 import org.opencv.imgproc.Imgproc;
 

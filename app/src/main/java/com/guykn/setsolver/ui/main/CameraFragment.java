@@ -21,13 +21,12 @@ import android.widget.Toast;
 import com.guykn.setsolver.R;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.threading.CameraPreviewThreadManager;
-import com.guykn.setsolver.threading.CameraThreadManager;
-import com.guykn.setsolver.threading.ImageProcessingThreadManager;
-import com.guykn.setsolver.threading.SimpleDelayChecker;
+import com.guykn.setsolver.threading.deprecated.CameraThreadManager;
+import com.guykn.setsolver.threading.deprecated.SimpleDelayChecker;
 import com.guykn.setsolver.ui.views.CameraPreview;
-import com.guykn.setsolver.ui.views.SetCardOutlineView;
+import com.guykn.setsolver.ui.views.CameraOverlay;
 
-public class CameraFragment extends Fragment implements ImageProcessingThreadManager.Callback {
+public class CameraFragment extends Fragment implements CameraPreviewThreadManager.Callback {
     //todo: allow user to take picture, and save the sections of the picture
     //todo: use the MainViewModel for config, and add a config fragment
     //todo: use viewmodel instead of passing DrawableOnCanvas objects from CameraThreadManager to CameraFragment
@@ -37,7 +36,7 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
     private MainViewModel mViewModel;
     private CameraThreadManager cameraThreadManager;
     private CameraPreview mCameraPreview;
-    private SetCardOutlineView setCardOutlineView;
+    private CameraOverlay cameraOverlay;
     private FrameLayout cameraFrame;
 
     public static CameraFragment newInstance() {
@@ -62,11 +61,17 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
         View view = inflater.inflate(R.layout.camera_fragment, container, false);
         cameraFrame = view.findViewById(R.id.camera_preview_frame);
         Context context = getActivity();
-        if(context != null) {
-            Log.d(TAG, "onCreateView(), context isn't null");
-            CameraPreviewThreadManager threadManager = new CameraPreviewThreadManager();
+        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        if(context != null && mViewModel !=null) {
+            Log.d(TAG, "onCreateView(), context and viewModel aren't null");
+            CameraPreviewThreadManager threadManager = new CameraPreviewThreadManager(mViewModel);
             mCameraPreview = new CameraPreview(context, threadManager);
-            setCardOutlineView = new SetCardOutlineView(context, null);
+            cameraOverlay = new CameraOverlay(context, null);
+
+            mViewModel.getDrawableLiveData().observe(getViewLifecycleOwner(), drawable -> {
+                cameraOverlay.setDrawable(drawable);
+                Log.d(TAG, "changing UI");
+            });
         }
 
         return view;
@@ -76,12 +81,12 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        if(cameraFrame != null && mCameraPreview !=null && setCardOutlineView !=null){
+        if(cameraFrame != null && mCameraPreview !=null && cameraOverlay !=null){
             Log.d(TAG, "onResume, cameraFrame!=null");
             Log.d(TAG, "All view aren't null.");
             cameraFrame.removeAllViews();
             cameraFrame.addView(mCameraPreview);
-            cameraFrame.addView(setCardOutlineView);
+            cameraFrame.addView(cameraOverlay);
         }else {
             Log.i(TAG, "Some views are null. ");
         }
@@ -100,8 +105,6 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        // TODO: Use the ViewModel
     }
 
 
@@ -109,7 +112,7 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
 
     @Override
     public void onImageProcessingSuccess(DrawableOnCanvas drawable) {
-        setCardOutlineView.setDrawable(drawable);
+        cameraOverlay.setDrawable(drawable);
     }
 
     @Override
@@ -134,5 +137,4 @@ public class CameraFragment extends Fragment implements ImageProcessingThreadMan
         // no camera on this device
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
-
 }

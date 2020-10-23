@@ -5,8 +5,9 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
+import com.guykn.setsolver.threading.CameraPreviewThreadManager;
 
-public class MainViewModel extends ViewModel  {
+public class MainViewModel extends ViewModel implements CameraPreviewThreadManager.Callback {
     private final MutableLiveData<DrawableOnCanvas> drawingLiveData;
 
     public MainViewModel(){
@@ -23,5 +24,16 @@ public class MainViewModel extends ViewModel  {
 
     public LiveData<DrawableOnCanvas> getDrawableLiveData(){
         return drawingLiveData;
+    }
+
+    @Override
+    public void onImageProcessingSuccess(DrawableOnCanvas drawable) {
+        postDrawable(drawable);
+    }
+
+    @Override
+    public void onImageProcessingFailure(Exception exception) {
+        exception.printStackTrace();
+        //todo: tell the UI thread something went wrong
     }
 }

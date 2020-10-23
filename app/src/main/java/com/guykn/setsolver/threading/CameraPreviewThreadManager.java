@@ -10,11 +10,18 @@ import android.view.SurfaceHolder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.guykn.setsolver.drawing.DrawableOnCanvas;
+import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
+import com.guykn.setsolver.imageprocessing.StandardImagePreprocessor;
+import com.guykn.setsolver.imageprocessing.detect.CardDetector;
+import com.guykn.setsolver.imageprocessing.detect.ContourBasedCardDetector;
 import com.guykn.setsolver.imageprocessing.image.ByteArrayImage;
 import com.guykn.setsolver.ui.main.CameraFragment;
+
+import org.opencv.core.Mat;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -27,8 +34,10 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
 
     private Handler uiToWorkerThreadHandler;
     private CameraPreviewThread mCameraPreviewThread;
+    private Callback mCallback;
 
-    public CameraPreviewThreadManager(){
+    public CameraPreviewThreadManager(Callback callback){
+        mCallback = callback;
         mCameraPreviewThread = new CameraPreviewThread();
         mCameraPreviewThread.start();
     }
@@ -38,8 +47,8 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
         if(uiToWorkerThreadHandler == null){
             return;
         }
-        uiToWorkerThreadHandler.post(()->
-            mCameraPreviewThread.surfaceCreated(holder)
+        uiToWorkerThreadHandler.post(
+                ()-> mCameraPreviewThread.surfaceCreated(holder)
         );
     }
 
@@ -48,8 +57,8 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
         if(uiToWorkerThreadHandler == null){
             return;
         }
-        uiToWorkerThreadHandler.post(()->
-                mCameraPreviewThread.surfaceChanged(holder, format, width, height)
+        uiToWorkerThreadHandler.post(
+                ()-> mCameraPreviewThread.surfaceChanged(holder, format, width, height)
         );
     }
 
@@ -58,8 +67,8 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
         if(uiToWorkerThreadHandler == null){
             return;
         }
-        uiToWorkerThreadHandler.post(()->
-                mCameraPreviewThread.surfaceDestroyed(holder)
+        uiToWorkerThreadHandler.post(
+                ()-> mCameraPreviewThread.surfaceDestroyed(holder)
         );
 
     }
@@ -67,6 +76,7 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
     private class CameraPreviewThread extends Thread implements SurfaceHolder.Callback, Camera.PreviewCallback{
 
         private Camera mCamera;
+
         private ImageProcessingManager manager;
         @Override
         public void run() {
@@ -77,7 +87,6 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
             uiToWorkerThreadHandler = new Handler(Objects.requireNonNull(Looper.myLooper()));
             Looper.loop();
         }
-
         @Override
         public void surfaceCreated(@NonNull SurfaceHolder holder) {
             // The Surface has been created, now tell the camera where to draw the preview.
@@ -132,13 +141,32 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
 
         @Override
         public void onPreviewFrame(byte[] data, Camera camera) {
+            ImageProcessingConfig config = ImageProcessingConfig.getDefaultConfig();
+            Log.d(CameraFragment.TAG, "inside of onPreviewFrame");
             Camera.Size imageSize = camera.getParameters().getPictureSize();
             int width = imageSize.width;
             int height = imageSize.height;
             ByteArrayImage byteImage = new ByteArrayImage(data, width, height);
+
+
+            Mat initialMat = byteImage.toMat();
+            ImageProcessingManager.ImagePreProcessor preProcessor = new StandardImagePreprocessor();
+            Mat preProcessed = preProcessor.preProcess(initialMat, config);
+            CardDetector detector = new ContourBasedCardDetector(config);
+            detector.setMat(preProcessed);
+            RotatedRectangleList result = detector.getAllCardRectangles();
+            result.printStates();
+            mCallback.onImageProcessingSuccess(result);
+            detector.releaseMat();
+
+            /*
             manager.setImage(byteImage);
             RotatedRectangleList cardPositions = manager.getCardPositions();
+            cardPositions.printStates();
+            mCallback.onImageProcessingSuccess(cardPositions);
             manager.finish();
+
+             */
         }
 
         @Nullable
@@ -153,5 +181,10 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
             return c; // returns null if camera is unavailable
         }
 
+
+    }
+    public interface Callback {
+        public void onImageProcessingSuccess(DrawableOnCanvas drawable);
+        public void onImageProcessingFailure(Exception exception);
     }
 }

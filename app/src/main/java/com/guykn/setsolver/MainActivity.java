@@ -23,7 +23,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
-import com.guykn.setsolver.threading.ImageProcessingThreadManager;
+import com.guykn.setsolver.threading.CameraPreviewThreadManager;
+import com.guykn.setsolver.threading.deprecated.ImageProcessingThreadManager;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
@@ -35,7 +36,7 @@ import java.io.IOException;
 
 import static com.guykn.setsolver.imageprocessing.ImageProcessingConfig.getDefaultConfig;
 
-public class MainActivity extends AppCompatActivity implements ImageProcessingThreadManager.Callback {
+public class MainActivity extends AppCompatActivity implements CameraPreviewThreadManager.Callback {
     //todo: remove most stuff from this activity and move it to CameraActivity
 
     static final int REQUEST_TAKE_PHOTO = 1;

@@ -1,4 +1,4 @@
-package com.guykn.setsolver.threading;
+package com.guykn.setsolver.threading.deprecated;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,11 +12,13 @@ import androidx.annotation.Nullable;
 
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
-import com.guykn.setsolver.imageprocessing.StandardImagePreprocessor;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
+import com.guykn.setsolver.imageprocessing.image.ByteArrayImage;
+import com.guykn.setsolver.imageprocessing.image.MatImage;
+import com.guykn.setsolver.threading.CameraPreviewThreadManager;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -37,10 +39,10 @@ public class ImageProcessingThreadManager {
 
     private Handler workerThreadToUiHandler;
     private volatile Handler uiToWorkerThreadHandler;
-    private final Callback callback;
+    private final CameraPreviewThreadManager.Callback callback;
 
 
-    public ImageProcessingThreadManager(Context context, Callback callback){
+    public ImageProcessingThreadManager(Context context, CameraPreviewThreadManager.Callback callback){
         this.context = context;
         this.callback = callback;
         threadBusy.set(false);
@@ -90,7 +92,6 @@ public class ImageProcessingThreadManager {
 
         @Override
         public void run() {
-            imageProcessingManager = ImageProcessingManager.getDefaultManager(context);
 
             Looper.prepare();
             uiToWorkerThreadHandler = new Handler(Objects.requireNonNull(
@@ -109,22 +110,21 @@ public class ImageProcessingThreadManager {
                             return;
                         }
 
+
                         Mat originalImageMat = message.getMat();
                         ImageProcessingConfig config = message.getConfig();
                         ImageProcessingAction action = message.getAction();
 
-                        Mat scaleDown = StandardImagePreprocessor.scaleDown(
-                                originalImageMat, config.image.totalPixels);
-                        originalImageMat.release();
+                        imageProcessingManager = ImageProcessingManager.getDefaultManager(config);
+                        imageProcessingManager.setImage(new MatImage(originalImageMat));
+                        RotatedRectangleList result = imageProcessingManager.getCardPositions();
 
-
-                        RotatedRectangleList result = imageProcessingManager.getCardPositions(
-                                scaleDown, config);
 
                         //result.trimToSize(1); //todo: remove
                         //save to the gallery if necessary
                         if(config.shouldSaveToGallery.shouldSaveToGallery(action)){
-                            result.saveToGallery(new ImageFileManager(context), scaleDown);
+                            imageProcessingManager.saveCardImagesToGallery(
+                                    new ImageFileManager(context));
                         }
 
                         //sends the result to the UI thread
@@ -141,7 +141,7 @@ public class ImageProcessingThreadManager {
             };
             Log.i(MainActivity.TAG, "Handler Set Up");
             Looper.loop(); //continously listens for messages, and upon recieving a message, acts based on the handler
-            imageProcessingManager.close();
+            imageProcessingManager.finish();
         }
 
     }
@@ -276,7 +276,8 @@ public class ImageProcessingThreadManager {
         @Override
         @NonNull
         public Mat getMat(){
-            return StandardImagePreprocessor.nv21ToRgbMat(binaryData, width, height);
+            ByteArrayImage image = new ByteArrayImage(binaryData, width, height);
+            return image.toMat();
         }
     }
 
@@ -312,10 +313,5 @@ public class ImageProcessingThreadManager {
         }
     }
 
-
-    public interface Callback {
-        public void onImageProcessingSuccess(DrawableOnCanvas drawable);
-        public void onImageProcessingFailure(Exception exception);
-    }
 
 }

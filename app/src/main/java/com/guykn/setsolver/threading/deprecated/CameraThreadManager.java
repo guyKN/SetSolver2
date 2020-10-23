@@ -1,4 +1,4 @@
-package com.guykn.setsolver.threading;
+package com.guykn.setsolver.threading.deprecated;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -6,10 +6,11 @@ import android.util.Log;
 
 import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
+import com.guykn.setsolver.threading.CameraPreviewThreadManager;
 
 public class CameraThreadManager extends ImageProcessingThreadManager implements Camera.PreviewCallback {
     private DelayChecker delayChecker;
-    public CameraThreadManager(Context context, Callback callback,
+    public CameraThreadManager(Context context, CameraPreviewThreadManager.Callback callback,
                                DelayChecker delayChecker) {
         super(context, callback);
         this.delayChecker = delayChecker;

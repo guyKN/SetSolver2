@@ -1,4 +1,4 @@
-package com.guykn.setsolver.threading;
+package com.guykn.setsolver.threading.deprecated;
 
 public class ThreadSynchronized<T> {
     private T value;

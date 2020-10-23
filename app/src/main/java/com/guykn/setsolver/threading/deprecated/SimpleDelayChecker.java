@@ -1,4 +1,6 @@
-package com.guykn.setsolver.threading;
+package com.guykn.setsolver.threading.deprecated;
+
+import com.guykn.setsolver.threading.deprecated.CameraThreadManager;
 
 public class SimpleDelayChecker implements CameraThreadManager.DelayChecker {
     private long processingDelay;
