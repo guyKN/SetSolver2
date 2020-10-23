@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
@@ -12,7 +13,11 @@ import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
 import com.guykn.setsolver.imageprocessing.image.ByteArrayImage;
+import com.guykn.setsolver.imageprocessing.image.MatImage;
 import com.guykn.setsolver.ui.main.CameraFragment;
+
+import org.opencv.core.Mat;
+
 @SuppressWarnings("deprecation")
 public class CameraProcessingThread extends CameraPreviewThread implements Camera.PreviewCallback {
 
@@ -20,14 +25,12 @@ public class CameraProcessingThread extends CameraPreviewThread implements Camer
 
     private final ImageProcessingManager processingManager;
     private Callback callback;
-    private ImageFileManager fileManager;
 
     public CameraProcessingThread(ImageProcessingManager processingManager,
-                                  Callback callback, ImageFileManager fileManager) {
-        super();
+                                  Callback callback, @Nullable ImageFileManager fileManager) {
+        super(fileManager);
         this.processingManager = processingManager;
         this.callback = callback;
-        this.fileManager = fileManager;
     }
 
 
@@ -44,8 +47,6 @@ public class CameraProcessingThread extends CameraPreviewThread implements Camer
         cardPositions.printStates();
         callback.onImageProcessingSuccess(cardPositions);
 
-        processingManager.saveOriginalImageToGallery(fileManager);
-
         processingManager.finish();
     }
 
@@ -57,6 +58,16 @@ public class CameraProcessingThread extends CameraPreviewThread implements Camer
 
     public void setConfig(ImageProcessingConfig config){
         processingManager.setConfig(config);
+    }
+
+    @Override
+    public void pictureTakenMatAction(Mat mat){
+        super.pictureTakenMatAction(mat);
+        MatImage matImage = new MatImage(mat);
+
+        processingManager.setImage(matImage);
+        processingManager.getCardPositions();
+        processingManager.saveCardImagesToGallery(getFileManager());
     }
 
     public interface Callback {

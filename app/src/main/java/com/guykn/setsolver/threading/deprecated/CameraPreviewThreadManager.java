@@ -32,7 +32,7 @@ public class CameraPreviewThreadManager implements SurfaceHolder.Callback {
         this.processingManager = processingManager;
         this.fileManager = fileManager;
         mCallback = callback;
-        mCameraPreviewThread = new CameraPreviewThread();
+        mCameraPreviewThread = new CameraPreviewThread(fileManager);
         mCameraPreviewThread.start();
     }
 

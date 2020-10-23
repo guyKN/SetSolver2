@@ -9,12 +9,27 @@ import android.view.SurfaceHolder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.guykn.setsolver.ImageFileManager;
+import com.guykn.setsolver.imageprocessing.image.JpegByteArrayImage;
 import com.guykn.setsolver.ui.main.CameraFragment;
+
+import org.opencv.core.Mat;
 
 import java.util.Objects;
 
 @SuppressWarnings("deprecation")
-public class CameraPreviewThread extends Thread{
+public class CameraPreviewThread extends Thread implements Camera.PictureCallback{
+
+    @Nullable
+    private ImageFileManager fileManager;
+
+    protected ImageFileManager getFileManager(){
+        return fileManager;
+    }
+
+    public CameraPreviewThread(@Nullable ImageFileManager fileManager){
+        this.fileManager = fileManager;
+    }
 
     private Camera mCamera;
     private Handler uiToWorkerThreadHandler;
@@ -78,6 +93,28 @@ public class CameraPreviewThread extends Thread{
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+
+    @Override
+    public void onPictureTaken(byte[] data, Camera camera) {
+        Camera.Size size = camera.getParameters().getPictureSize();
+        int width = size.width;
+        int height = size.height;
+
+        JpegByteArrayImage image = new JpegByteArrayImage(data, width, height);
+        pictureTakenMatAction(image.toMat());
+    }
+
+    public void pictureTakenMatAction(Mat mat){
+        if(fileManager != null){
+            fileManager.saveToGallery(mat);
+        }
+
+    }
+
+    public void takePicture(){
+        mCamera.takePicture(null, null, null, this);
     }
 
 

@@ -59,4 +59,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 ()->processingThread.setConfig(config)
         );
     }
+
+    public void takePicture() {
+        processingThread.getHandler().post(
+                ()->processingThread.takePicture()
+        );
+
+    }
 }

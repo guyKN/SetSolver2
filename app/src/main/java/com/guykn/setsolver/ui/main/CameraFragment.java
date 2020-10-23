@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -40,6 +41,7 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
     private CameraPreview mCameraPreview;
     private CameraOverlay cameraOverlay;
     private FrameLayout cameraFrame;
+    private Button captureButton;
 
     public static CameraFragment newInstance() {
         return new CameraFragment();
@@ -61,6 +63,7 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
         Log.d(TAG, "onCreateView()");
 
         View view = inflater.inflate(R.layout.camera_fragment, container, false);
+
         cameraFrame = view.findViewById(R.id.camera_preview_frame);
         Context context = getActivity();
         mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
@@ -83,7 +86,16 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
                 cameraOverlay.setDrawable(drawable);
                 Log.d(TAG, "changing UI");
             });
+
+            captureButton = view.findViewById(R.id.button_capture);
+            captureButton.setOnClickListener(
+                    (View v) -> {
+                        mCameraPreview.takePicture();
+                    }
+            );
+
         }
+
 
         return view;
     }
