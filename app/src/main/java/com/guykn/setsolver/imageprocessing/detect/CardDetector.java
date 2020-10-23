@@ -8,10 +8,8 @@ import org.opencv.core.Mat;
 
 public interface CardDetector {
     public void setConfig(ImageProcessingConfig config);
-    public void setMat(Mat mat);
-    public void releaseMat();
-    public void findAllCardsAndDoAction(CardAction cardAction);
-    public RotatedRectangleList getAllCardRectangles();
+    public void findAllCardsAndDoAction(Mat initialMat,CardAction cardAction);
+    public RotatedRectangleList getAllCardRectangles(Mat initialMat);
 
     interface CardAction {
         public void doAction(GenericRotatedRectangle position);

@@ -1,9 +1,6 @@
 package com.guykn.setsolver.imageprocessing;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-
-import com.guykn.setsolver.imageprocessing.image.Image;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;

@@ -17,10 +17,15 @@ public class ByteArrayImage extends Image {
 
     @Override
     public Mat toMat() {
+        return nv21ToRgbMat(data, width, height);
+    }
+
+    public static Mat nv21ToRgbMat(byte[] data, int width, int height){
         Mat nv21Mat = new Mat(height+height/2, width, CvType.CV_8UC1);
         Mat rgbMat = new Mat(nv21Mat.height(), nv21Mat.width(), CvType.CV_8UC1);
         nv21Mat.put(0,0, data);
         Imgproc.cvtColor(nv21Mat, rgbMat, Imgproc.COLOR_YUV2RGB_NV21);
         return rgbMat;
     }
+
 }

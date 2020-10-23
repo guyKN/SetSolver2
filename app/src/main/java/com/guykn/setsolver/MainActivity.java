@@ -1,8 +1,5 @@
 package com.guykn.setsolver;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -21,11 +18,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+
 import com.bumptech.glide.Glide;
-import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
-import com.guykn.setsolver.threading.CameraPreviewThreadManager;
-import com.guykn.setsolver.threading.deprecated.ImageProcessingThreadManager;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
+import com.guykn.setsolver.threading.CameraProcessingThread;
+import com.guykn.setsolver.threading.deprecated.ImageProcessingThreadManager;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 
@@ -36,7 +36,7 @@ import java.io.IOException;
 
 import static com.guykn.setsolver.imageprocessing.ImageProcessingConfig.getDefaultConfig;
 
-public class MainActivity extends AppCompatActivity implements CameraPreviewThreadManager.Callback {
+public class MainActivity extends AppCompatActivity implements CameraProcessingThread.Callback {
     //todo: remove most stuff from this activity and move it to CameraActivity
 
     static final int REQUEST_TAKE_PHOTO = 1;

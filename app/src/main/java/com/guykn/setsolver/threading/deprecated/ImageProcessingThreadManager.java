@@ -14,11 +14,11 @@ import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
-import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
+import com.guykn.setsolver.imageprocessing.JavaImageProcessingManager;
 import com.guykn.setsolver.imageprocessing.image.ByteArrayImage;
 import com.guykn.setsolver.imageprocessing.image.MatImage;
-import com.guykn.setsolver.threading.CameraPreviewThreadManager;
+import com.guykn.setsolver.threading.CameraProcessingThread;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -39,10 +39,10 @@ public class ImageProcessingThreadManager {
 
     private Handler workerThreadToUiHandler;
     private volatile Handler uiToWorkerThreadHandler;
-    private final CameraPreviewThreadManager.Callback callback;
+    private final CameraProcessingThread.Callback callback;
 
 
-    public ImageProcessingThreadManager(Context context, CameraPreviewThreadManager.Callback callback){
+    public ImageProcessingThreadManager(Context context, CameraProcessingThread.Callback callback){
         this.context = context;
         this.callback = callback;
         threadBusy.set(false);
@@ -88,7 +88,7 @@ public class ImageProcessingThreadManager {
 
     private class ImageProcessingThread implements Runnable{
         //todo: implement timeout
-        private ImageProcessingManager imageProcessingManager;
+        private JavaImageProcessingManager imageProcessingManager;
 
         @Override
         public void run() {
@@ -115,7 +115,7 @@ public class ImageProcessingThreadManager {
                         ImageProcessingConfig config = message.getConfig();
                         ImageProcessingAction action = message.getAction();
 
-                        imageProcessingManager = ImageProcessingManager.getDefaultManager(config);
+                        imageProcessingManager = JavaImageProcessingManager.getDefaultManager(config);
                         imageProcessingManager.setImage(new MatImage(originalImageMat));
                         RotatedRectangleList result = imageProcessingManager.getCardPositions();
 

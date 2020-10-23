@@ -5,9 +5,9 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
-import com.guykn.setsolver.threading.CameraPreviewThreadManager;
+import com.guykn.setsolver.threading.CameraProcessingThread;
 
-public class MainViewModel extends ViewModel implements CameraPreviewThreadManager.Callback {
+public class MainViewModel extends ViewModel implements CameraProcessingThread.Callback {
     private final MutableLiveData<DrawableOnCanvas> drawingLiveData;
 
     public MainViewModel(){

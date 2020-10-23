@@ -1,16 +1,9 @@
 package com.guykn.setsolver.ui.main;
 
-import androidx.lifecycle.ViewModelProviders;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,15 +11,24 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+
+import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.R;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
-import com.guykn.setsolver.threading.CameraPreviewThreadManager;
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
+import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
+import com.guykn.setsolver.imageprocessing.JavaImageProcessingManager;
+import com.guykn.setsolver.threading.CameraProcessingThread;
 import com.guykn.setsolver.threading.deprecated.CameraThreadManager;
 import com.guykn.setsolver.threading.deprecated.SimpleDelayChecker;
-import com.guykn.setsolver.ui.views.CameraPreview;
 import com.guykn.setsolver.ui.views.CameraOverlay;
+import com.guykn.setsolver.ui.views.CameraPreview;
 
-public class CameraFragment extends Fragment implements CameraPreviewThreadManager.Callback {
+public class CameraFragment extends Fragment implements CameraProcessingThread.Callback {
     //todo: allow user to take picture, and save the sections of the picture
     //todo: use the MainViewModel for config, and add a config fragment
     //todo: use viewmodel instead of passing DrawableOnCanvas objects from CameraThreadManager to CameraFragment
@@ -64,8 +66,17 @@ public class CameraFragment extends Fragment implements CameraPreviewThreadManag
         mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         if(context != null && mViewModel !=null) {
             Log.d(TAG, "onCreateView(), context and viewModel aren't null");
-            CameraPreviewThreadManager threadManager = new CameraPreviewThreadManager(mViewModel);
-            mCameraPreview = new CameraPreview(context, threadManager);
+
+            ImageProcessingConfig config = ImageProcessingConfig.getDefaultConfig();
+
+            ImageFileManager fileManager = new ImageFileManager(context);
+            ImageProcessingManager processingManager =
+                    JavaImageProcessingManager.getDefaultManager(config);
+
+            CameraProcessingThread processingThread = new CameraProcessingThread(
+                    processingManager, mViewModel, fileManager);
+
+            mCameraPreview = new CameraPreview(context, processingThread);
             cameraOverlay = new CameraOverlay(context, null);
 
             mViewModel.getDrawableLiveData().observe(getViewLifecycleOwner(), drawable -> {

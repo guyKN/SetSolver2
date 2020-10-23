@@ -28,7 +28,7 @@ public class ImageProcessingConfig {
     }
 
     public static class MemoryManagement {
-        public boolean shouldReleaseUnprocessedImage = true;
+        public boolean shouldReleaseUnprocessedImage = false;
     }
 
     public enum ShouldSaveToGallery {
