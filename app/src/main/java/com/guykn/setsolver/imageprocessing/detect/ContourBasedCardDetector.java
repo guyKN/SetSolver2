@@ -19,6 +19,7 @@ public class ContourBasedCardDetector implements CardDetector {
     //todo: manage memory: make sure only things that are necessary are loaded into memory.
     //todo: maybe go back to having a wrapper class?
     //todo: use ML to check that cards are actually cards
+    //todo: go back to old version, since this is not working
 
     private Mat initialMat;
     private Mat blurredMat = new Mat(); //same as initialMat, but in greyscale and with a gausian filter
