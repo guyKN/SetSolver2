@@ -24,48 +24,46 @@ import java.util.Locale;
 public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     //todo: debug more: sometimes rectangles are clearly not quite right
-    //todo: restructure to save the width and height of the Mat properly
+    //todo: add comments to make it generally more clear
 
     public static final String TAG = "GenericRotatedRectangle";
 
-    private double centerX;
-    private double centerY;
-    private double width;
-    private double height;
+    private int centerX;
+    private int centerY;
+    private int width;
+    private int height;
     private double angle;
 
-    private static int lastHeight = 0;
-    private static int lastWidth = 0;
+    private int originalCanvasWidth;
+    private int originalCanvasHeight;
 
-    private static final boolean writeToConsole = false;
+    private static final boolean WRITE_TO_CONSOLE = false;
 
     @Override
     public void drawOnCanvas(Canvas canvas, Paint paint) {
-        //todo: make sure this works. It currently doesn't work completely and sometimes draws wierdly
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
-        if(writeToConsole) Log.d(TAG, "Width: " + canvasWidth + " Height  " + canvasHeight);
 
-        float adjustableAngle = (float) angle;
-        double adjustableWidth = width;
-        double adjustableHeight = height;
+        ScaleFactor scaleFactor = new ScaleFactor(canvas.getWidth(), canvas.getHeight());
 
-        if(writeToConsole) Log.d(TAG, angle > -45.0 ? "angle>-45":"-45>angle");
-        if(writeToConsole) Log.d(TAG, (height>width ? "h>w": "w>h"));
+        if(WRITE_TO_CONSOLE) Log.d(TAG, angle > -45.0 ? "angle>-45":"-45>angle");
+        if(WRITE_TO_CONSOLE) Log.d(TAG, (height>width ? "h>w": "w>h"));
 
         Rect rect = new Rect(
-                (int) ((centerX - adjustableWidth/2)*canvasWidth),
-                (int) ((centerY - adjustableHeight/2)*canvasHeight),
-                (int) ((centerX + adjustableWidth/2)*canvasWidth),
-                (int) ((centerY + adjustableHeight/2)*canvasHeight)
+                (int) ((centerX - width/2)*scaleFactor.x),
+                (int) ((centerY - height/2)*scaleFactor.y),
+                (int) ((centerX + width/2)*scaleFactor.x),
+                (int) ((centerY + height/2)*scaleFactor.y)
         );
         canvas.save();
-        canvas.rotate(adjustableAngle, (int)(centerX*canvasWidth), (int)(centerY*canvasHeight));
+        canvas.rotate(
+                (float) angle,
+                (float) (centerX*scaleFactor.x),
+                (float) (centerY*scaleFactor.y)
+        );
 
         canvas.drawRect(rect, paint);
         canvas.restore();
 
-        if(writeToConsole)
+        if(WRITE_TO_CONSOLE)
             Log.i(TAG, "canvas width: " + canvas.getWidth()
                     + "canvas height: " + canvas.getHeight());
     }
@@ -83,33 +81,36 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     public Mat cropToRect(Mat initialMat){
         //todo: remove unnecessary math, by using the RotatedRect from OpenCv
-        //todo: use width and height directly from original, rather than scaled versions
         Size originalImageSize = initialMat.size();
-        int originalImageWidth = (int) originalImageSize.width;
-        int originalImageHeight = (int) originalImageSize.height;
+        int newWidth = (int) originalImageSize.width;
+        int newHeight = (int) originalImageSize.height;
 
-        int adjustedWidth = (int) (originalImageWidth * width);
-        int adjustedHeight = (int) (originalImageHeight * height);
-        int adjustedCenterX = (int) (originalImageWidth*centerX);
-        int adjustedCenterY = (int) (originalImageHeight*centerY);
-        Size rectSize = new Size(adjustedWidth, adjustedHeight);
-        org.opencv.core.Point center = new org.opencv.core.Point(adjustedCenterX, adjustedCenterY);
+        ScaleFactor scaleFactor = new ScaleFactor(newWidth, newHeight);
+
+        Size adjustableSize = new Size(width, height);
+        double adjustableAngle = angle;
 
         Mat M = new Mat();
         Mat rotated = new Mat();
         Mat cropped = new Mat();
 
-        double adjustedAngle = angle;
-        if(adjustedAngle<-45.0){
-            adjustedAngle+=90;
+        if(adjustableAngle<-45.0){
+            adjustableAngle+=90;
             //swap the width and height
-            double temp = rectSize.width;
-            rectSize.width = rectSize.height;
-            rectSize.height = temp;
+            double temp = adjustableSize.width;
+            adjustableSize.width = adjustableSize.height;
+            adjustableSize.height = temp;
         }
-        M = Imgproc.getRotationMatrix2D(center, angle, 1.0);
-        Imgproc.warpAffine(initialMat, rotated,M, initialMat.size(), Imgproc.INTER_CUBIC);
-        Imgproc.getRectSubPix(rotated, rectSize, center, cropped);
+
+        Point adjustedCenter = new Point(centerX*scaleFactor.x,
+                centerY*scaleFactor.y);
+
+        Size adjustedSize = new Size(width*scaleFactor.x,
+                height*scaleFactor.y);
+
+        M = Imgproc.getRotationMatrix2D(adjustedCenter, adjustableAngle, 1.0);
+        Imgproc.warpAffine(initialMat, rotated, M, initialMat.size(), Imgproc.INTER_CUBIC);
+        Imgproc.getRectSubPix(rotated, adjustedSize, adjustedCenter, cropped);
         return cropped;
     }
 
@@ -120,22 +121,29 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         this.width = rotatedRect.width;
         this.height = rotatedRect.height;
         this.angle = rotatedRect.angle;
+        this.originalCanvasWidth = rotatedRect.originalCanvasWidth;
+        this.originalCanvasHeight = rotatedRect.originalCanvasHeight;
     }
 
     public GenericRotatedRectangle(RotatedRect rect, int canvasWidth, int canvasHeight){
-        centerX = ( (double) rect.center.x) / ( (double) canvasWidth);
-        centerY = ( (double) rect.center.y) / ( (double) canvasHeight);
-        width = ( (double) rect.size.width )/( (double) canvasWidth);
-        height = ( (double) rect.size.height) / ( (double) canvasHeight);
+        centerX = (int) rect.center.x;
+        centerY = (int) rect.center.y;
+        width = (int) rect.size.width;
+        height = (int) rect.size.height;
         angle = rect.angle;
+
+        originalCanvasWidth = canvasWidth;
+        originalCanvasHeight = canvasHeight;
     }
 
-    public GenericRotatedRectangle(double centerX, double centerY, double width, double height, double angle){
+    public GenericRotatedRectangle(int centerX, int centerY, int width, int height, double angle, int originalCanvasWidth, int originalCanvasHeight){
         this.centerX = centerX;
         this.centerY = centerY;
         this.width = width;
         this.height = height;
         this.angle = angle;
+        this.originalCanvasWidth = originalCanvasWidth;
+        this.originalCanvasHeight = originalCanvasHeight;
     }
 
 
@@ -226,7 +234,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         int adjustedCenterY = (int) (centerY * canvasHeight);
 
 
-        if(writeToConsole) Log.d(TAG,
+        if(WRITE_TO_CONSOLE) Log.d(TAG,
                 String.format(Locale.US,
                         "\nangleRadians: %s\nsin: %s\ncos: %s\nsegment1X: %s\nsegment1Y: %s\nsegment2X: %s\nsegment2Y: %s\nadjustedCenterX: %s\nadjustedCenterY: %s",
                         angleRadians, sin, cos, segment1X, segment1Y, segment2X, segment2Y, adjustedCenterX, adjustedCenterY));
@@ -254,6 +262,14 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     }
 
+    private class ScaleFactor{
+        public double x;
+        public double y;
+        private ScaleFactor(int newCanvasWidth, int newCanvasHeight){
+            this.x = ((double) newCanvasWidth)/( (double) originalCanvasWidth);
+            this.y = ((double) newCanvasHeight)/( (double) originalCanvasHeight);
+        }
+    }
 
     /**
      * Currently doesn't work
@@ -415,10 +431,6 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                     Math.pow(height, 2)
             );
         }
-
-
-
-
     }
 
 }
