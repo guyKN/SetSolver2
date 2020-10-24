@@ -8,10 +8,8 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import com.guykn.setsolver.ImageFileManager;
-import com.guykn.setsolver.MainActivity;
 
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Size;
@@ -85,6 +83,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
 
     public Mat cropToRect(Mat initialMat){
         //todo: remove unnecessary math, by using the RotatedRect from OpenCv
+        //todo: use width and height directly from original, rather than scaled versions
         Size originalImageSize = initialMat.size();
         int originalImageWidth = (int) originalImageSize.width;
         int originalImageHeight = (int) originalImageSize.height;
