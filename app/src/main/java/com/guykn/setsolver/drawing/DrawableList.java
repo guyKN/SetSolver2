@@ -9,14 +9,22 @@ import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 import java.util.List;
-
+//todo: maybe just extend the collection class instead of storing a collection inside
 public abstract class DrawableList<Drawable extends DrawableOnCanvas> implements DrawableOnCanvas{
     private static final int DEFAULT_TRIM_SIZE = 30;
 
-    protected List<Drawable> drawables = new ArrayList<>();
+    private List<Drawable> drawables = new ArrayList<>();
 
     public List<Drawable> getDrawables(){
         return drawables;
+    }
+
+    public void setDrawables(List<Drawable> drawables){
+        this.drawables = drawables;
+    }
+
+    public int getSize(){
+        return drawables.size();
     }
 
     protected void addDrawable(Drawable drawable){

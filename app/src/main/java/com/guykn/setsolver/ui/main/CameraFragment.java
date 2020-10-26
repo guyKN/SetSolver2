@@ -33,6 +33,7 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
     //todo: use the MainViewModel for config, and add a config fragment
     //todo: make screen stay awake
     //todo: use a lifeCycleObserver for the camera
+    //todo: have a visible FPS counter
     public static final String TAG = "CameraFragment";
     private MainViewModel mViewModel;
     private CameraThreadManager cameraThreadManager;

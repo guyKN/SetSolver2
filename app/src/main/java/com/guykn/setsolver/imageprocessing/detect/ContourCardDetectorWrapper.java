@@ -24,6 +24,7 @@ public class ContourCardDetectorWrapper implements CardDetector{
     @Override
     public void setConfig(ImageProcessingConfig config) {
         this.config = config;
+
     }
 
     /**
@@ -99,21 +100,38 @@ public class ContourCardDetectorWrapper implements CardDetector{
             for (MatOfPoint contour : contours) {
                 MatOfPoint2f f_contour = new MatOfPoint2f();
                 contour.convertTo(f_contour, CvType.CV_32FC2); //convert to matofpoint2f
-                double arcLength = Imgproc.arcLength(f_contour, true);
-                if (arcLength > config.contours.minContourPerimeter) {
-                    if(config.contours.useEpsilon) {
-                        double epsilon = arcLength * config.contours.epsilonMultiplier;
+
+                if(config.contourVerification.useContourPerimeter){
+                    double arcLength = Imgproc.arcLength(f_contour, true);
+                    if (arcLength < config.contourVerification.minContourPerimeter) {
+                        continue;
+                    }
+                    if(config.contourVerification.useEpsilon) {
+                        double epsilon = arcLength * config.contourVerification.epsilonMultiplier;
                         Imgproc.approxPolyDP(f_contour, f_contour, epsilon, true);
                     }
-                    RotatedRect rotatedRect = Imgproc.minAreaRect(f_contour);
-                    double rectArea = rotatedRect.size.area();
-                    System.out.println(rectArea);
-                    if(rectArea > config.contours.minContourArea) {
-                        GenericRotatedRectangle cardPosition = new GenericRotatedRectangle(
-                                rotatedRect, initialMat.width(), initialMat.height());
-                        cardAction.doAction(cardPosition);
+                }
+
+                RotatedRect rotatedRect = Imgproc.minAreaRect(f_contour);
+
+                if(config.contourVerification.useCardAspectRatioCheck){
+                    double aspectRatio = rotatedRect.size.width/rotatedRect.size.height;
+                    if(aspectRatio > config.contourVerification.maxCardAspectRatioDeviation ||
+                            aspectRatio < 1.0/config.contourVerification.maxCardAspectRatioDeviation){ //todo: don't repeat the same 1/x computation multiple times
+                        continue;
                     }
                 }
+                double rectArea;
+                rectArea = rotatedRect.size.area();
+                if(config.contourVerification.useAreaCheck){
+                    if(rectArea < config.contourVerification.minContourArea) {
+                        continue;
+                    }
+                }
+                    GenericRotatedRectangle cardPosition = new GenericRotatedRectangle(
+                            rotatedRect, initialMat.width(), initialMat.height(), (int) rectArea);
+
+                    cardAction.doAction(cardPosition);
             }
         }
     }

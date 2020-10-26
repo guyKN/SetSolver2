@@ -37,6 +37,9 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     private int originalCanvasWidth;
     private int originalCanvasHeight;
 
+    private int area;
+
+
     private static final boolean WRITE_TO_CONSOLE = false;
 
     @Override
@@ -80,8 +83,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     }
 
     public Mat cropToRect(Mat initialMat){
-        //todo: check angles less than 45
-        //todo: make sure this is working 100%
+        //todo: maybe rotate contours so that width>height
         Size originalImageSize = initialMat.size();
         int newWidth = (int) originalImageSize.width;
         int newHeight = (int) originalImageSize.height;
@@ -107,6 +109,10 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     }
 
 
+    public int getArea() {
+        return area;
+    }
+
     protected GenericRotatedRectangle(GenericRotatedRectangle rotatedRect) {
         this.centerX = rotatedRect.centerX;
         this.centerY = rotatedRect.centerY;
@@ -115,28 +121,33 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         this.angle = rotatedRect.angle;
         this.originalCanvasWidth = rotatedRect.originalCanvasWidth;
         this.originalCanvasHeight = rotatedRect.originalCanvasHeight;
+        this.area = rotatedRect.area;
     }
 
-    public GenericRotatedRectangle(RotatedRect rect, int canvasWidth, int canvasHeight){
+    private GenericRotatedRectangle(RotatedRect rect){
         centerX = (int) rect.center.x;
         centerY = (int) rect.center.y;
         width = (int) rect.size.width;
         height = (int) rect.size.height;
         angle = rect.angle;
+    }
 
+    public GenericRotatedRectangle(RotatedRect rect, int canvasWidth, int canvasHeight){
+        this(rect);
         originalCanvasWidth = canvasWidth;
         originalCanvasHeight = canvasHeight;
+        this.area = width*height;
     }
 
-    public GenericRotatedRectangle(int centerX, int centerY, int width, int height, double angle, int originalCanvasWidth, int originalCanvasHeight){
-        this.centerX = centerX;
-        this.centerY = centerY;
-        this.width = width;
-        this.height = height;
-        this.angle = angle;
-        this.originalCanvasWidth = originalCanvasWidth;
-        this.originalCanvasHeight = originalCanvasHeight;
+    public GenericRotatedRectangle(RotatedRect rect, int canvasWidth, int canvasHeight, int area){
+        this(rect, canvasWidth, canvasHeight);
+        originalCanvasWidth = canvasWidth;
+        originalCanvasHeight = canvasHeight;
+        this.area = area;
     }
+
+
+
 
 
 

@@ -10,8 +10,7 @@ public class ImageProcessingConfig {
         public int totalPixels = 1000000;
     }
     public static class GaussianBlur{
-        public int radius = 3;
-
+        public int radius = 7;
     }
     public static class CannyEdgeDetection{
         public int threshold = 50;
@@ -19,12 +18,32 @@ public class ImageProcessingConfig {
     }
 
     public static class Contours{
-        public int minContourPerimeter = 50;
-        public int minContourArea = 200;
-        public int reBlurRadius = 5;
-        public double epsilonMultiplier = 0.1;
-        public boolean useEpsilon = true;
+        public int reBlurRadius = 11;
         public int hierarchyType = Imgproc.RETR_EXTERNAL;
+
+    }
+
+    public static class ContourVerification{
+        public boolean useContourPerimeter = false;
+        public int minContourPerimeter = 0;
+
+        public boolean useEpsilon = false;
+        public double epsilonMultiplier = 0;
+
+        public boolean useCardAspectRatioCheck = true;
+        public double maxCardAspectRatioDeviation = 3;
+
+        public int minContourArea = 5000;
+        public boolean useAreaCheck=true;
+
+        public boolean doAreaOutliersCheck = true;
+        public int areaOutliersMaxDeviation = 5;//todo: find resonable number
+    }
+
+    public static class OutlierDetection{
+        public boolean shouldDoOutlierDetection  = true;
+        public int minClusterSize = 2;
+        public double maxDistance = 100000000;
     }
 
     public static class MemoryManagement {
@@ -59,23 +78,14 @@ public class ImageProcessingConfig {
     public GaussianBlur gaussianBlur = new GaussianBlur();
     public CannyEdgeDetection cannyEdgeDetection = new CannyEdgeDetection();
     public Contours contours = new Contours();
+    public ContourVerification contourVerification = new ContourVerification();
     public ShouldSaveToGallery shouldSaveToGallery = ShouldSaveToGallery.NEVER;
     public MemoryManagement memoryManagement= new MemoryManagement();
+    public OutlierDetection outlierDetection = new OutlierDetection();
+
 
     public static ImageProcessingConfig getDefaultConfig(){
         ImageProcessingConfig cfg = new ImageProcessingConfig();
-        cfg.image.totalPixels = 1000000;
-
-        cfg.gaussianBlur.radius = 7;
-        cfg.cannyEdgeDetection.threshold = 50;
-        cfg.cannyEdgeDetection.ratio = 2.0f;
-
-        cfg.contours.useEpsilon = false;
-        cfg.contours.reBlurRadius = 11;
-        cfg.contours.minContourPerimeter = 200;
-        cfg.contours.minContourArea = 1000;
-        cfg.contours.hierarchyType = Imgproc.RETR_EXTERNAL;
-        cfg.shouldSaveToGallery = ShouldSaveToGallery.NEVER;
         return cfg;
     }
 
