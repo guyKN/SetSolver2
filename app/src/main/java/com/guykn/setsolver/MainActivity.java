@@ -39,6 +39,7 @@ import static com.guykn.setsolver.imageprocessing.ImageProcessingConfig.getDefau
 public class MainActivity extends AppCompatActivity implements CameraProcessingThread.Callback {
     //todo: remove most stuff from this activity and move it to CameraActivity
 
+
     static final int REQUEST_TAKE_PHOTO = 1;
     static final int REQUEST_CROP_PHOTO = 2;
     public static final String TAG = "MainActivity1";

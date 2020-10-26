@@ -60,6 +60,7 @@ public class ImageFileManager {
 
 
     public void saveToGallery(Bitmap bmp){
+        //todo: figure a better way to save files, to avoid errors on some phones
         MediaStore.Images.Media.insertImage(context.getContentResolver(), bmp, getUniqueFileName(), "A longer description");
     }
 

@@ -30,11 +30,9 @@ import com.guykn.setsolver.ui.views.CameraOverlay;
 import com.guykn.setsolver.ui.views.CameraPreview;
 
 public class CameraFragment extends Fragment implements CameraProcessingThread.Callback {
-    //todo: allow user to take picture, and save the sections of the picture
     //todo: use the MainViewModel for config, and add a config fragment
-    //todo: use viewmodel instead of passing DrawableOnCanvas objects from CameraThreadManager to CameraFragment
     //todo: make screen stay awake
-    //todo: put cameraPreview on seprate thread
+    //todo: use a lifeCycleObserver for the camera
     public static final String TAG = "CameraFragment";
     private MainViewModel mViewModel;
     private CameraThreadManager cameraThreadManager;

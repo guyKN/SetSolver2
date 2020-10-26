@@ -30,12 +30,15 @@ public class CameraOverlay extends View {
     }
 
     public void setDrawable(DrawableOnCanvas drawable){
+        //todo: do all the math ahead of time, so that the location of the rect doesn't have to be calculated every time
         this.drawable = drawable;
         invalidate();
     }
 
     @Override
     protected void onDraw(Canvas canvas){
+        //todo: do all the math ahead of time, so that the location of the rect doesn't have to be calculated every time
+
         if(drawable == null) return;
         drawable.drawOnCanvas(canvas, mPaint);
     }

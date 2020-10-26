@@ -1,18 +1,19 @@
 package com.guykn.setsolver;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.guykn.setsolver.ui.main.CameraFragment;
 
 public class CameraActivity extends AppCompatActivity {
+    //todo: add whatTheStack for better crash info
     private static final int REQUEST_CODE_CAMERA_PERMISSION = 33;
 
     @Override

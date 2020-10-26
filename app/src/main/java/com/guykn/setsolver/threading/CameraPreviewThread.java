@@ -17,6 +17,8 @@ import org.opencv.core.Mat;
 
 import java.util.Objects;
 
+//todo: use HandlerTHread instead of thread
+
 @SuppressWarnings("deprecation")
 public class CameraPreviewThread extends Thread implements Camera.PictureCallback{
 

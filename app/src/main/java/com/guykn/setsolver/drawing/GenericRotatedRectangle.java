@@ -80,27 +80,19 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     }
 
     public Mat cropToRect(Mat initialMat){
-        //todo: remove unnecessary math, by using the RotatedRect from OpenCv
+        //todo: check angles less than 45
+        //todo: make sure this is working 100%
         Size originalImageSize = initialMat.size();
         int newWidth = (int) originalImageSize.width;
         int newHeight = (int) originalImageSize.height;
 
         ScaleFactor scaleFactor = new ScaleFactor(newWidth, newHeight);
 
-        Size adjustableSize = new Size(width, height);
-        double adjustableAngle = angle;
 
         Mat M = new Mat();
         Mat rotated = new Mat();
         Mat cropped = new Mat();
 
-        if(adjustableAngle<-45.0){
-            adjustableAngle+=90;
-            //swap the width and height
-            double temp = adjustableSize.width;
-            adjustableSize.width = adjustableSize.height;
-            adjustableSize.height = temp;
-        }
 
         Point adjustedCenter = new Point(centerX*scaleFactor.x,
                 centerY*scaleFactor.y);
@@ -108,7 +100,7 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         Size adjustedSize = new Size(width*scaleFactor.x,
                 height*scaleFactor.y);
 
-        M = Imgproc.getRotationMatrix2D(adjustedCenter, adjustableAngle, 1.0);
+        M = Imgproc.getRotationMatrix2D(adjustedCenter, angle, 1.0);
         Imgproc.warpAffine(initialMat, rotated, M, initialMat.size(), Imgproc.INTER_CUBIC);
         Imgproc.getRectSubPix(rotated, adjustedSize, adjustedCenter, cropped);
         return cropped;
