@@ -45,8 +45,8 @@ public class CameraProcessingThread extends CameraPreviewThread implements Camer
     }
 
     @Override
-    protected void onResumeCamera(){
-        super.onResumeCamera();
+    protected void startCamera(){
+        super.startCamera();
         getCamera().setPreviewCallback(this);
     }
 

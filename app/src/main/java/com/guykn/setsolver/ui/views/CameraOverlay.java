@@ -4,22 +4,24 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.AttributeSet;
 import android.view.View;
 
-import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 
-public class CameraOverlay extends View {
+public class CameraOverlay extends View implements LifecycleObserver {
 
     private DrawableOnCanvas drawable;
     private Paint mPaint;
 
-    public CameraOverlay(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+    public CameraOverlay(Context context, Lifecycle lifecycle) {
+        super(context);
         drawable = null;
         init();
+        lifecycle.addObserver(this);
     }
 
     private void init(){
@@ -42,4 +44,16 @@ public class CameraOverlay extends View {
         if(drawable == null) return;
         drawable.drawOnCanvas(canvas, mPaint);
     }
+
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    public void onResume(){
+        setVisibility(VISIBLE);
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    public void onPause(){
+        setVisibility(GONE);
+    }
+
 }

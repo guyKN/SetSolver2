@@ -15,26 +15,17 @@ import com.guykn.setsolver.ui.views.CameraPreview;
 
 import org.opencv.core.Mat;
 
-import java.io.IOException;
-
-//todo: make use handler internally to allow direct calls from UI thread
-//todo: improve the lifecycle, make sure it's working
+//todo: make CameraPreviewThread internally to allow direct calls from UI thread
 
 @SuppressWarnings("deprecation")
-public class CameraPreviewThread extends HandlerThread implements Camera.PictureCallback{
+public class CameraPreviewThread extends HandlerThread implements Camera.PictureCallback, SurfaceHolder.Callback {
     
     private static final String TAG = CameraPreview.TAG;
-    
-    enum CameraPreviewState{
-        STOPPED,
-        STARTED,
-        RESUMED
-    }
-
-    private CameraPreviewState mPreviewState;
 
     private Camera mCamera;
     private Handler mHandler;
+
+    private static final int CAMERA_RESTART_DELAY = 0;
 
     @Nullable
     private ImageFileManager fileManager;
@@ -47,136 +38,58 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
     public CameraPreviewThread(@Nullable ImageFileManager fileManager){
         super("CameraPreviewThread");
         this.fileManager = fileManager;
-        mPreviewState = CameraPreviewState.STOPPED;
-    }
-
-    public CameraPreviewState getPreviewState(){
-        return mPreviewState;
     }
 
     protected Camera getCamera(){
         return mCamera;
     }
 
-    public Handler getHandler(){
+    protected Handler getHandler(){
         if(mHandler == null){
             mHandler = new Handler(getLooper());
         }
         return mHandler;
     }
 
-    public final void surfaceCreated(@NonNull SurfaceHolder holder) {
+    private void internalSurfaceCreated(@NonNull SurfaceHolder holder) {
         // The Surface has been created, now tell the camera where to draw the preview.
-        Log.d(TAG, "surfaceCreated(). Current state: " + mPreviewState);
-        startCamera();
+        Log.d(TAG, "surfaceCreated(). ");
+        openCamera();
     }
 
-    public final void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-        Log.d(TAG, "surfaceDestroyed. Current state: " + mPreviewState);
-        stopCamera();
-    }
-
-    public final void surfaceChanged(@NonNull SurfaceHolder holder, int format, int w, int h) {
-        Log.d(TAG, "surfaceChanged. Current state: " + mPreviewState);
+    private void internalSurfaceChanged(@NonNull SurfaceHolder holder, int format, int w, int h) {
+        Log.d(TAG, "surfaceChanged.");
         if (holder.getSurface() == null){
             // preview surface does not exist
             return;
         }
+        stopCamera();
         try {
-            switch (mPreviewState) {
-                case STOPPED:
-                    break;
-                case STARTED:
-                    mCamera.setPreviewDisplay(holder);
-                    break;
-                case RESUMED:
-                    pauseCamera();
-                    mCamera.setPreviewDisplay(holder);
-                    resumeCamera();
-                    break;
-            }
-        } catch (IOException e) {
+            mCamera.setPreviewDisplay(holder);
+        } catch (Exception e) {
             e.printStackTrace();
-            //todo: handle errors
         }
+        startCamera();
     }
 
-    public void startCamera(){
-        Log.d(TAG, "StartCamera() called. previous state: " + mPreviewState.name());
-        switch (mPreviewState){
-            case STOPPED:
-                onStartCamera();
-                break;
-            case STARTED:
-            case RESUMED:
-                new Throwable("Attempted to call startCamera() when Camera was already started")
-                        .printStackTrace();
-                break;
-        }
-        mPreviewState = CameraPreviewState.STARTED;
-    }
-
-    public void resumeCamera(){
-        Log.d(TAG, "resumeCamera() called. previous state: " + mPreviewState.name());
-        switch(mPreviewState){
-            case STOPPED:
-                onStartCamera();
-                onResumeCamera();
-                break;
-            case STARTED:
-                onResumeCamera();
-                break;
-            case RESUMED:
-                new Throwable("Attempted to call resumeCamera() when camera was already resumed")
-                        .printStackTrace();
-                break;
-        }
-        mPreviewState = CameraPreviewState.RESUMED;
-    }
-
-    public void pauseCamera(){
-        Log.d(TAG, "pauseCamera() called. previous state: " + mPreviewState.name());
-        switch(mPreviewState){
-            case STOPPED:
-            case STARTED:
-                new Throwable("Attempted to call pauseCamera() when camera was already paused")
-                        .printStackTrace();
-                break;
-            case RESUMED:
-                onPauseCamera();
-                break;
-        }
-        mPreviewState = CameraPreviewState.STARTED;
-    }
-
-    public void stopCamera(){
-        Log.d(TAG, "stopCamera() called. previous state: " + mPreviewState.name());
-        switch(mPreviewState){
-            case STOPPED:
-                Log.w(TAG, "Attempted to call stopCamera() when camera was already stopped");
-                new Throwable().printStackTrace();
-                break;
-            case STARTED:
-                onPauseCamera();
-            case RESUMED:
-                onPauseCamera();
-                onStopCamera();
-        }
-        mPreviewState = CameraPreviewState.STOPPED;
+    private void internalSurfaceDestroyed(@NonNull SurfaceHolder holder) {
+        Log.d(TAG, "surfaceDestroyed(). ");
+        destroyCamera();
     }
 
 
 
-    protected void onStartCamera(){
-        Log.d(TAG, "onStartCamera()");
+
+    protected void openCamera(){
+        Log.d(TAG, "openCamera()");
         mCamera = getCameraInstance();
         if(mCamera == null) {
             Log.w(TAG, "couldn't open camera");
         }
     }
 
-    protected void onResumeCamera(){
-        Log.d(TAG, "onResumeCamera()");
+    protected void startCamera(){
+        Log.d(TAG, "startCamera()");
         try {
             mCamera.startPreview();
             mCamera.autoFocus(null);
@@ -185,19 +98,20 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
         }
     }
 
-    protected void onPauseCamera(){
-        Log.d(TAG, "onPauseCamera()");
+    protected void stopCamera(){
+        Log.d(TAG, "stopCamera()");
         mCamera.stopPreview();
+        mCamera.cancelAutoFocus();
+        mCamera.setPreviewCallback(null);
     }
 
-    protected void onStopCamera(){
-        Log.d(TAG, "onStopCamera()");
+    protected void destroyCamera(){
+        Log.d(TAG, "destroyCamera()");
         if(mCamera == null){
             return;
         }
+        stopCamera();
         try {
-            mCamera.setPreviewCallback(null);
-            mCamera.cancelAutoFocus();
             mCamera.release();
         }catch (Exception e){
             e.printStackTrace();
@@ -208,22 +122,24 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
 
 
     @Override
-    final public void onPictureTaken(byte[] data, Camera camera) {
+    public final void onPictureTaken(byte[] data, Camera camera) {
         Camera.Size size = camera.getParameters().getPictureSize();
         int width = size.width;
         int height = size.height;
 
         JpegByteArrayImage image = new JpegByteArrayImage(data, width, height);
         pictureTakenMatAction(image.toMat());
+        startCamera();
+        //startCameraDelayed();
     }
 
-    public void pictureTakenMatAction(Mat mat){
+    protected void pictureTakenMatAction(Mat mat){
         if(fileManager != null){
             fileManager.saveToGallery(mat);
         }
     }
 
-    public void takePicture(){
+    private void internalTakePicture(){
         mCamera.takePicture(null, null, null, this);
     }
 
@@ -239,4 +155,46 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
         return c; // returns null if camera is unavailable
     }
 
+    /**
+     * After a certain amount of time, start the camera again.
+     * Used to give the user a certain amount of time to look at the camera output
+     * before it starts again
+     */
+    private void startCameraDelayed(){
+        getHandler().postDelayed(
+                () -> {
+                    if(mCamera != null) {
+                        startCamera();
+                    }
+                },
+                CAMERA_RESTART_DELAY
+        );
+    }
+
+    @Override
+    public void surfaceCreated(@NonNull SurfaceHolder holder) {
+        getHandler().post(
+                ()->internalSurfaceCreated(holder)
+        );
+    }
+
+    @Override
+    public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
+        getHandler().post(
+                ()->internalSurfaceChanged(holder, format ,width, height)
+        );
+    }
+
+    @Override
+    public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+        getHandler().post(
+                ()->internalSurfaceDestroyed(holder)
+        );
+    }
+
+    public void takePicture(){
+        getHandler().post(
+                ()->internalTakePicture()
+        );
+    }
 }

@@ -79,7 +79,7 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
                     processingManager, mViewModel, fileManager);
 
             mCameraPreview = new CameraPreview(context, processingThread, getLifecycle());
-            mCameraOverlay = new CameraOverlay(context, null);
+            mCameraOverlay = new CameraOverlay(context, getLifecycle());
 
             cameraFrame.addView(mCameraPreview);
             cameraFrame.addView(mCameraOverlay);
@@ -100,33 +100,6 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
 
         return root;
     }
-
-    /*
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
-        if(cameraFrame != null && mCameraPreview !=null && mCameraOverlay !=null){
-            Log.d(TAG, "onResume, cameraFrame!=null");
-            Log.d(TAG, "All view aren't null.");
-            cameraFrame.removeAllViews();
-            cameraFrame.addView(mCameraPreview);
-            cameraFrame.addView(mCameraOverlay);
-        }else {
-            Log.i(TAG, "Some views are null. ");
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d(TAG, "onPause()");
-        if(cameraFrame !=null) {
-            Log.d(TAG, "onPause, cameraFrame!=null");
-            cameraFrame.removeAllViews();
-        }
-    }
-     */
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
