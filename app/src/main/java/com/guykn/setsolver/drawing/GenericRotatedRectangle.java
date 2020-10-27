@@ -210,14 +210,17 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
                 2 * centerX - p1.x,
                 2 * centerY - p1.y
         );
-        Log.d(TAG, "angle1: " + findAngle(p0,p1,p2) +
-                "\nangle2: " + findAngle(p1,p2,p3) +
-                "\nangle3: " + findAngle(p2,p3,p0) +
-                "\nangle4: " + findAngle(p3,p0,p1) +
-                "\ntest: " + findAngle(new Point(0,1),new Point(0,0),new Point(1,0))
-        );
-        return new Point[]{p0, p1, p2, p3};
 
+        if(WRITE_TO_CONSOLE) {
+            Log.d(TAG, "angle1: " + findAngle(p0, p1, p2) +
+                    "\nangle2: " + findAngle(p1, p2, p3) +
+                    "\nangle3: " + findAngle(p2, p3, p0) +
+                    "\nangle4: " + findAngle(p3, p0, p1) +
+                    "\ntest: " + findAngle(new Point(0, 1), new Point(0, 0), new Point(1, 0))
+            );
+        }
+
+        return new Point[]{p0, p1, p2, p3};
     }
 
     @Deprecated

@@ -14,6 +14,10 @@ import java.util.List;
 
 public class DBSCANOutlierDetector implements OutlierDetector {
 
+    //todo: in addition, add a noise detector that prevents rectangles from being there for only 1 frame
+    //todo: see what happens with cards that are too close to each other
+    //todo: find the best way to handle cards that are also outliers
+
     private static final int MIN_SIZE_TO_DO_CLUSTERING =3;
 
     private ImageProcessingConfig config;

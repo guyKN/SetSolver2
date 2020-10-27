@@ -1,10 +1,7 @@
 package com.guykn.setsolver.threading;
 
 import android.hardware.Camera;
-import android.util.Log;
-import android.view.SurfaceHolder;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.guykn.setsolver.ImageFileManager;
@@ -14,7 +11,6 @@ import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
 import com.guykn.setsolver.imageprocessing.image.ByteArrayImage;
 import com.guykn.setsolver.imageprocessing.image.MatImage;
-import com.guykn.setsolver.ui.main.CameraFragment;
 
 import org.opencv.core.Mat;
 
@@ -24,7 +20,7 @@ public class CameraProcessingThread extends CameraPreviewThread implements Camer
     //todo: use a byte buffer in the callback for better performance
 
     private final ImageProcessingManager processingManager;
-    private Callback callback;
+    private final Callback callback;
 
     public CameraProcessingThread(ImageProcessingManager processingManager,
                                   Callback callback, @Nullable ImageFileManager fileManager) {
@@ -36,7 +32,6 @@ public class CameraProcessingThread extends CameraPreviewThread implements Camer
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        Log.d(CameraFragment.TAG, "inside of onPreviewFrame");
         Camera.Size imageSize = camera.getParameters().getPreviewSize();
         int width = imageSize.width;
         int height = imageSize.height;
@@ -44,15 +39,14 @@ public class CameraProcessingThread extends CameraPreviewThread implements Camer
         ByteArrayImage byteImage = new ByteArrayImage(data, width, height);
         processingManager.setImage(byteImage);
         RotatedRectangleList cardPositions = processingManager.getCardPositions();
-        cardPositions.printStates();
         callback.onImageProcessingSuccess(cardPositions);
 
         processingManager.finish();
     }
 
     @Override
-    public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int w, int h) {
-        super.surfaceChanged(holder, format, w, h);
+    protected void onResumeCamera(){
+        super.onResumeCamera();
         getCamera().setPreviewCallback(this);
     }
 
@@ -68,6 +62,7 @@ public class CameraProcessingThread extends CameraPreviewThread implements Camer
         processingManager.setImage(matImage);
         processingManager.getCardPositions();
         processingManager.saveCardImagesToGallery(getFileManager());
+        processingManager.finish();
     }
 
     public interface Callback {

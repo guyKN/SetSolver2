@@ -6,6 +6,9 @@ import org.opencv.imgproc.Imgproc;
 
 public class ImageProcessingConfig {
 
+    //todo: tweak
+    //todo: add fragment that allows user to change this
+
     public static class Image{
         public int totalPixels = 1000000;
     }
@@ -19,7 +22,7 @@ public class ImageProcessingConfig {
 
     public static class Contours{
         public int reBlurRadius = 11;
-        public int hierarchyType = Imgproc.RETR_EXTERNAL;
+        public int hierarchyType = Imgproc.RETR_EXTERNAL; //todo: see with one is best.
 
     }
 
@@ -35,15 +38,12 @@ public class ImageProcessingConfig {
 
         public int minContourArea = 5000;
         public boolean useAreaCheck=true;
-
-        public boolean doAreaOutliersCheck = true;
-        public int areaOutliersMaxDeviation = 5;//todo: find resonable number
     }
 
     public static class OutlierDetection{
         public boolean shouldDoOutlierDetection  = true;
         public int minClusterSize = 2;
-        public double maxDistance = 100000000;
+        public double maxDistance = 1000000000;
     }
 
     public static class MemoryManagement {

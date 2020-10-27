@@ -32,13 +32,13 @@ import com.guykn.setsolver.ui.views.CameraPreview;
 public class CameraFragment extends Fragment implements CameraProcessingThread.Callback {
     //todo: use the MainViewModel for config, and add a config fragment
     //todo: make screen stay awake
-    //todo: use a lifeCycleObserver for the camera
+    //todo: actually make the CameraPreview look at the CameraFragment's lifecycle
     //todo: have a visible FPS counter
     public static final String TAG = "CameraFragment";
     private MainViewModel mViewModel;
     private CameraThreadManager cameraThreadManager;
     private CameraPreview mCameraPreview;
-    private CameraOverlay cameraOverlay;
+    private CameraOverlay mCameraOverlay;
     private FrameLayout cameraFrame;
     private Button captureButton;
 
@@ -61,9 +61,9 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
                              @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView()");
 
-        View view = inflater.inflate(R.layout.camera_fragment, container, false);
+        View root = inflater.inflate(R.layout.camera_fragment, container, false);
 
-        cameraFrame = view.findViewById(R.id.camera_preview_frame);
+        cameraFrame = root.findViewById(R.id.camera_preview_frame);
         Context context = getActivity();
         mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         if(context != null && mViewModel !=null) {
@@ -78,15 +78,17 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
             CameraProcessingThread processingThread = new CameraProcessingThread(
                     processingManager, mViewModel, fileManager);
 
-            mCameraPreview = new CameraPreview(context, processingThread);
-            cameraOverlay = new CameraOverlay(context, null);
+            mCameraPreview = new CameraPreview(context, processingThread, getLifecycle());
+            mCameraOverlay = new CameraOverlay(context, null);
+
+            cameraFrame.addView(mCameraPreview);
+            cameraFrame.addView(mCameraOverlay);
 
             mViewModel.getDrawableLiveData().observe(getViewLifecycleOwner(), drawable -> {
-                cameraOverlay.setDrawable(drawable);
-                Log.d(TAG, "changing UI");
+                mCameraOverlay.setDrawable(drawable);
             });
 
-            captureButton = view.findViewById(R.id.button_capture);
+            captureButton = root.findViewById(R.id.button_capture);
             captureButton.setOnClickListener(
                     (View v) -> {
                         mCameraPreview.takePicture();
@@ -96,19 +98,20 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
         }
 
 
-        return view;
+        return root;
     }
 
+    /*
     @Override
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        if(cameraFrame != null && mCameraPreview !=null && cameraOverlay !=null){
+        if(cameraFrame != null && mCameraPreview !=null && mCameraOverlay !=null){
             Log.d(TAG, "onResume, cameraFrame!=null");
             Log.d(TAG, "All view aren't null.");
             cameraFrame.removeAllViews();
             cameraFrame.addView(mCameraPreview);
-            cameraFrame.addView(cameraOverlay);
+            cameraFrame.addView(mCameraOverlay);
         }else {
             Log.i(TAG, "Some views are null. ");
         }
@@ -123,6 +126,7 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
             cameraFrame.removeAllViews();
         }
     }
+     */
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -134,7 +138,7 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
 
     @Override
     public void onImageProcessingSuccess(DrawableOnCanvas drawable) {
-        cameraOverlay.setDrawable(drawable);
+        mCameraOverlay.setDrawable(drawable);
     }
 
     @Override
@@ -155,8 +159,6 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
     }
 
     private boolean checkCameraHardware(Context context) {
-        // this device has a camera
-        // no camera on this device
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
 }
