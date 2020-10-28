@@ -27,10 +27,11 @@ import com.guykn.setsolver.ui.views.CameraOverlay;
 import com.guykn.setsolver.ui.views.CameraPreview;
 
 public class CameraFragment extends Fragment {
-    //todo: use the MainViewModel for config, and add a config fragment
-    //todo: make screen stay awake
-    //todo: actually make the CameraPreview look at the CameraFragment's lifecycle
     //todo: have a visible FPS counter
+    //todo: scale saved image down to fixed resolution
+    //todo: gather data for ML
+    //todo: make it save images on all phones
+
     public static final String TAG = "CameraFragment";
     private MainViewModel mViewModel;
     private CameraPreview mCameraPreview;

@@ -5,8 +5,8 @@ import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourCardDetectorWrapper;
-import com.guykn.setsolver.imageprocessing.detect.outlierdetection.DBSCANOutlierDetector;
-import com.guykn.setsolver.imageprocessing.detect.outlierdetection.OutlierDetector;
+import com.guykn.setsolver.imageprocessing.detect.outlierdetection.CardVerifier;
+import com.guykn.setsolver.imageprocessing.detect.outlierdetection.DBSCANCardVerifier;
 import com.guykn.setsolver.imageprocessing.image.Image;
 
 import org.opencv.core.Mat;
@@ -21,17 +21,17 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
     private Mat unProcessedMat;
     private Mat processedMat;
 
-    private OutlierDetector outlierDetector;
+    private CardVerifier cardVerifier;
     private ImageProcessingConfig config;
     private RotatedRectangleList cardPositions;
 
     public JavaImageProcessingManager(CardDetector detector, CardClassifier classifier,
                                       ImageProcessingManager.ImagePreProcessor preProcessor,
-                                      OutlierDetector outlierDetector, ImageProcessingConfig config){
+                                      CardVerifier cardVerifier, ImageProcessingConfig config){
         this.detector = detector;
         this.classifier = classifier;
         this.preProcessor = preProcessor;
-        this.outlierDetector = outlierDetector;
+        this.cardVerifier = cardVerifier;
         this.config = config;
 
     }
@@ -48,6 +48,8 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
     public void setConfig(ImageProcessingConfig config){
         //todo: change config of everything else too
         this.config = config;
+        detector.setConfig(config);
+        cardVerifier.setConfig(config);
     }
 
 
@@ -55,7 +57,7 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         CardDetector detector = new ContourCardDetectorWrapper(config);
         CardClassifier classifier = null;//todo: actually implement
         ImageProcessingManager.ImagePreProcessor preProcessor = new StandardImagePreprocessor();
-        OutlierDetector outlierDetector = new DBSCANOutlierDetector(config);
+        CardVerifier outlierDetector = new DBSCANCardVerifier(config);
 
         return new JavaImageProcessingManager(detector,classifier,
                 preProcessor, outlierDetector, config);
@@ -64,7 +66,7 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
     private void findCards(){
         cardPositions = detector.getAllCardRectangles(processedMat);
         if(config.outlierDetection.shouldDoOutlierDetection){
-            cardPositions = outlierDetector.removeOutliers(cardPositions);
+            cardPositions = cardVerifier.removeFalsePositives(cardPositions);
         }
     }
     public RotatedRectangleList getCardPositions(){
@@ -85,7 +87,7 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
     }
 
     public void removeOutliers(){
-        cardPositions = outlierDetector.removeOutliers(cardPositions);
+        cardPositions = cardVerifier.removeFalsePositives(cardPositions);
     }
 
     public void saveOriginalImageToGallery(ImageFileManager fileManager){

@@ -73,6 +73,7 @@ public class CameraProcessingThread extends CameraPreviewThread implements Camer
 
     public interface Callback {
         public void onImageProcessingSuccess(DrawableOnCanvas drawable);
+        public void displayFrameRate(int frameRate);
         public void onImageProcessingFailure(Exception exception);
     }
 }

@@ -2,8 +2,8 @@ package com.guykn.setsolver.imageprocessing.classify;
 
 import android.graphics.Bitmap;
 
-import com.guykn.setsolver.imageprocessing.StandardImagePreprocessor;
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
+import com.guykn.setsolver.imageprocessing.StandardImagePreprocessor;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.SetBoardPosition;
@@ -14,6 +14,7 @@ import org.opencv.core.Mat;
 public abstract class CardClassifier implements CardDetector.CardAction {
     protected Mat originalImageMat;
     private SetBoardPosition board;
+
     @Override
     public void doAction(GenericRotatedRectangle cardRect) {
         SetCard card = classify(cardRect);

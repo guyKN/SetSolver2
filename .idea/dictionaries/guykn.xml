@@ -2,6 +2,7 @@
   <dictionary name="guykn">
     <words>
       <w>clusterer</w>
+      <w>dbscan</w>
     </words>
   </dictionary>
 </component>

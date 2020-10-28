@@ -12,7 +12,7 @@ import org.christopherfrantz.dbscan.DBSCANClusteringException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DBSCANOutlierDetector implements OutlierDetector {
+public class DBSCANCardVerifier implements CardVerifier {
 
     //todo: in addition, add a noise detector that prevents rectangles from being there for only 1 frame
     //todo: see what happens with cards that are too close to each other
@@ -23,7 +23,7 @@ public class DBSCANOutlierDetector implements OutlierDetector {
 
     private ImageProcessingConfig config;
 
-    public DBSCANOutlierDetector(@NonNull ImageProcessingConfig config){
+    public DBSCANCardVerifier(@NonNull ImageProcessingConfig config){
         this.config = config;
     }
 
@@ -32,7 +32,7 @@ public class DBSCANOutlierDetector implements OutlierDetector {
     }
 
     @Override
-    public RotatedRectangleList removeOutliers(RotatedRectangleList rectangleList) {
+    public RotatedRectangleList removeFalsePositives(RotatedRectangleList rectangleList) {
 
         List<GenericRotatedRectangle> rectangleArray = rectangleList.getDrawables();
 

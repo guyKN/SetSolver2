@@ -1,6 +1,37 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--todo: maybe remove and redo programmatically-->
+
+    <PreferenceCategory
+        app:key="image_saving"
+        app:title="Image Saving">
+
+        <SwitchPreferenceCompat
+            app:key="save_every_frame"
+            app:title="Save Every Frame"
+            android:defaultValue="false"/>
+
+        <SwitchPreferenceCompat
+            app:key="save_on_image_capture"
+            app:title="Save On Image Capture"
+            android:defaultValue="true"/>
+
+        <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
+            android:key="saved_image_side_length"
+            app:nppc_minValue="50"
+            android:defaultValue="256"
+            app:nppc_maxValue="1000"
+
+            android:title="Saved Image Side Length"
+            android:summary="The side length of the images saved to the gallery"
+            app:nppc_unitText="px"
+            />
+
+
+    </PreferenceCategory>
+
+
     <PreferenceCategory
         app:key="card_detection"
         app:title="Card Detection">
@@ -11,7 +42,8 @@
             android:defaultValue="1000"
             app:nppc_maxValue="10000"
 
-            android:title="Scaled Down Image side length"
+            android:title="Scaled Down Image Side Length"
+            android:summary="The size that images get scaled down to"
             app:nppc_unitText="px"
             />
 
@@ -72,6 +104,25 @@
         app:key="Card Verification"
         app:title="Card Verification">
 
+        <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
+            android:key="min_area"
+            app:nppc_minValue="0"
+            android:defaultValue="5000"
+            app:nppc_maxValue="250000"
+
+            android:title="Min Card area"
+            android:summary="The minimum area a rectangle needs in order to be considered a card. Scaled based on the scaled down image area, with a target area of 1,000,000. Set to zero to disable."
+            />
+
+        <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
+            android:key="dbscan_max_difference"
+            app:nppc_minValue="0"
+            android:defaultValue="5000"
+            app:nppc_maxValue="250000"
+
+            android:title="Max DBSCAN area difference"
+            android:summary="The maximum difference in the area of two rectangles in order to be considered similar. Scaled based on the scaled down image area, with a target area of 1,000,000. Set to 0 to disable. "
+            />
 
     </PreferenceCategory>
 </PreferenceScreen>

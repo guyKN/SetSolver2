@@ -8,11 +8,15 @@ import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.threading.CameraProcessingThread;
 
 public class MainViewModel extends ViewModel implements CameraProcessingThread.Callback {
+
     private final MutableLiveData<DrawableOnCanvas> drawingLiveData;
+
+    private final MutableLiveData<Integer> frameRateData;
 
     public MainViewModel(){
         super();
         drawingLiveData = new MutableLiveData<>();
+        frameRateData = new MutableLiveData<>();
     }
 
     public void setDrawable(DrawableOnCanvas drawable){
@@ -24,6 +28,15 @@ public class MainViewModel extends ViewModel implements CameraProcessingThread.C
 
     public LiveData<DrawableOnCanvas> getDrawableLiveData(){
         return drawingLiveData;
+    }
+
+    public LiveData<Integer> getFrameRate(){
+        return frameRateData;
+    }
+
+    @Override
+    public void displayFrameRate(int frameRate) {
+        frameRateData.postValue(frameRate);
     }
 
     @Override
