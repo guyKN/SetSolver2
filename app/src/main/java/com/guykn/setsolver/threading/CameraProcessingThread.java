@@ -50,6 +50,12 @@ public class CameraProcessingThread extends CameraPreviewThread implements Camer
         getCamera().setPreviewCallback(this);
     }
 
+    @Override
+    protected void onTerminateThread(){
+        processingManager.finish();
+        super.onTerminateThread();
+    }
+
     public void setConfig(ImageProcessingConfig config){
         processingManager.setConfig(config);
     }

@@ -1,7 +1,7 @@
 package com.guykn.setsolver.ui.main;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,24 +18,21 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.R;
-import com.guykn.setsolver.drawing.DrawableOnCanvas;
+import com.guykn.setsolver.SettingsActivity;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
 import com.guykn.setsolver.imageprocessing.JavaImageProcessingManager;
 import com.guykn.setsolver.threading.CameraProcessingThread;
-import com.guykn.setsolver.threading.deprecated.CameraThreadManager;
-import com.guykn.setsolver.threading.deprecated.SimpleDelayChecker;
 import com.guykn.setsolver.ui.views.CameraOverlay;
 import com.guykn.setsolver.ui.views.CameraPreview;
 
-public class CameraFragment extends Fragment implements CameraProcessingThread.Callback {
+public class CameraFragment extends Fragment {
     //todo: use the MainViewModel for config, and add a config fragment
     //todo: make screen stay awake
     //todo: actually make the CameraPreview look at the CameraFragment's lifecycle
     //todo: have a visible FPS counter
     public static final String TAG = "CameraFragment";
     private MainViewModel mViewModel;
-    private CameraThreadManager cameraThreadManager;
     private CameraPreview mCameraPreview;
     private CameraOverlay mCameraOverlay;
     private FrameLayout cameraFrame;
@@ -50,8 +46,6 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
     public void onAttach(@NonNull Context context) {
         Log.d(TAG,"inside of updated program");
         super.onAttach(context);
-        CameraThreadManager.DelayChecker delayChecker = new SimpleDelayChecker(200,50);
-        cameraThreadManager = new CameraThreadManager(context, this, delayChecker);
     }
 
 
@@ -95,40 +89,25 @@ public class CameraFragment extends Fragment implements CameraProcessingThread.C
                     }
             );
 
+            View settingsButton = root.findViewById(R.id.button_settings);
+
+            settingsButton.setOnClickListener(
+                    (View v) -> openSettingsActivity()
+            );
+
         }
 
-
         return root;
+    }
+
+    private void openSettingsActivity(){
+        Intent intent = new Intent(requireContext(), SettingsActivity.class);
+        startActivity(intent);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-    }
-
-
-
-
-    @Override
-    public void onImageProcessingSuccess(DrawableOnCanvas drawable) {
-        mCameraOverlay.setDrawable(drawable);
-    }
-
-    @Override
-    public void onImageProcessingFailure(Exception e) {
-        Activity parent = getActivity();
-        if(parent == null) return;
-        Toast.makeText(parent, "there was an error.", Toast.LENGTH_LONG).show();
-        e.printStackTrace();
-    }
-
-    @Nullable
-    private Context getContextFromParentActivity(){
-        Activity activity = getActivity();
-        if(activity == null) {
-            return null;
-        }
-        return activity.getApplicationContext();
     }
 
     private boolean checkCameraHardware(Context context) {

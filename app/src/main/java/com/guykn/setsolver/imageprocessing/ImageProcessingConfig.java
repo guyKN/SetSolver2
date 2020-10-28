@@ -42,7 +42,6 @@ public class ImageProcessingConfig {
 
     public static class OutlierDetection{
         public boolean shouldDoOutlierDetection  = true;
-        public int minClusterSize = 2;
         public double maxDistance = 1000000000;
     }
 

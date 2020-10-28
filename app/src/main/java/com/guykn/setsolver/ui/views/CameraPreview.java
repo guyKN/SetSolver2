@@ -20,7 +20,8 @@ public class CameraPreview extends SurfaceView implements LifecycleObserver {
 
     private CameraProcessingThread processingThread;
 
-    public CameraPreview(Context context, CameraProcessingThread processingThread, Lifecycle lifecycle) {
+    public CameraPreview(Context context, CameraProcessingThread processingThread,
+                         Lifecycle lifecycle) {
         super(context);
 
         lifecycle.addObserver(this);
@@ -34,6 +35,9 @@ public class CameraPreview extends SurfaceView implements LifecycleObserver {
         holder.addCallback(processingThread);
         // deprecated setting, but required on Android versions prior to 3.0
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+        //make it so that the screen never turns off while this view is visible
+        setKeepScreenOn(true);
 
     }
 

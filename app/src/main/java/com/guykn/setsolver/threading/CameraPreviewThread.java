@@ -15,10 +15,9 @@ import com.guykn.setsolver.ui.views.CameraPreview;
 
 import org.opencv.core.Mat;
 
-//todo: make CameraPreviewThread internally to allow direct calls from UI thread
-
 @SuppressWarnings("deprecation")
-public class CameraPreviewThread extends HandlerThread implements Camera.PictureCallback, SurfaceHolder.Callback {
+public class CameraPreviewThread extends HandlerThread implements Camera.PictureCallback,
+        SurfaceHolder.Callback {
     
     private static final String TAG = CameraPreview.TAG;
 
@@ -77,8 +76,16 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
         destroyCamera();
     }
 
+    private void internalTerminateThread(){
+        onTerminateThread();
+        quit();
+    }
 
 
+
+    protected void onTerminateThread(){
+
+    }
 
     protected void openCamera(){
         Log.d(TAG, "openCamera()");
@@ -119,6 +126,7 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
         }
         mCamera = null;
     }
+
 
 
     @Override
@@ -196,5 +204,9 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
         getHandler().post(
                 ()->internalTakePicture()
         );
+    }
+
+    public void terminateThread(){
+        getHandler().post(this::internalTerminateThread);
     }
 }

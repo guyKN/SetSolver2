@@ -1,0 +1,77 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        app:key="card_detection"
+        app:title="Card Detection">
+
+        <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
+            android:key="cropped_image_side_length"
+            app:nppc_minValue="100"
+            android:defaultValue="1000"
+            app:nppc_maxValue="10000"
+
+            android:title="Scaled Down Image side length"
+            app:nppc_unitText="px"
+            />
+
+
+        <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
+            android:key="first_blur_radius"
+            app:nppc_minValue="3"
+            android:defaultValue="7"
+            app:nppc_maxValue="23"
+
+            android:summary="The radius for the first Gaussian Blur used"
+            android:title="First Blur Radius"
+            app:nppc_unitText="px"
+            />
+        <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
+            android:key="second_blur_radius"
+            app:nppc_minValue="3"
+            android:defaultValue="11"
+            app:nppc_maxValue="23"
+
+            android:summary="The radius of the second gausian blur used"
+            android:title="Second Blur Radius"
+            app:nppc_unitText="px"
+            />
+
+
+        <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
+            android:key="canny_edge_detection_threshold"
+            app:nppc_minValue="20"
+            android:defaultValue="50"
+            app:nppc_maxValue="200"
+
+            android:summary="The threshold for the edge detection used to find cards"
+            android:title="Edge Detection Threshold"
+            />
+
+        <com.h6ah4i.android.preference.NumberPickerPreferenceCompat
+            android:key="canny_edge_detection_ratio"
+            app:nppc_minValue="100"
+            android:defaultValue="200"
+            app:nppc_maxValue="400"
+
+            android:summary="The ratio of the threshold for canny edge detection, Measured as a percent"
+            android:title="Edge Detection Threshold Ratio"
+            app:nppc_unitText="%"
+            />
+
+        <SwitchPreferenceCompat
+            app:key="show_internal_contours"
+            app:title="Show Internal Contours"
+            android:defaultValue="false"/>
+
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="Card Verification"
+        app:title="Card Verification">
+
+
+    </PreferenceCategory>
+</PreferenceScreen>

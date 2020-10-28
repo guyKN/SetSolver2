@@ -19,6 +19,7 @@ public class DBSCANOutlierDetector implements OutlierDetector {
     //todo: find the best way to handle cards that are also outliers
 
     private static final int MIN_SIZE_TO_DO_CLUSTERING =3;
+    private static final int MIN_CLUSTER_SIZE = 2;
 
     private ImageProcessingConfig config;
 
@@ -44,7 +45,7 @@ public class DBSCANOutlierDetector implements OutlierDetector {
         DBSCANClusterer<GenericRotatedRectangle> clusterer;
         try {
             clusterer = new DBSCANClusterer<>(rectangleArray,
-                    config.outlierDetection.minClusterSize,
+                    MIN_CLUSTER_SIZE,
                     config.outlierDetection.maxDistance,
                     new RectangleAreaDistanceMetric()
             );

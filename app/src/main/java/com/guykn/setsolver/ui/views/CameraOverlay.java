@@ -44,16 +44,15 @@ public class CameraOverlay extends View implements LifecycleObserver {
         if(drawable == null) return;
         drawable.drawOnCanvas(canvas, mPaint);
     }
-
+    
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    public void onPause(){
+        setVisibility(GONE);
+    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     public void onResume(){
         setVisibility(VISIBLE);
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    public void onPause(){
-        setVisibility(GONE);
     }
 
 }
