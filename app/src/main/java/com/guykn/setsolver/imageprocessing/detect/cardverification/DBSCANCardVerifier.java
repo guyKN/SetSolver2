@@ -1,4 +1,4 @@
-package com.guykn.setsolver.imageprocessing.detect.outlierdetection;
+package com.guykn.setsolver.imageprocessing.detect.cardverification;
 
 import androidx.annotation.NonNull;
 

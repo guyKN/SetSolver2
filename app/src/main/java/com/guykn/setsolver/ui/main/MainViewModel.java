@@ -4,10 +4,12 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.threading.CameraProcessingThread;
 
-public class MainViewModel extends ViewModel implements CameraProcessingThread.Callback {
+public class MainViewModel extends ViewModel implements CameraProcessingThread.Callback,
+        FpsCounter.FpsCallback {
 
     private final MutableLiveData<DrawableOnCanvas> drawingLiveData;
 
@@ -30,12 +32,11 @@ public class MainViewModel extends ViewModel implements CameraProcessingThread.C
         return drawingLiveData;
     }
 
-    public LiveData<Integer> getFrameRate(){
+    public LiveData<Integer> getFpsLiveData(){
         return frameRateData;
     }
 
-    @Override
-    public void displayFrameRate(int frameRate) {
+    public void displayFps(int frameRate) {
         frameRateData.postValue(frameRate);
     }
 

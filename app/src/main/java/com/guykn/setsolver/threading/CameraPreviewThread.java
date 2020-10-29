@@ -1,5 +1,6 @@
 package com.guykn.setsolver.threading;
 
+import android.content.Context;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -9,6 +10,7 @@ import android.view.SurfaceHolder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.imageprocessing.image.JpegByteArrayImage;
 import com.guykn.setsolver.ui.views.CameraPreview;
@@ -17,8 +19,10 @@ import org.opencv.core.Mat;
 
 @SuppressWarnings("deprecation")
 public class CameraPreviewThread extends HandlerThread implements Camera.PictureCallback,
-        SurfaceHolder.Callback {
-    
+        SurfaceHolder.Callback, Camera.PreviewCallback {
+
+    private static final String THREAD_NAME = "CameraPreviewThread";
+
     private static final String TAG = CameraPreview.TAG;
 
     private Camera mCamera;
@@ -27,17 +31,28 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
     private static final int CAMERA_RESTART_DELAY = 0;
 
     @Nullable
-    private ImageFileManager fileManager;
+    private final ImageFileManager fileManager;
+    @Nullable
+    private final FpsCounter fpsCounter;
 
     @Nullable
     protected ImageFileManager getFileManager(){
         return fileManager;
     }
 
-    public CameraPreviewThread(@Nullable ImageFileManager fileManager){
-        super("CameraPreviewThread");
-        this.fileManager = fileManager;
+    public CameraPreviewThread(Context context , @Nullable FpsCounter fpsCounter) {
+        super(THREAD_NAME);
+        this.fileManager = new ImageFileManager(context);
+        this.fpsCounter = fpsCounter;
     }
+
+    public CameraPreviewThread(@Nullable ImageFileManager fileManager,
+                               @Nullable FpsCounter fpsCounter){
+        super(THREAD_NAME);
+        this.fileManager = fileManager;
+        this.fpsCounter = fpsCounter;
+    }
+    
 
     protected Camera getCamera(){
         return mCamera;
@@ -100,6 +115,8 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
         try {
             mCamera.startPreview();
             mCamera.autoFocus(null);
+            mCamera.setPreviewCallback(this);
+            fpsCounter.startCounting();
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -110,6 +127,7 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
         mCamera.stopPreview();
         mCamera.cancelAutoFocus();
         mCamera.setPreviewCallback(null);
+        fpsCounter.startCounting();
     }
 
     protected void destroyCamera(){
@@ -128,6 +146,11 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
     }
 
 
+
+    @Override
+    public void onPreviewFrame(byte[] data, Camera camera) {
+        fpsCounter.onFrame();
+    }
 
     @Override
     public final void onPictureTaken(byte[] data, Camera camera) {

@@ -5,8 +5,8 @@ import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourCardDetectorWrapper;
-import com.guykn.setsolver.imageprocessing.detect.outlierdetection.CardVerifier;
-import com.guykn.setsolver.imageprocessing.detect.outlierdetection.DBSCANCardVerifier;
+import com.guykn.setsolver.imageprocessing.detect.cardverification.CardVerifier;
+import com.guykn.setsolver.imageprocessing.detect.cardverification.DBSCANCardVerifier;
 import com.guykn.setsolver.imageprocessing.image.Image;
 
 import org.opencv.core.Mat;
