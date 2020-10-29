@@ -1,15 +1,20 @@
 package com.guykn.setsolver.imageprocessing;
 
 import com.guykn.setsolver.ImageFileManager;
+import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourCardDetectorWrapper;
 import com.guykn.setsolver.imageprocessing.image.Image;
-import com.guykn.setsolver.imageprocessing.verify.CardVerifier;
-import com.guykn.setsolver.imageprocessing.verify.DBSCANCardVerifier;
+import com.guykn.setsolver.imageprocessing.verify.direct.AverageColorCardVerifier;
+import com.guykn.setsolver.imageprocessing.verify.direct.DirectCardVerifier;
+import com.guykn.setsolver.imageprocessing.verify.indirect.DBSCANCardVerifier;
+import com.guykn.setsolver.imageprocessing.verify.indirect.IndirectCardVerifier;
 
 import org.opencv.core.Mat;
+
+import java.util.List;
 
 //todo: reserve mat objects in memory so they're not constantly added and deleted
 //todo: rewrite in C++?
@@ -21,17 +26,23 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
     private Mat unProcessedMat;
     private Mat processedMat;
 
-    private CardVerifier cardVerifier;
+    private IndirectCardVerifier indirectCardVerifier;
+    private DirectCardVerifier directCardVerifier;
     private ImageProcessingConfig config;
     private RotatedRectangleList cardPositions;
 
+    public static final String TAG = "ImageProcessing";
+
     public JavaImageProcessingManager(CardDetector detector, CardClassifier classifier,
                                       ImageProcessingManager.ImagePreProcessor preProcessor,
-                                      CardVerifier cardVerifier, ImageProcessingConfig config){
+                                      IndirectCardVerifier indirectCardVerifier,
+                                      DirectCardVerifier directCardVerifier,
+                                      ImageProcessingConfig config){
         this.detector = detector;
         this.classifier = classifier;
         this.preProcessor = preProcessor;
-        this.cardVerifier = cardVerifier;
+        this.indirectCardVerifier = indirectCardVerifier;
+        this.directCardVerifier = directCardVerifier;
         this.config = config;
 
     }
@@ -49,7 +60,6 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         //todo: change config of everything else too
         this.config = config;
         detector.setConfig(config);
-        cardVerifier.setConfig(config);
     }
 
 
@@ -57,16 +67,33 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         CardDetector detector = new ContourCardDetectorWrapper(config);
         CardClassifier classifier = null;//todo: actually implement
         ImageProcessingManager.ImagePreProcessor preProcessor = new StandardImagePreprocessor();
-        CardVerifier outlierDetector = new DBSCANCardVerifier(config);
+        IndirectCardVerifier outlierDetector = new DBSCANCardVerifier();
+        DirectCardVerifier directCardVerifier = new AverageColorCardVerifier();
 
         return new JavaImageProcessingManager(detector,classifier,
-                preProcessor, outlierDetector, config);
+                preProcessor, outlierDetector, directCardVerifier,config);
     }
 
     private void findCards(){
         cardPositions = detector.getAllCardRectangles(processedMat);
         if(config.contourVerification.shouldDoOutlierDetection){
-            cardPositions = cardVerifier.removeFalsePositives(cardPositions);
+            cardPositions = indirectCardVerifier.removeFalsePositives(cardPositions, config);
+        }
+        if(config.contourVerification.shouldDoAverageColorCheck){
+
+            Mat initialMat = getMat();
+
+            List<GenericRotatedRectangle> cardRects = cardPositions.getDrawables();
+
+            for(int i=0;i<cardRects.size();i++){
+                GenericRotatedRectangle card = cardRects.get(i);
+                Mat cropped = card.cropToRect(initialMat, config.image.scaledDownSize);
+                if(directCardVerifier.isFalsePositive(cropped, config)){
+                    // the rectangle was actually a false positive, so remove it
+                    cardRects.remove(i);
+                    i--; //decrease i in order to not skip over elements
+                }
+            }
         }
     }
     public RotatedRectangleList getCardPositions(){

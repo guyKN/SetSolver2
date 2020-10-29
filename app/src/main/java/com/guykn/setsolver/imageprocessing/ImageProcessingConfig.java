@@ -43,7 +43,8 @@ public class ImageProcessingConfig {
         public boolean shouldDoOutlierDetection  = true;
         public double maxDistance = 1000000000;
 
-
+        public boolean shouldDoAverageColorCheck = false;
+        public double averageColorCheckThreshold = 80;
     }
 
 

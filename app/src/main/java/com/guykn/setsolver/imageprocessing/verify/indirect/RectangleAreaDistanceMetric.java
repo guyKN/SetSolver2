@@ -1,4 +1,4 @@
-package com.guykn.setsolver.imageprocessing.verify;
+package com.guykn.setsolver.imageprocessing.verify.indirect;
 
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 

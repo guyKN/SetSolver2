@@ -1,6 +1,4 @@
-package com.guykn.setsolver.imageprocessing.verify;
-
-import androidx.annotation.NonNull;
+package com.guykn.setsolver.imageprocessing.verify.indirect;
 
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
@@ -12,7 +10,7 @@ import org.christopherfrantz.dbscan.DBSCANClusteringException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DBSCANCardVerifier implements CardVerifier {
+public class DBSCANCardVerifier implements IndirectCardVerifier {
 
     //todo: in addition, add a noise detector that prevents rectangles from being there for only 1 frame
     //todo: see what happens with cards that are too close to each other
@@ -21,18 +19,11 @@ public class DBSCANCardVerifier implements CardVerifier {
     private static final int MIN_SIZE_TO_DO_CLUSTERING =3;
     private static final int MIN_CLUSTER_SIZE = 2;
 
-    private ImageProcessingConfig config;
 
-    public DBSCANCardVerifier(@NonNull ImageProcessingConfig config){
-        this.config = config;
-    }
-
-    public void setConfig(@NonNull ImageProcessingConfig config){
-        this.config = config;
-    }
 
     @Override
-    public RotatedRectangleList removeFalsePositives(RotatedRectangleList rectangleList) {
+    public RotatedRectangleList removeFalsePositives(RotatedRectangleList rectangleList,
+                                                     ImageProcessingConfig config) {
 
         List<GenericRotatedRectangle> rectangleArray = rectangleList.getDrawables();
 
