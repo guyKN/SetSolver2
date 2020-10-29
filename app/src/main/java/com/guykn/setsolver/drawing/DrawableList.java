@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import com.guykn.setsolver.ImageFileManager;
 
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public abstract class DrawableList<Drawable extends DrawableOnCanvas> implements
         return drawables;
     }
 
-    public void setDrawables(List<Drawable> drawables){
+    protected void setDrawables(List<Drawable> drawables){
         this.drawables = drawables;
     }
 
@@ -45,6 +46,13 @@ public abstract class DrawableList<Drawable extends DrawableOnCanvas> implements
     public void saveToGallery(ImageFileManager fileManager, Mat originalImage){
         for(DrawableOnCanvas drawable: drawables){
             drawable.saveToGallery(fileManager, originalImage);
+        }
+    }
+
+    @Override
+    public void saveToGallery(ImageFileManager fileManager, Mat originalImage, Size scaledDownSize) {
+        for(DrawableOnCanvas drawable: drawables){
+            drawable.saveToGallery(fileManager, originalImage, scaledDownSize);
         }
     }
 

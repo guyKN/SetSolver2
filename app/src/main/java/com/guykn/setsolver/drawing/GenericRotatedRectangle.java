@@ -82,6 +82,17 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
             }
     }
 
+    @Override
+    public void saveToGallery(ImageFileManager fileManager, Mat originalImage, Size scaledDownSize){
+        try {
+            Mat cropped = cropToRect(originalImage, scaledDownSize);
+            fileManager.saveToGallery(cropped);
+        }catch (IllegalArgumentException e){
+            printState();
+            throw e;
+        }
+    }
+
     public Mat cropToRect(Mat initialMat){
         //todo: maybe rotate contours so that width>height
         Size originalImageSize = initialMat.size();
@@ -106,6 +117,14 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
         Imgproc.warpAffine(initialMat, rotated, M, initialMat.size(), Imgproc.INTER_CUBIC);
         Imgproc.getRectSubPix(rotated, adjustedSize, adjustedCenter, cropped);
         return cropped;
+    }
+
+    public Mat cropToRect(Mat initialMat, Size size){
+        Mat cropped = cropToRect(initialMat);
+
+        Mat resized = new Mat();
+        Imgproc.resize(cropped, resized, size);
+        return resized;
     }
 
 
@@ -438,5 +457,4 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
             );
         }
     }
-
 }

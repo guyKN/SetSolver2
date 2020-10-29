@@ -28,7 +28,7 @@ public class FpsCounter {
         long currentTime = getElapsedRealTime();
         long deltaTime = currentTime - lastTime;
         if(deltaTime > fpsUpdateTimeInterval){
-            int fps = (int) (( 1000 * numFrames ) / deltaTime);
+            int fps =  (int)((1000 * numFrames) / (deltaTime));
             callback.displayFps(fps);
             numFrames = 0;
             lastTime = currentTime;

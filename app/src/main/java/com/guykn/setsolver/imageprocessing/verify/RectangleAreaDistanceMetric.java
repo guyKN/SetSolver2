@@ -1,4 +1,4 @@
-package com.guykn.setsolver.imageprocessing.detect.cardverification;
+package com.guykn.setsolver.imageprocessing.verify;
 
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 

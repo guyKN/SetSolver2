@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.guykn.setsolver.FpsCounter;
-import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.R;
 import com.guykn.setsolver.SettingsActivity;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
@@ -65,18 +64,20 @@ public class CameraFragment extends Fragment {
         cameraFrame = root.findViewById(R.id.camera_preview_frame);
         Context context = getActivity();
         mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        if(context != null && mViewModel !=null) {
+        if(context != null) {
 
             fpsView = root.findViewById(R.id.fps_display);
 
 
             ImageProcessingConfig config = ImageProcessingConfig.getDefaultConfig();
 
-            ImageFileManager fileManager = new ImageFileManager(context);
             ImageProcessingManager processingManager =
                     JavaImageProcessingManager.getDefaultManager(config);
 
-            FpsCounter fpsCounter = new FpsCounter(mViewModel, 1000);
+            FpsCounter fpsCounter = new FpsCounter(mViewModel, 300);
+
+//            CameraPreviewThread previewThread = new CameraPreviewThread(context, fpsCounter);
+//            mCameraPreview = new CameraPreview(context, previewThread, getLifecycle());
 
             mCameraPreview = new CameraPreview(
                     context, processingManager, mViewModel, fpsCounter, getLifecycle());

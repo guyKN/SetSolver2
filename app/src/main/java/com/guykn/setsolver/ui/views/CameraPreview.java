@@ -12,6 +12,7 @@ import androidx.lifecycle.OnLifecycleEvent;
 import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
+import com.guykn.setsolver.threading.CameraPreviewThread;
 import com.guykn.setsolver.threading.CameraProcessingThread;
 
 /**
@@ -24,7 +25,7 @@ public class CameraPreview extends SurfaceView implements LifecycleObserver {
 
     public static final String TAG = "CameraPreviewTag";
 
-    private final CameraProcessingThread processingThread;
+    private final CameraPreviewThread previewThread;
 
 
     public CameraPreview(Context context, ImageProcessingManager processingManager,
@@ -36,19 +37,19 @@ public class CameraPreview extends SurfaceView implements LifecycleObserver {
         if(lifecycle != null){
             lifecycle.addObserver(this);
         }
-        this.processingThread = new CameraProcessingThread(context, fpsCounter,
+        this.previewThread = new CameraProcessingThread(context, fpsCounter,
                 processingManager, processingCallback);
 
         init();
     }
 
     public CameraPreview(Context  context,
-                         CameraProcessingThread processingThread, Lifecycle lifecycle){
+                         CameraPreviewThread previewThread, Lifecycle lifecycle){
         super(context);
         if(lifecycle != null){
             lifecycle.addObserver(this);
         }
-        this.processingThread = processingThread;
+        this.previewThread = previewThread;
         init();
     }
 
@@ -57,14 +58,14 @@ public class CameraPreview extends SurfaceView implements LifecycleObserver {
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
         SurfaceHolder holder = getHolder();
-        holder.addCallback(processingThread);
+        holder.addCallback(previewThread);
         // deprecated setting, but required on Android versions prior to 3.0
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
         //make it so that the screen never turns off while this view is visible
         setKeepScreenOn(true);
 
-        processingThread.start();
+        previewThread.start();
     }
 
 
@@ -81,7 +82,7 @@ public class CameraPreview extends SurfaceView implements LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     public void onDestroy(){
-        processingThread.terminateThread();
+        previewThread.terminateThread();
     }
 
 
@@ -95,6 +96,6 @@ public class CameraPreview extends SurfaceView implements LifecycleObserver {
     }
 
     public void takePicture() {
-        processingThread.takePicture();
+        previewThread.takePicture();
     }
 }

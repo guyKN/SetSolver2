@@ -5,9 +5,9 @@ import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourCardDetectorWrapper;
-import com.guykn.setsolver.imageprocessing.detect.cardverification.CardVerifier;
-import com.guykn.setsolver.imageprocessing.detect.cardverification.DBSCANCardVerifier;
 import com.guykn.setsolver.imageprocessing.image.Image;
+import com.guykn.setsolver.imageprocessing.verify.CardVerifier;
+import com.guykn.setsolver.imageprocessing.verify.DBSCANCardVerifier;
 
 import org.opencv.core.Mat;
 
@@ -65,7 +65,7 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
 
     private void findCards(){
         cardPositions = detector.getAllCardRectangles(processedMat);
-        if(config.outlierDetection.shouldDoOutlierDetection){
+        if(config.contourVerification.shouldDoOutlierDetection){
             cardPositions = cardVerifier.removeFalsePositives(cardPositions);
         }
     }
@@ -77,30 +77,27 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
     }
 
     public void saveCardImagesToGallery(ImageFileManager fileManager){
-        Mat mat;
-        if(config.memoryManagement.shouldReleaseUnprocessedImage){
-            mat = processedMat;
-        }else{
-            mat = unProcessedMat;
-        }
-        cardPositions.saveToGallery(fileManager, mat);
+        Mat mat = getMat();
+        cardPositions.saveToGallery(fileManager, mat, config.image.scaledDownSize);
     }
 
-    public void removeOutliers(){
-        cardPositions = cardVerifier.removeFalsePositives(cardPositions);
-    }
 
     public void saveOriginalImageToGallery(ImageFileManager fileManager){
-        Mat mat;
-        if(config.memoryManagement.shouldReleaseUnprocessedImage){
-            mat = processedMat;
-        }else{
-            mat = unProcessedMat;
-        }
+        Mat mat = getMat();
         fileManager.saveToGallery(mat);
     }
 
 
+
+    private Mat getMat() {
+        Mat mat;
+        if (config.memoryManagement.shouldReleaseUnprocessedImage) {
+            mat = processedMat;
+        } else {
+            mat = unProcessedMat;
+        }
+        return mat;
+    }
 
 
     public void finish() {

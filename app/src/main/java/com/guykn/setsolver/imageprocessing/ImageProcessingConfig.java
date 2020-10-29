@@ -2,6 +2,7 @@ package com.guykn.setsolver.imageprocessing;
 
 import com.guykn.setsolver.threading.deprecated.ImageProcessingThreadManager.ImageProcessingAction;
 
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class ImageProcessingConfig {
@@ -11,6 +12,7 @@ public class ImageProcessingConfig {
 
     public static class Image{
         public int totalPixels = 1000000;
+        public Size scaledDownSize = new Size(256,256);
     }
     public static class GaussianBlur{
         public int radius = 7;
@@ -23,7 +25,6 @@ public class ImageProcessingConfig {
     public static class Contours{
         public int reBlurRadius = 11;
         public int hierarchyType = Imgproc.RETR_EXTERNAL; //todo: see with one is best.
-
     }
 
     public static class ContourVerification{
@@ -38,12 +39,13 @@ public class ImageProcessingConfig {
 
         public int minContourArea = 5000;
         public boolean useAreaCheck=true;
-    }
 
-    public static class OutlierDetection{
         public boolean shouldDoOutlierDetection  = true;
         public double maxDistance = 1000000000;
+
+
     }
+
 
     public static class MemoryManagement {
         public boolean shouldReleaseUnprocessedImage = false;
@@ -80,7 +82,6 @@ public class ImageProcessingConfig {
     public ContourVerification contourVerification = new ContourVerification();
     public ShouldSaveToGallery shouldSaveToGallery = ShouldSaveToGallery.NEVER;
     public MemoryManagement memoryManagement= new MemoryManagement();
-    public OutlierDetection outlierDetection = new OutlierDetection();
 
 
     public static ImageProcessingConfig getDefaultConfig(){

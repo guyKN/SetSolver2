@@ -1,4 +1,4 @@
-package com.guykn.setsolver.imageprocessing.detect.cardverification;
+package com.guykn.setsolver.imageprocessing.verify;
 
 import androidx.annotation.NonNull;
 
@@ -46,7 +46,7 @@ public class DBSCANCardVerifier implements CardVerifier {
         try {
             clusterer = new DBSCANClusterer<>(rectangleArray,
                     MIN_CLUSTER_SIZE,
-                    config.outlierDetection.maxDistance,
+                    config.contourVerification.maxDistance,
                     new RectangleAreaDistanceMetric()
             );
             ArrayList<ArrayList<GenericRotatedRectangle>> clusters = clusterer.performClustering();
