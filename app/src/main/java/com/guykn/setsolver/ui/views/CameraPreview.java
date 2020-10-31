@@ -20,7 +20,7 @@ import com.guykn.setsolver.threading.CameraProcessingThread;
  */
 public class CameraPreview extends SurfaceView implements LifecycleObserver {
 
-    //todo: make the class more generic
+    //todo: Add a CameraPreviewThreadManager class, and make this view just show a surface
 
 
     public static final String TAG = "CameraPreviewTag";

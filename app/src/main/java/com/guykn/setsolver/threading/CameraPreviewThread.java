@@ -160,7 +160,8 @@ public class CameraPreviewThread extends HandlerThread implements Camera.Picture
 
         JpegByteArrayImage image = new JpegByteArrayImage(data, width, height);
         pictureTakenMatAction(image.toMat());
-        startCamera();
+        stopCamera();
+        //startCamera();
         //startCameraDelayed();
     }
 

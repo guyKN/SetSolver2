@@ -1,9 +1,13 @@
 package com.guykn.setsolver.imageprocessing;
 
+import android.content.Context;
+
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
+import com.guykn.setsolver.imageprocessing.classify.CardClassifier.CardClassifierFactory;
+import com.guykn.setsolver.imageprocessing.classify.MLCardClassifier;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourCardDetectorWrapper;
 import com.guykn.setsolver.imageprocessing.image.Image;
@@ -11,16 +15,19 @@ import com.guykn.setsolver.imageprocessing.verify.direct.AverageColorCardVerifie
 import com.guykn.setsolver.imageprocessing.verify.direct.DirectCardVerifier;
 import com.guykn.setsolver.imageprocessing.verify.indirect.DBSCANCardVerifier;
 import com.guykn.setsolver.imageprocessing.verify.indirect.IndirectCardVerifier;
+import com.guykn.setsolver.set.PositionlessSetCard;
+import com.guykn.setsolver.set.SetBoardPosition;
+import com.guykn.setsolver.set.SetCard;
 
 import org.opencv.core.Mat;
 
+import java.io.IOException;
 import java.util.List;
 
 //todo: reserve mat objects in memory so they're not constantly added and deleted
-//todo: rewrite in C++?
 public class JavaImageProcessingManager implements ImageProcessingManager {
     private final CardDetector detector;
-    private final CardClassifier classifier;
+    private final CardClassifierFactory classifierFactory;
     private final ImageProcessingManager.ImagePreProcessor preProcessor;
 
     private Mat unProcessedMat;
@@ -31,20 +38,29 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
     private ImageProcessingConfig config;
     private RotatedRectangleList cardPositions;
 
+    private SetBoardPosition boardPosition;
+
+    private Context context;
+
     public static final String TAG = "ImageProcessing";
 
-    public JavaImageProcessingManager(CardDetector detector, CardClassifier classifier,
-                                      ImageProcessingManager.ImagePreProcessor preProcessor,
+    //todo: add builder method
+
+    public JavaImageProcessingManager(Context context,
+                                      CardDetector detector,
+                                      CardClassifierFactory classifierFactory,
+                                      ImagePreProcessor preProcessor,
                                       IndirectCardVerifier indirectCardVerifier,
                                       DirectCardVerifier directCardVerifier,
                                       ImageProcessingConfig config){
         this.detector = detector;
-        this.classifier = classifier;
+        this.classifierFactory = classifierFactory;
         this.preProcessor = preProcessor;
         this.indirectCardVerifier = indirectCardVerifier;
         this.directCardVerifier = directCardVerifier;
         this.config = config;
 
+        this.context = context;
     }
 
     public void setImage(Image image){
@@ -63,31 +79,31 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
     }
 
 
-    public static JavaImageProcessingManager getDefaultManager(ImageProcessingConfig config){
+    public static JavaImageProcessingManager getDefaultManager(Context context, ImageProcessingConfig config){
         CardDetector detector = new ContourCardDetectorWrapper(config);
-        CardClassifier classifier = null;//todo: actually implement
+        CardClassifierFactory classifier = new MLCardClassifier.MLCardClassifierFactory();
         ImageProcessingManager.ImagePreProcessor preProcessor = new StandardImagePreprocessor();
-        IndirectCardVerifier outlierDetector = new DBSCANCardVerifier();
+        IndirectCardVerifier indirectCardVerifier = new DBSCANCardVerifier();
         DirectCardVerifier directCardVerifier = new AverageColorCardVerifier();
 
-        return new JavaImageProcessingManager(detector,classifier,
-                preProcessor, outlierDetector, directCardVerifier,config);
+        return new JavaImageProcessingManager(context, detector,classifier,
+                preProcessor, indirectCardVerifier, directCardVerifier,config);
     }
 
     private void findCards(){
         cardPositions = detector.getAllCardRectangles(processedMat);
+
         if(config.contourVerification.shouldDoOutlierDetection){
             cardPositions = indirectCardVerifier.removeFalsePositives(cardPositions, config);
         }
+
         if(config.contourVerification.shouldDoAverageColorCheck){
 
             Mat initialMat = getMat();
-
             List<GenericRotatedRectangle> cardRects = cardPositions.getDrawables();
-
             for(int i=0;i<cardRects.size();i++){
                 GenericRotatedRectangle card = cardRects.get(i);
-                Mat cropped = card.cropToRect(initialMat, config.image.scaledDownSize);
+                Mat cropped = card.cropToRect(initialMat, config.image.getScaledDownSize());
                 if(directCardVerifier.isFalsePositive(cropped, config)){
                     // the rectangle was actually a false positive, so remove it
                     cardRects.remove(i);
@@ -103,9 +119,39 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         return cardPositions;
     }
 
-    public void saveCardImagesToGallery(ImageFileManager fileManager){
+    private void doClassification(){
+        if(cardPositions == null){
+            findCards();
+        }
         Mat mat = getMat();
-        cardPositions.saveToGallery(fileManager, mat, config.image.scaledDownSize);
+        boardPosition = new SetBoardPosition();
+        try(CardClassifier classifier = classifierFactory.createCardClassifier(context, config)){
+            for(GenericRotatedRectangle rect: cardPositions.getDrawables()){
+                Mat cropped = rect.cropToRect(mat);
+
+                PositionlessSetCard result = classifier.classify(cropped);
+                SetCard card = new SetCard(rect, result);
+                boardPosition.addCard(card);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public SetBoardPosition getBoard(){
+        if(boardPosition == null){
+            doClassification();
+        }
+        return boardPosition;
+    }
+
+    public void saveCardImagesToGallery(ImageFileManager fileManager){
+        if(cardPositions == null){
+            findCards();
+        }
+
+        Mat mat = getMat();
+        cardPositions.saveToGallery(fileManager, mat, config.image.getScaledDownSize());
     }
 
 
@@ -138,6 +184,6 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         }
         unProcessedMat = null;
         cardPositions = null;
+        boardPosition = null;
     }
-
 }

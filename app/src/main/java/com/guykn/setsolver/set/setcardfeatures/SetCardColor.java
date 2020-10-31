@@ -1,19 +1,28 @@
 package com.guykn.setsolver.set.setcardfeatures;
 
-import com.guykn.setsolver.imageprocessing.classify.FeatureClassifier;
+import com.guykn.setsolver.R;
+import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
 
 public class SetCardColor extends SetCardFeature<SetCardColor.SetCardColorEnum>{
 
     public  enum SetCardColorEnum implements SetCardFeatureEnum {
-        PURPLE(0, "Purple"), GREEN(1, "Green"), RED(2, "Red");
+        RED(0, "Red", R.color.redCard),
+        PURPLE(1, "Purple", R.color.purpleCard),
+        GREEN(2, "Green", R.color.greenCard);
 
-        private String name;
+        private final String name;
+
+        public int getColorCode() {
+            return colorCode;
+        }
+
+        private int colorCode;
 
         public String getName() {
             return name;
         }
 
-        private int id;
+        private final int id;
 
         public int getId() {
             return id;
@@ -24,10 +33,13 @@ public class SetCardColor extends SetCardFeature<SetCardColor.SetCardColorEnum>{
             return getName();
         }
 
-        private SetCardColorEnum(int id, String name) {
+        private SetCardColorEnum(int id, String name, int colorCode) {
             this.id = id;
             this.name = name;
+            this.colorCode = colorCode;
         }
+
+
     }
 
     private SetCardColorEnum color;
@@ -41,7 +53,7 @@ public class SetCardColor extends SetCardFeature<SetCardColor.SetCardColorEnum>{
         this.color = color;
     }
 
-    public SetCardColor(FeatureClassifier.ClassificationResult result){
+    public SetCardColor(ClassificationResult result){
         this.color = getEnumFromId(result.getResultID());
         this.certainty = result.getResultProbability();
     }

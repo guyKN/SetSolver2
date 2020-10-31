@@ -45,7 +45,6 @@ public class SetCard extends GenericRotatedRectangle {
     public SetCardCount getCount() {
         return count;
     }
-
     public SetCardFill getFill() {
         return fill;
     }

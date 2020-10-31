@@ -13,6 +13,7 @@ import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
 import com.guykn.setsolver.imageprocessing.image.ByteArrayImage;
 import com.guykn.setsolver.imageprocessing.image.MatImage;
+import com.guykn.setsolver.set.SetBoardPosition;
 
 import org.opencv.core.Mat;
 
@@ -76,12 +77,13 @@ public class CameraProcessingThread extends CameraPreviewThread {
 
     @Override
     public void pictureTakenMatAction(Mat mat){
-        super.pictureTakenMatAction(mat);
+        //super.pictureTakenMatAction(mat); //uncoment to also saved the original, full-sized image
         MatImage matImage = new MatImage(mat);
-
         processingManager.setImage(matImage);
         processingManager.getCardPositions();
         processingManager.saveCardImagesToGallery(getFileManager());
+        SetBoardPosition boardPosition = processingManager.getBoard();
+        callback.onImageProcessingSuccess(boardPosition);
         processingManager.finish();
     }
 

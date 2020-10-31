@@ -12,7 +12,11 @@ public class ImageProcessingConfig {
 
     public static class Image{
         public int totalPixels = 1000000;
-        public Size scaledDownSize = new Size(256,256);
+        public int scaledDownWidth = 254;
+        public int scaledDownHeight = 254;
+        public Size getScaledDownSize(){
+            return new Size(scaledDownWidth, scaledDownHeight);
+        }
     }
     public static class GaussianBlur{
         public int radius = 7;
@@ -45,6 +49,10 @@ public class ImageProcessingConfig {
 
         public boolean shouldDoAverageColorCheck = false;
         public double averageColorCheckThreshold = 80;
+    }
+
+    public static class MachineLearning{
+
     }
 
 

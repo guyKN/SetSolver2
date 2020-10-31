@@ -1,6 +1,6 @@
 package com.guykn.setsolver.set.setcardfeatures;
 
-import com.guykn.setsolver.imageprocessing.classify.FeatureClassifier;
+import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
 
 public class SetCardCount extends SetCardFeature<SetCardCount.SetCardCountEnum>{
     public enum SetCardCountEnum implements SetCardFeatureEnum{
@@ -37,7 +37,7 @@ public class SetCardCount extends SetCardFeature<SetCardCount.SetCardCountEnum>{
         this.certainty = certainty;
         this.count = count;
     }
-    public SetCardCount(FeatureClassifier.ClassificationResult result){
+    public SetCardCount(ClassificationResult result){
         this.count = getEnumFromId(result.getResultID());
         this.certainty= result.getResultProbability();
     }

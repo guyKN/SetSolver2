@@ -72,7 +72,7 @@ public class CameraFragment extends Fragment {
             ImageProcessingConfig config = ImageProcessingConfig.getDefaultConfig();
 
             ImageProcessingManager processingManager =
-                    JavaImageProcessingManager.getDefaultManager(config);
+                    JavaImageProcessingManager.getDefaultManager(context.getApplicationContext(), config);
 
             FpsCounter fpsCounter = new FpsCounter(mViewModel, 300);
 

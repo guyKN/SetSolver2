@@ -115,7 +115,7 @@ public class ImageProcessingThreadManager {
                         ImageProcessingConfig config = message.getConfig();
                         ImageProcessingAction action = message.getAction();
 
-                        imageProcessingManager = JavaImageProcessingManager.getDefaultManager(config);
+                        imageProcessingManager = JavaImageProcessingManager.getDefaultManager(context, config);
                         imageProcessingManager.setImage(new MatImage(originalImageMat));
                         RotatedRectangleList result = imageProcessingManager.getCardPositions();
 

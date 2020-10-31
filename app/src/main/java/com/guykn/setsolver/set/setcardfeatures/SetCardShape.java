@@ -2,7 +2,7 @@ package com.guykn.setsolver.set.setcardfeatures;
 
 import androidx.annotation.NonNull;
 
-import com.guykn.setsolver.imageprocessing.classify.FeatureClassifier;
+import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
 
 import java.util.Locale;
 
@@ -35,7 +35,7 @@ public class SetCardShape extends SetCardFeature<SetCardShape.SetCardShapeEnum> 
         return shape;
     }
 
-    public SetCardShape(FeatureClassifier.ClassificationResult result) {
+    public SetCardShape(ClassificationResult result) {
         this.shape = getEnumFromId(result.getResultID());
         this.certainty = result.getResultProbability();
     }

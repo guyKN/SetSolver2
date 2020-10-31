@@ -13,19 +13,29 @@ import androidx.core.content.ContextCompat;
 import com.guykn.setsolver.ui.main.CameraFragment;
 
 public class CameraActivity extends AppCompatActivity {
-    //todo: add whatTheStack for better crash info
     private static final int REQUEST_CODE_CAMERA_PERMISSION = 33;
+    private static final int REQUEST_CODE_WRITE_STORAGE_PERMISSION = 73;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_activity);
         if (savedInstanceState == null) {
-            if(activityHasCameraPermission()){
-                createCameraFragment();
-            }else{
-                requestCameraPermission();
-            }
+            checkPermissionsAndOpenFragment();
+        }
+    }
+
+    private void checkPermissionsAndOpenFragment() {
+        if (!activityHasCameraPermission()) {
+            requestCameraPermission();
+        } else if(!activityHasWriteStoragePermission()) {
+            requestWriteStoragePermission();
+        }else {
+            createCameraFragment();
         }
     }
 
@@ -34,12 +44,20 @@ public class CameraActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_CAMERA_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                createCameraFragment();
+                checkPermissionsAndOpenFragment();
             } else {
-                Toast.makeText(this, "This app can't work without the camera. ", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "This app can't work without the camera.", Toast.LENGTH_LONG).show();
             }
+        }else if(requestCode == REQUEST_CODE_WRITE_STORAGE_PERMISSION){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                checkPermissionsAndOpenFragment();
+            } else {
+                Toast.makeText(this, "This app needs to access external storage.", Toast.LENGTH_LONG).show();
+            }
+
         }
     }
+
 
 
     private void createCameraFragment(){
@@ -49,11 +67,21 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private boolean activityHasCameraPermission(){
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean activityHasWriteStoragePermission(){
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestCameraPermission(){
         ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, REQUEST_CODE_CAMERA_PERMISSION);
+    }
+
+    private void requestWriteStoragePermission(){
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_CAMERA_PERMISSION);
     }
 
 

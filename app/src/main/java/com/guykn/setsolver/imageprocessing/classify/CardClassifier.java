@@ -1,36 +1,19 @@
 package com.guykn.setsolver.imageprocessing.classify;
 
-import android.graphics.Bitmap;
+import android.content.Context;
 
-import com.guykn.setsolver.drawing.GenericRotatedRectangle;
-import com.guykn.setsolver.imageprocessing.StandardImagePreprocessor;
-import com.guykn.setsolver.imageprocessing.detect.CardDetector;
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.set.PositionlessSetCard;
-import com.guykn.setsolver.set.SetBoardPosition;
-import com.guykn.setsolver.set.SetCard;
 
 import org.opencv.core.Mat;
 
-public abstract class CardClassifier implements CardDetector.CardAction {
-    protected Mat originalImageMat;
-    private SetBoardPosition board;
+import java.io.Closeable;
+import java.io.IOException;
 
-    @Override
-    public void doAction(GenericRotatedRectangle cardRect) {
-        SetCard card = classify(cardRect);
-        board.addCard(card);
+public interface CardClassifier extends Closeable {
+    public PositionlessSetCard classify(Mat image);
+
+    public interface CardClassifierFactory{
+        public CardClassifier createCardClassifier(Context context, ImageProcessingConfig config) throws IOException;
     }
-
-    public SetCard classify(GenericRotatedRectangle cardRect){
-        Mat cropped = cardRect.cropToRect(originalImageMat);//crops the bitmap to contain just the rectangle specified
-        Bitmap croppedBitmap = StandardImagePreprocessor.matToBitmap(cropped);
-        PositionlessSetCard card = classify(croppedBitmap);
-        return new SetCard(cardRect, card);
-    }
-
-    public SetBoardPosition getBoard(){
-        return board;
-    }
-
-    protected abstract PositionlessSetCard classify(Bitmap cropped);
 }
