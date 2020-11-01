@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements CameraProcessingT
 
     private void runTest() {
         ImageClassificationTest test = new ImageClassificationTest(this);
-        //test.test();
+        test.test2();
     }
 
     @Override

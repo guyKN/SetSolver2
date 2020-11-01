@@ -9,7 +9,9 @@ import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
 import com.guykn.setsolver.imageprocessing.classify.FeatureClassifier;
 import com.guykn.setsolver.imageprocessing.classify.MLCardClassifier;
+import com.guykn.setsolver.imageprocessing.classify.models.CardClassifierV1;
 import com.guykn.setsolver.imageprocessing.classify.models.floatmodels.ColorClassifier;
+import com.guykn.setsolver.set.PositionlessSetCard;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.support.common.ops.NormalizeOp;
@@ -28,6 +30,10 @@ public class ImageClassificationTest {
     static final float IMAGE_MEAN = 0.0f;
     static final float IMAGE_STD = 1.0f;
 
+    String imRed = "TestImages/SolidRedDiamond2.jpg";
+    String imPurple = "TestImages/SolidPurpleDiamond1.jpg";
+    String imGreen = "TestImages/SolidGreenSShape2.jpg";
+
 
     private final Context context;
     private static final String TAG = MLCardClassifier.TAG;
@@ -36,7 +42,39 @@ public class ImageClassificationTest {
         this.context = context;
     }
 
-    public void test(){
+    public void test2() {
+        Log.d(TAG, "testing RED: ");
+        PositionlessSetCard res = classifyFromFile(imRed);
+        Log.d(TAG, "RED result: " + res.getColor().getColor().getName());
+
+        Log.d(TAG, "testing PURPLE: ");
+        res = classifyFromFile(imPurple);
+        Log.d(TAG, "PURPLE result: " + res.getColor().getColor().getName());
+
+        Log.d(TAG, "testing GREEN: ");
+        res = classifyFromFile(imGreen);
+        Log.d(TAG, "GREEN result: " + res.getColor().getColor().getName());
+    }
+
+    public PositionlessSetCard classifyFromFile(String filepath) {
+        try {
+            CardClassifierV1 cardClassifier = new CardClassifierV1(context,
+                    ImageProcessingConfig.getDefaultConfig());
+
+            Bitmap bmp = loadBitmapAsset(filepath);
+
+            return cardClassifier.classify(bmp);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+
+    public void test() {
         try {
             FeatureClassifier colorClassifier = new ColorClassifier(context,
                     ImageProcessingConfig.getDefaultConfig());
@@ -45,10 +83,6 @@ public class ImageClassificationTest {
                     .add(getResizeOp())
                     .add(getPreProcessingNormalization())
                     .build();
-
-            String imRed = "TestImages/SolidRedDiamond2.jpg";
-            String imPurple = "TestImages/SolidPurpleDiamond1.jpg";
-            String imGreen = "TestImages/SolidGreenSShape2.jpg";
 
             Bitmap bmp = loadBitmapAsset(imRed);
 
@@ -73,7 +107,7 @@ public class ImageClassificationTest {
         return new ResizeOp(SCALE_DOWN_HEIGHT, SCALE_DOWN_WIDTH, ResizeOp.ResizeMethod.BILINEAR);
     }
 
-    protected NormalizeOp getPreProcessingNormalization(){
+    protected NormalizeOp getPreProcessingNormalization() {
         return new NormalizeOp(IMAGE_MEAN, IMAGE_STD);
     }
 

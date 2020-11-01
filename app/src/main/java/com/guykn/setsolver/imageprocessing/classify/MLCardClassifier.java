@@ -2,14 +2,13 @@ package com.guykn.setsolver.imageprocessing.classify;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.classify.models.InternalFeatureClassifier;
+import com.guykn.setsolver.imageprocessing.image.MatImage;
 import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.tensorflow.lite.support.common.ops.NormalizeOp;
 import org.tensorflow.lite.support.image.ImageProcessor;
@@ -44,7 +43,15 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     @Override
     public PositionlessSetCard classify(Mat image) {
-        loadTensorImageFromMat(image);
+        Bitmap bmp = new MatImage(image)
+                .toBitmap();
+        return classify(bmp);
+    }
+
+    public PositionlessSetCard classify(Bitmap bmp){
+        tImage.load(bmp);
+        preProcessor.process(tImage);
+
         SetCardColor color = colorClassifier.classifyCardFeature(tImage);
         return new PositionlessSetCard(color, null, null, null);
     }
@@ -83,11 +90,4 @@ public abstract class MLCardClassifier implements CardClassifier {
 */
 
 
-    private void loadTensorImageFromMat(Mat mat){
-        Log.d(MLCardClassifier.TAG, "loading from Mat");
-        Bitmap bmp = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mat, bmp);
-        tImage.load(bmp);
-        preProcessor.process(tImage);
-    }
 }
