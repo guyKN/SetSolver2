@@ -26,6 +26,7 @@ import com.guykn.setsolver.drawing.DrawableOnCanvas;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.threading.CameraProcessingThread;
 import com.guykn.setsolver.threading.deprecated.ImageProcessingThreadManager;
+import com.guykn.setsolver.unittest.ImageClassificationTest;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 
@@ -61,7 +62,8 @@ public class MainActivity extends AppCompatActivity implements CameraProcessingT
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "Hello world");
-        //runTest();
+
+        runTest();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -83,6 +85,11 @@ public class MainActivity extends AppCompatActivity implements CameraProcessingT
 
         initOpenCV();
         //todo: save important variables in a bundle
+    }
+
+    private void runTest() {
+        ImageClassificationTest test = new ImageClassificationTest(this);
+        //test.test();
     }
 
     @Override

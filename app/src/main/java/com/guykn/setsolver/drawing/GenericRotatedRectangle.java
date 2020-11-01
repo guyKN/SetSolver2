@@ -23,8 +23,9 @@ import java.util.Locale;
  */
 public class GenericRotatedRectangle implements DrawableOnCanvas {
 
-    //todo: debug more: sometimes rectangles are clearly not quite right
-    //todo: add comments to make it generally more clear
+    // todo: add comments to make it generally more clear
+    // todo: rotate so that width is always greater than height
+    // todo: crop a little bit into the image so that the edges are removed
 
     public static final String TAG = "GenericRotatedRectangle";
 
@@ -38,7 +39,6 @@ public class GenericRotatedRectangle implements DrawableOnCanvas {
     private int originalCanvasHeight;
 
     private int area;
-
 
     private static final boolean WRITE_TO_CONSOLE = false;
 
