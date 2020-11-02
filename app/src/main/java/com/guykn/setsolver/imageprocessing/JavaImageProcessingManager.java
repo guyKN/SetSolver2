@@ -7,7 +7,7 @@ import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier.CardClassifierFactory;
-import com.guykn.setsolver.imageprocessing.classify.models.CardClassifierV1.CardClassifierV1Factory;
+import com.guykn.setsolver.imageprocessing.classify.models.v2floatmodels.CardClassifierV2.CardClassifierV2Factory;
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourCardDetectorWrapper;
 import com.guykn.setsolver.imageprocessing.image.Image;
@@ -82,7 +82,7 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
 
     public static JavaImageProcessingManager getDefaultManager(Context context, ImageProcessingConfig config) {
         CardDetector detector = new ContourCardDetectorWrapper(config);
-        CardClassifierFactory classifier = new CardClassifierV1Factory();
+        CardClassifierFactory classifier = new CardClassifierV2Factory();
         ImageProcessingManager.ImagePreProcessor preProcessor = new StandardImagePreprocessor();
         IndirectCardVerifier indirectCardVerifier = new DBSCANCardVerifier();
         DirectCardVerifier directCardVerifier = new AverageColorCardVerifier();

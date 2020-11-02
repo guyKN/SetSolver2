@@ -7,17 +7,11 @@ import android.util.Log;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
-import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
-import com.guykn.setsolver.imageprocessing.classify.FeatureClassifier;
 import com.guykn.setsolver.imageprocessing.classify.MLCardClassifier;
-import com.guykn.setsolver.imageprocessing.classify.models.FloatCardClassifierV1;
-import com.guykn.setsolver.imageprocessing.classify.models.floatmodels.ColorClassifier;
+import com.guykn.setsolver.imageprocessing.classify.models.v2floatmodels.CardClassifierV2;
 import com.guykn.setsolver.set.PositionlessSetCard;
 
-import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.support.common.ops.NormalizeOp;
-import org.tensorflow.lite.support.image.ImageProcessor;
-import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.support.image.ops.ResizeOp;
 
 import java.io.IOException;
@@ -71,7 +65,7 @@ public class ImageClassificationTest {
 
     public PositionlessSetCard classifyFromFile(String filepath) {
         try {
-            CardClassifier cardClassifier = new FloatCardClassifierV1(context,
+            CardClassifier cardClassifier = new CardClassifierV2(context,
                     ImageProcessingConfig.getDefaultConfig());
 
             Bitmap bmp = loadBitmapAsset(filepath);
@@ -86,30 +80,6 @@ public class ImageClassificationTest {
 
     }
 
-
-    public void test() {
-        try {
-            FeatureClassifier colorClassifier = new ColorClassifier(context,
-                    ImageProcessingConfig.getDefaultConfig());
-
-            ImageProcessor preProcessor = new ImageProcessor.Builder()
-                    .add(getResizeOp())
-                    .add(getPreProcessingNormalization())
-                    .build();
-
-            Bitmap bmp = loadBitmapAsset(imRed);
-
-            TensorImage tImage = new TensorImage(DataType.UINT8);
-            tImage.load(bmp);
-            preProcessor.process(tImage);
-            ClassificationResult result = colorClassifier.classify(tImage);
-            Log.d(TAG, " resultId: " + result.id);
-            Log.d(TAG, " resultProbability: " + result.probability);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private Bitmap loadBitmapAsset(String filepath) throws IOException {
         InputStream assetInStream = context.getAssets().open(filepath);

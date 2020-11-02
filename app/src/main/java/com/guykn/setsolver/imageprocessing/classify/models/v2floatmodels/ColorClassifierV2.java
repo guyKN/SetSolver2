@@ -1,4 +1,4 @@
-package com.guykn.setsolver.imageprocessing.classify.models.floatmodels;
+package com.guykn.setsolver.imageprocessing.classify.models.v2floatmodels;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,13 +12,11 @@ import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 
 import java.io.IOException;
 
-public class ColorClassifier extends InternalFeatureClassifier<SetCardColor> {
+public class ColorClassifierV2 extends InternalFeatureClassifier<SetCardColor> {
 
-    private static final String MODEL_PATH = "Models/New/float/Color/ColorModel.tflite";
-    private static final int NUM_CATEGORIES = 3;
-//    private static final String MODEL_PATH = "Models/New/quantized/Color/model.tflite";
+    private static final String MODEL_PATH = "Models/NewFloat/Color/model_unquant.tflite";
 
-    public ColorClassifier(Context context, ImageProcessingConfig config) throws IOException {
+    public ColorClassifierV2(Context context, ImageProcessingConfig config) throws IOException {
         super(context, config);
     }
 
@@ -30,13 +28,12 @@ public class ColorClassifier extends InternalFeatureClassifier<SetCardColor> {
     }
 
     @Override
-    protected ModelType getModelType() {
-        return ModelType.FLOAT;
-    }
-
-    @Override
     protected String getModelPath() {
         return MODEL_PATH;
     }
 
+    @Override
+    protected ModelType getModelType() {
+        return ModelType.FLOAT;
+    }
 }

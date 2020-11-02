@@ -1,6 +1,7 @@
 package com.guykn.setsolver.imageprocessing.classify.models.quantizedmodels;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
@@ -8,8 +9,6 @@ import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
 import com.guykn.setsolver.imageprocessing.classify.MLCardClassifier;
 import com.guykn.setsolver.imageprocessing.classify.models.InternalFeatureClassifier;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
-
-import org.tensorflow.lite.support.image.TensorImage;
 
 import java.io.IOException;
 
@@ -24,15 +23,15 @@ public class ColorClassifierV1 extends InternalFeatureClassifier<SetCardColor> {
     }
 
     @Override
-    public SetCardColor classifyCardFeature(TensorImage image){
-        ClassificationResult res = classify(image);
+    public SetCardColor classifyCardFeature(Bitmap bitmap){
+        ClassificationResult res = classify(bitmap);
         Log.d(MLCardClassifier.TAG, "id: " + res.id);
         return new SetCardColor(res);
     }
 
     @Override
-    protected int getNumCategories() {
-        return NUM_CATEGORIES;
+    protected ModelType getModelType() {
+        return ModelType.QUANTIZED;
     }
 
     @Override

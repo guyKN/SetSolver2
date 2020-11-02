@@ -1,41 +1,34 @@
-package com.guykn.setsolver.imageprocessing.classify.models;
+package com.guykn.setsolver.imageprocessing.classify.models.v2floatmodels;
 
 import android.content.Context;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.imageprocessing.classify.MLCardClassifier;
-import com.guykn.setsolver.imageprocessing.classify.models.quantizedmodels.ColorClassifierV1;
+import com.guykn.setsolver.imageprocessing.classify.models.InternalFeatureClassifier;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 
 import java.io.IOException;
 
-public class CardClassifierV1 extends MLCardClassifier {
+public class CardClassifierV2 extends MLCardClassifier {
 
-    static final int SCALE_DOWN_WIDTH = 224;
-    static final int SCALE_DOWN_HEIGHT = 224;
-
-    private static final float IMAGE_MEAN = 0f;
-    private static final float IMAGE_STD = 1f;
-
-    public CardClassifierV1(Context context, ImageProcessingConfig config) throws IOException {
+    public CardClassifierV2(Context context, ImageProcessingConfig config) throws IOException {
         super(context, config);
     }
 
     @Override
     protected InternalFeatureClassifier<SetCardColor> getColorClassifier(Context context,
                                                                          ImageProcessingConfig config) throws IOException {
-        return new ColorClassifierV1(context, config);
+        return new ColorClassifierV2(context, config);
     }
 
-    public static class CardClassifierV1Factory implements CardClassifierFactory{
+    public static class CardClassifierV2Factory implements CardClassifierFactory{
 
         @Override
         public CardClassifier createCardClassifier(Context context, ImageProcessingConfig config)
                 throws IOException {
-            return new CardClassifierV1(context, config);
+            return new CardClassifierV2(context, config);
         }
-
     }
 
 }

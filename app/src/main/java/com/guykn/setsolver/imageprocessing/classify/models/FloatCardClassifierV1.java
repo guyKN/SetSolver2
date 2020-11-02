@@ -8,9 +8,6 @@ import com.guykn.setsolver.imageprocessing.classify.MLCardClassifier;
 import com.guykn.setsolver.imageprocessing.classify.models.floatmodels.ColorClassifier;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 
-import org.tensorflow.lite.support.common.ops.NormalizeOp;
-import org.tensorflow.lite.support.image.ops.ResizeOp;
-
 import java.io.IOException;
 
 public class FloatCardClassifierV1 extends MLCardClassifier {
@@ -29,16 +26,6 @@ public class FloatCardClassifierV1 extends MLCardClassifier {
     protected InternalFeatureClassifier<SetCardColor> getColorClassifier(Context context,
                                                  ImageProcessingConfig config) throws IOException {
         return new ColorClassifier(context, config);
-    }
-
-    @Override
-    protected ResizeOp getResizeOp() {
-        return new ResizeOp(SCALE_DOWN_HEIGHT, SCALE_DOWN_WIDTH, ResizeOp.ResizeMethod.BILINEAR);
-    }
-
-    @Override
-    protected NormalizeOp getNormalizeOp() {
-        return new NormalizeOp(IMAGE_MEAN, IMAGE_STD);
     }
 
     public static class FloatCardClassifierV1Factory implements CardClassifierFactory{

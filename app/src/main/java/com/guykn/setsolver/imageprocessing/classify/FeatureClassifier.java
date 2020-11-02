@@ -47,7 +47,7 @@ public abstract class FeatureClassifier implements Closeable {
         Log.d(TAG, "datatype: " + tflite.getInputTensor(0).dataType().name());
         tflite.run(image.getBuffer(), probabilityBuffer.getBuffer().rewind());
         Log.d(MLCardClassifier.TAG, Arrays.toString(probabilityBuffer.getFloatArray()));
-        return ClassificationResult.fromProbabilityBuffer(probabilityBuffer, POST_PROCESSING_SCALE_FACTOR);
+        return ClassificationResult.fromProbabilityBuffer(probabilityBuffer);
     }
 
 

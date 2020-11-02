@@ -10,10 +10,6 @@ import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 
 import org.opencv.core.Mat;
-import org.tensorflow.lite.support.common.ops.NormalizeOp;
-import org.tensorflow.lite.support.image.ImageProcessor;
-import org.tensorflow.lite.support.image.TensorImage;
-import org.tensorflow.lite.support.image.ops.ResizeOp;
 
 import java.io.IOException;
 
@@ -26,15 +22,10 @@ public abstract class MLCardClassifier implements CardClassifier {
     private final ImageProcessingConfig config;
 
     private final InternalFeatureClassifier<SetCardColor> colorClassifier;
-    private final ImageProcessor preProcessor;
-    private final TensorImage tImage;
 
     public MLCardClassifier(Context context, ImageProcessingConfig config) throws IOException {
         this.config = config;
         colorClassifier = getColorClassifier(context, config);
-
-        preProcessor = getPreProcessor();
-        tImage = new TensorImage(colorClassifier.getDataType());
     }
 
 
@@ -43,16 +34,12 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     @Override
     public PositionlessSetCard classify(Mat image) {
-        Bitmap bmp = new MatImage(image)
-                .toBitmap();
+        Bitmap bmp = new MatImage(image).toBitmap();
         return classify(bmp);
     }
 
     public PositionlessSetCard classify(Bitmap bmp){
-        tImage.load(bmp);
-        preProcessor.process(tImage);
-
-        SetCardColor color = colorClassifier.classifyCardFeature(tImage);
+        SetCardColor color = colorClassifier.classifyCardFeature(bmp);
         return new PositionlessSetCard(color, null, null, null);
     }
 
@@ -66,28 +53,5 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     protected abstract InternalFeatureClassifier<SetCardColor> getColorClassifier(Context context,
                                                                                   ImageProcessingConfig config) throws IOException;
-
-    protected ImageProcessor getPreProcessor(){
-        return new ImageProcessor.Builder()
-                .add(getResizeOp())
-                .add(getNormalizeOp())
-                .build();
-    }
-
-    protected abstract ResizeOp getResizeOp();
-    protected abstract NormalizeOp getNormalizeOp();
-
-/*
-    protected ResizeOp getResizeOp() {
-        return new ResizeOp(MLCardClassifier.SCALE_DOWN_HEIGHT, MLCardClassifier.SCALE_DOWN_WIDTH, ResizeOp.ResizeMethod.BILINEAR);
-    }
-*/
-
-/*
-    protected NormalizeOp getPreProcessingNormalization(){
-        return new NormalizeOp(MLCardClassifier.IMAGE_MEAN, MLCardClassifier.IMAGE_STD);
-    }
-*/
-
 
 }
