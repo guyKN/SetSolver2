@@ -80,8 +80,10 @@ public class CameraProcessingThread extends CameraPreviewThread {
         //super.pictureTakenMatAction(mat); //uncoment to also saved the original, full-sized image
         MatImage matImage = new MatImage(mat);
         processingManager.setImage(matImage);
-        processingManager.getCardPositions();
-        processingManager.saveCardImagesToGallery(getFileManager());
+        //processingManager.saveCardImagesToGallery(getFileManager());
+//        DrawableOnCanvas result =  processingManager.getCardPositions();
+//        callback.onImageProcessingSuccess(result);
+
         SetBoardPosition boardPosition = processingManager.getBoard();
         callback.onImageProcessingSuccess(boardPosition);
         processingManager.finish();

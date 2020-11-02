@@ -6,10 +6,11 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
+import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
 import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
 import com.guykn.setsolver.imageprocessing.classify.FeatureClassifier;
 import com.guykn.setsolver.imageprocessing.classify.MLCardClassifier;
-import com.guykn.setsolver.imageprocessing.classify.models.CardClassifierV1;
+import com.guykn.setsolver.imageprocessing.classify.models.FloatCardClassifierV1;
 import com.guykn.setsolver.imageprocessing.classify.models.floatmodels.ColorClassifier;
 import com.guykn.setsolver.set.PositionlessSetCard;
 
@@ -34,6 +35,14 @@ public class ImageClassificationTest {
     String imPurple = "TestImages/SolidPurpleDiamond1.jpg";
     String imGreen = "TestImages/SolidGreenSShape2.jpg";
 
+    String imRed2 = "TestImages/2_SolidRedCircle1.jpg";
+    String imPurple2 = "TestImages/2_SolidPurpleSShape1.jpg";
+    String imGreen2 = "TestImages/2_SolidGreenCircle1.jpg";
+
+    String imRed3 = "TestImages/red3.jpg";
+
+
+
 
     private final Context context;
     private static final String TAG = MLCardClassifier.TAG;
@@ -44,21 +53,25 @@ public class ImageClassificationTest {
 
     public void test2() {
         Log.d(TAG, "testing RED: ");
-        PositionlessSetCard res = classifyFromFile(imRed);
+        PositionlessSetCard res = classifyFromFile(imRed3);
         Log.d(TAG, "RED result: " + res.getColor().getColor().getName());
+        Log.d(TAG, "RED probability: " + res.getColor().getCertainty());
 
         Log.d(TAG, "testing PURPLE: ");
-        res = classifyFromFile(imPurple);
+        res = classifyFromFile(imPurple2);
         Log.d(TAG, "PURPLE result: " + res.getColor().getColor().getName());
+        Log.d(TAG, "PURPLE probability: " + res.getColor().getCertainty());
+
 
         Log.d(TAG, "testing GREEN: ");
-        res = classifyFromFile(imGreen);
+        res = classifyFromFile(imGreen2);
         Log.d(TAG, "GREEN result: " + res.getColor().getColor().getName());
+        Log.d(TAG, "GREEN probability: " + res.getColor().getCertainty());
     }
 
     public PositionlessSetCard classifyFromFile(String filepath) {
         try {
-            CardClassifierV1 cardClassifier = new CardClassifierV1(context,
+            CardClassifier cardClassifier = new FloatCardClassifierV1(context,
                     ImageProcessingConfig.getDefaultConfig());
 
             Bitmap bmp = loadBitmapAsset(filepath);
@@ -90,7 +103,8 @@ public class ImageClassificationTest {
             tImage.load(bmp);
             preProcessor.process(tImage);
             ClassificationResult result = colorClassifier.classify(tImage);
-            Log.d(TAG, " resultId: " + result.getResultID());
+            Log.d(TAG, " resultId: " + result.id);
+            Log.d(TAG, " resultProbability: " + result.probability);
 
         } catch (IOException e) {
             e.printStackTrace();

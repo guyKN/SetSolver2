@@ -38,8 +38,8 @@ public class SetCardCount extends SetCardFeature<SetCardCount.SetCardCountEnum>{
         this.count = count;
     }
     public SetCardCount(ClassificationResult result){
-        this.count = getEnumFromId(result.getResultID());
-        this.certainty= result.getResultProbability();
+        this.count = getEnumFromId(result.id);
+        this.certainty= result.probability;
     }
 
     @Override

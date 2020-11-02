@@ -38,8 +38,8 @@ public class SetCardFill extends SetCardFeature<SetCardFill.SetCardFillEnum> {
     }
 
     public SetCardFill(ClassificationResult result){
-        this.fill = getEnumFromId(result.getResultID());
-        this.certainty = result.getResultProbability();
+        this.fill = getEnumFromId(result.id);
+        this.certainty = result.probability;
     }
 
     @Override

@@ -54,8 +54,8 @@ public class SetCardColor extends SetCardFeature<SetCardColor.SetCardColorEnum>{
     }
 
     public SetCardColor(ClassificationResult result){
-        this.color = getEnumFromId(result.getResultID());
-        this.certainty = result.getResultProbability();
+        this.color = getEnumFromId(result.id);
+        this.certainty = result.probability;
     }
 
     @Override

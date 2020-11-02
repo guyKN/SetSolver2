@@ -36,8 +36,8 @@ public class SetCardShape extends SetCardFeature<SetCardShape.SetCardShapeEnum> 
     }
 
     public SetCardShape(ClassificationResult result) {
-        this.shape = getEnumFromId(result.getResultID());
-        this.certainty = result.getResultProbability();
+        this.shape = getEnumFromId(result.id);
+        this.certainty = result.probability;
     }
 
     private SetCardShape(SetCardShapeEnum shape, double certainty) {

@@ -42,6 +42,7 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
 
     private Context context;
 
+
     public static final String TAG = "ImageProcessing";
 
     //todo: add builder method
@@ -52,7 +53,7 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
                                       ImagePreProcessor preProcessor,
                                       IndirectCardVerifier indirectCardVerifier,
                                       DirectCardVerifier directCardVerifier,
-                                      ImageProcessingConfig config){
+                                      ImageProcessingConfig config) {
         this.detector = detector;
         this.classifierFactory = classifierFactory;
         this.preProcessor = preProcessor;
@@ -63,48 +64,48 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         this.context = context;
     }
 
-    public void setImage(Image image){
+    public void setImage(Image image) {
         this.unProcessedMat = image.toMat();
         this.processedMat = preProcessor.preProcess(unProcessedMat, config);
-        if(config.memoryManagement.shouldReleaseUnprocessedImage){
+        if (config.memoryManagement.shouldReleaseUnprocessedImage) {
             unProcessedMat.release();
             unProcessedMat = null;
         }
     }
 
-    public void setConfig(ImageProcessingConfig config){
+    public void setConfig(ImageProcessingConfig config) {
         //todo: change config of everything else too
         this.config = config;
         detector.setConfig(config);
     }
 
 
-    public static JavaImageProcessingManager getDefaultManager(Context context, ImageProcessingConfig config){
+    public static JavaImageProcessingManager getDefaultManager(Context context, ImageProcessingConfig config) {
         CardDetector detector = new ContourCardDetectorWrapper(config);
         CardClassifierFactory classifier = new CardClassifierV1Factory();
         ImageProcessingManager.ImagePreProcessor preProcessor = new StandardImagePreprocessor();
         IndirectCardVerifier indirectCardVerifier = new DBSCANCardVerifier();
         DirectCardVerifier directCardVerifier = new AverageColorCardVerifier();
 
-        return new JavaImageProcessingManager(context, detector,classifier,
-                preProcessor, indirectCardVerifier, directCardVerifier,config);
+        return new JavaImageProcessingManager(context, detector, classifier,
+                preProcessor, indirectCardVerifier, directCardVerifier, config);
     }
 
-    private void findCards(){
+    private void findCards() {
         cardPositions = detector.getAllCardRectangles(processedMat);
 
-        if(config.contourVerification.shouldDoOutlierDetection){
+        if (config.contourVerification.shouldDoOutlierDetection) {
             cardPositions = indirectCardVerifier.removeFalsePositives(cardPositions, config);
         }
 
-        if(config.contourVerification.shouldDoAverageColorCheck){
+        if (config.contourVerification.shouldDoAverageColorCheck) {
 
             Mat initialMat = getMat();
             List<GenericRotatedRectangle> cardRects = cardPositions.getDrawables();
-            for(int i=0;i<cardRects.size();i++){
+            for (int i = 0; i < cardRects.size(); i++) {
                 GenericRotatedRectangle card = cardRects.get(i);
                 Mat cropped = card.cropToRect(initialMat, config.image.getScaledDownSize());
-                if(directCardVerifier.isFalsePositive(cropped, config)){
+                if (directCardVerifier.isFalsePositive(cropped, config)) {
                     // the rectangle was actually a false positive, so remove it
                     cardRects.remove(i);
                     i--; //decrease i in order to not skip over elements
@@ -112,22 +113,28 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
             }
         }
     }
-    public RotatedRectangleList getCardPositions(){
-        if(cardPositions == null){
+
+    public RotatedRectangleList getCardPositions() {
+        if (cardPositions == null) {
             findCards();
         }
         return cardPositions;
     }
 
-    private void doClassification(){
-        if(cardPositions == null){
+    private void doClassification() {
+        if (cardPositions == null) {
             findCards();
         }
+        cardPositions.printStates();
         Mat mat = getMat();
+        ImageFileManager fileManager = new ImageFileManager(context); //todo: do earlier
         boardPosition = new SetBoardPosition();
-        try(CardClassifier classifier = classifierFactory.createCardClassifier(context, config)){
-            for(GenericRotatedRectangle rect: cardPositions.getDrawables()){
+        try (CardClassifier classifier = classifierFactory.createCardClassifier(context, config)) {
+            for (GenericRotatedRectangle rect : cardPositions.getDrawables()) {
                 Mat cropped = rect.cropToRect(mat);
+
+                //todo: remove
+                fileManager.saveToGallery(cropped);
 
                 PositionlessSetCard result = classifier.classify(cropped);
                 SetCard card = new SetCard(rect, result);
@@ -138,15 +145,16 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         }
     }
 
-    public SetBoardPosition getBoard(){
-        if(boardPosition == null){
+
+    public SetBoardPosition getBoard() {
+        if (boardPosition == null) {
             doClassification();
         }
         return boardPosition;
     }
 
-    public void saveCardImagesToGallery(ImageFileManager fileManager){
-        if(cardPositions == null){
+    public void saveCardImagesToGallery(ImageFileManager fileManager) {
+        if (cardPositions == null) {
             findCards();
         }
 
@@ -155,12 +163,10 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
     }
 
 
-    public void saveOriginalImageToGallery(ImageFileManager fileManager){
+    public void saveOriginalImageToGallery(ImageFileManager fileManager) {
         Mat mat = getMat();
         fileManager.saveToGallery(mat);
     }
-
-
 
     private Mat getMat() {
         Mat mat;
@@ -173,13 +179,14 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
     }
 
 
+
     public void finish() {
-        if(processedMat != null){
+        if (processedMat != null) {
             processedMat.release();
         }
         processedMat = null;
 
-        if(unProcessedMat != null){
+        if (unProcessedMat != null) {
             unProcessedMat.release();
         }
         unProcessedMat = null;

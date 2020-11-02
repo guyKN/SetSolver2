@@ -26,7 +26,7 @@ public class ColorClassifier extends InternalFeatureClassifier<SetCardColor> {
     @Override
     public SetCardColor classifyCardFeature(TensorImage image){
         ClassificationResult res = classify(image);
-        Log.d(MLCardClassifier.TAG, "id: " + res.getResultID());
+        Log.d(MLCardClassifier.TAG, "id: " + res.id);
         return new SetCardColor(res);
     }
 

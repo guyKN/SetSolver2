@@ -62,7 +62,7 @@ public class OldFeatureClassifier {
         tImage.load(image);
         tImage = imageProcessor.process(tImage);
         interpreter.run(tImage.getBuffer(), probabilityBuffer.getBuffer());
-        return ClassificationResult.fromProbabilityBuffer(probabilityBuffer);
+        return ClassificationResult.fromProbabilityBuffer(probabilityBuffer, 1);
     }
 
 }
