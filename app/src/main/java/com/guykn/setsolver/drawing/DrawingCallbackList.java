@@ -3,15 +3,12 @@ package com.guykn.setsolver.drawing;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.guykn.setsolver.ImageFileManager;
-
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
-
 import java.util.ArrayList;
 import java.util.List;
 //todo: maybe just extend the collection class instead of storing a collection inside
-public abstract class DrawableList<Drawable extends DrawableOnCanvas> implements DrawableOnCanvas{
+public abstract class DrawingCallbackList<Drawable extends DrawingCallback>
+        implements DrawingCallback {
+
     private static final int DEFAULT_TRIM_SIZE = 30;
 
     private List<Drawable> drawables = new ArrayList<>();
@@ -39,20 +36,6 @@ public abstract class DrawableList<Drawable extends DrawableOnCanvas> implements
         }
         for(Drawable drawable: drawables){
             drawable.drawOnCanvas(canvas, paint);
-        }
-    }
-
-    @Override
-    public void saveToGallery(ImageFileManager fileManager, Mat originalImage){
-        for(DrawableOnCanvas drawable: drawables){
-            drawable.saveToGallery(fileManager, originalImage);
-        }
-    }
-
-    @Override
-    public void saveToGallery(ImageFileManager fileManager, Mat originalImage, Size scaledDownSize) {
-        for(DrawableOnCanvas drawable: drawables){
-            drawable.saveToGallery(fileManager, originalImage, scaledDownSize);
         }
     }
 

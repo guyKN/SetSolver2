@@ -20,7 +20,6 @@ package com.guykn.setsolver.imageprocessing.classify.tflite.copypasta;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.RectF;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Log;
@@ -43,13 +42,6 @@ import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-
-import static java.lang.Math.min;
 
 /**
  * A classifier specialized to label images using TensorFlow Lite.
@@ -122,8 +114,6 @@ public abstract class Classifier implements Closeable {
      */
     private static final int MAX_RESULTS = 3;
 
-    /** The loaded TensorFlow Lite model. */
-
     /**
      * Image size along the x axis.
      */
@@ -165,82 +155,6 @@ public abstract class Classifier implements Closeable {
      */
     private final TensorProcessor probabilityProcessor;
 
-
-    /**
-     * An immutable result returned by a Classifier describing what was recognized.
-     */
-    public static class Recognition {
-        /**
-         * A unique identifier for what has been recognized. Specific to the class, not the instance of
-         * the object.
-         */
-        private final String id;
-
-        /**
-         * Display name for the recognition.
-         */
-        private final String title;
-
-        /**
-         * A sortable score for how good the recognition is relative to others. Higher should be better.
-         */
-        private final Float confidence;
-
-        /**
-         * Optional location within the source image for the location of the recognized object.
-         */
-        private RectF location;
-
-        public Recognition(
-                final String id, final String title, final Float confidence, final RectF location) {
-            this.id = id;
-            this.title = title;
-            this.confidence = confidence;
-            this.location = location;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public Float getConfidence() {
-            return confidence;
-        }
-
-        public RectF getLocation() {
-            return new RectF(location);
-        }
-
-        public void setLocation(RectF location) {
-            this.location = location;
-        }
-
-        @Override
-        public String toString() {
-            String resultString = "";
-            if (id != null) {
-                resultString += "[" + id + "] ";
-            }
-
-            if (title != null) {
-                resultString += title + " ";
-            }
-
-            if (confidence != null) {
-                resultString += String.format("(%.1f%%) ", confidence * 100.0f);
-            }
-
-            if (location != null) {
-                resultString += location + " ";
-            }
-
-            return resultString.trim();
-        }
-    }
 
     /**
      * Initializes a {@code Classifier}.
@@ -346,12 +260,9 @@ public abstract class Classifier implements Closeable {
         inputImageBuffer.load(bitmap);
 
         // Creates processor for the TensorImage.
-        int cropSize = min(bitmap.getWidth(), bitmap.getHeight());
-        // TODO(b/143564309): Fuse ops inside ImageProcessor.
         ImageProcessor imageProcessor =
                 new ImageProcessor.Builder()
-                        //.add(new ResizeWithCropOrPadOp(cropSize, cropSize)) todo: is removal worth
-                        // TODO(b/169379396): investigate the impact of the resize algorithm on accuracy.
+                        //.add(new ResizeWithCropOrPadOp(cropSize, cropSize))
                         // To get the same inference results as lib_task_api, which is built on top of the Task
                         // Library, use ResizeMethod.BILINEAR.
                         .add(new ResizeOp(imageSizeX, imageSizeY, ResizeMethod.BILINEAR))
@@ -359,34 +270,6 @@ public abstract class Classifier implements Closeable {
                         .add(getPreprocessNormalizeOp())
                         .build();
         return imageProcessor.process(inputImageBuffer);
-    }
-
-    /**
-     * Gets the top-k results.
-     */
-    private static List<Recognition> getTopKProbability(Map<String, Float> labelProb) {
-        // Find the best classifications.
-        PriorityQueue<Recognition> pq =
-                new PriorityQueue<>(
-                        MAX_RESULTS,
-                        new Comparator<Recognition>() {
-                            @Override
-                            public int compare(Recognition lhs, Recognition rhs) {
-                                // Intentionally reversed to put high confidence at the head of the queue.
-                                return Float.compare(rhs.getConfidence(), lhs.getConfidence());
-                            }
-                        });
-
-        for (Map.Entry<String, Float> entry : labelProb.entrySet()) {
-            pq.add(new Recognition("" + entry.getKey(), entry.getKey(), entry.getValue(), null));
-        }
-
-        final ArrayList<Recognition> recognitions = new ArrayList<>();
-        int recognitionsSize = min(pq.size(), MAX_RESULTS);
-        for (int i = 0; i < recognitionsSize; ++i) {
-            recognitions.add(pq.poll());
-        }
-        return recognitions;
     }
 
     protected abstract ModelType getModelType();

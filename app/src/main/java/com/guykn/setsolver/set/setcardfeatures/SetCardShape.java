@@ -30,31 +30,33 @@ public class SetCardShape extends SetCardFeature<SetCardShape.SetCardShapeEnum> 
         }
 
     }
-    private SetCardShapeEnum shape;
-    public SetCardShapeEnum getShape() {
-        return shape;
-    }
+    final private SetCardShapeEnum shape;
 
     public SetCardShape(ClassificationResult result) {
         this.shape = getEnumFromId(result.id);
-        this.certainty = result.probability;
+        this.confidence = result.probability;
     }
 
     private SetCardShape(SetCardShapeEnum shape, double certainty) {
         this.shape = shape;
-        this.certainty = certainty;
-    }
-
-    @Override
-    @NonNull
-    public String toString(){
-        return String.format(Locale.US,
-                "%.0f%% certainty that the shape is %s",
-                certainty*100, shape.toString());
+        this.confidence = certainty;
     }
 
     protected SetCardShapeEnum[] getFeatureEnumValues(){
         return SetCardShapeEnum.values();
+    }
+
+    @Override
+    public String getName() {
+        return shape.getName();
+    }
+
+    @Override
+    public String getDescription() {
+        return String.format(Locale.US,
+                "%.0f%% confidence that the card's shape is %s",
+                confidence *100, getName());
+
     }
 
 }

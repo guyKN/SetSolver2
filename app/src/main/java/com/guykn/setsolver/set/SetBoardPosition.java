@@ -3,12 +3,11 @@ package com.guykn.setsolver.set;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
 
-import com.guykn.setsolver.drawing.DrawableList;
+import com.guykn.setsolver.drawing.DrawingCallbackList;
 
 //todo: implement logic to find sets
-public class SetBoardPosition extends DrawableList<SetCard> {
+public class SetBoardPosition extends DrawingCallbackList<SetCard> {
     public void addCard(SetCard card) {
         addDrawable(card);
     }
@@ -43,9 +42,7 @@ public class SetBoardPosition extends DrawableList<SetCard> {
     public void drawOnCanvas(Canvas canvas, Paint paint) {
         for (SetCard card : getDrawables()) {
             Paint currentPaint;
-            Log.d(TAG, "Color: " + card.getColor().getColor().getName());
-
-            switch (card.getColor().getColor().getName()) {
+            switch (card.getColor().getName()) {
                 case "Green":
                     currentPaint = greenPaint;
                     break;
@@ -59,13 +56,7 @@ public class SetBoardPosition extends DrawableList<SetCard> {
                     throw new IllegalStateException("the given color is neither red, green, nor purple");
             }
 
-            Log.d(TAG, currentPaint == redPaint ? "red paint" : "not red paint");
-
-
-
             card.drawOnCanvas(canvas, currentPaint);
         }
     }
-
-
 }

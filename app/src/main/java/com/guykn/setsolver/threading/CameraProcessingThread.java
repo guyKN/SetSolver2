@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 
 import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.ImageFileManager;
-import com.guykn.setsolver.drawing.DrawableOnCanvas;
+import com.guykn.setsolver.drawing.DrawingCallback;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
@@ -90,7 +90,7 @@ public class CameraProcessingThread extends CameraPreviewThread {
     }
 
     public interface Callback {
-        public void onImageProcessingSuccess(DrawableOnCanvas drawable);
+        public void onImageProcessingSuccess(DrawingCallback drawable);
         public void onImageProcessingFailure(Exception exception);
     }
 }

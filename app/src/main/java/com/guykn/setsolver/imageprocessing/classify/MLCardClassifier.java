@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
-import com.guykn.setsolver.imageprocessing.classify.models.InternalFeatureClassifier;
 import com.guykn.setsolver.imageprocessing.image.MatImage;
 import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;

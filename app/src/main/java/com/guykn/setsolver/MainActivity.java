@@ -22,7 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.Glide;
-import com.guykn.setsolver.drawing.DrawableOnCanvas;
+import com.guykn.setsolver.drawing.DrawingCallback;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.threading.CameraProcessingThread;
 import com.guykn.setsolver.threading.deprecated.ImageProcessingThreadManager;
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements CameraProcessingT
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "Hello world");
 
-        runTest();
+//        runTest();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -245,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements CameraProcessingT
 
 
     @Override
-    public void onImageProcessingSuccess(DrawableOnCanvas drawable) {
+    public void onImageProcessingSuccess(DrawingCallback drawable) {
         try {
             recalculate.setVisibility(View.INVISIBLE);
             imageLoadingProgressBar.setVisibility(View.GONE);

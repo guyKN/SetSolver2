@@ -2,21 +2,19 @@ package com.guykn.setsolver.set.setcardfeatures;
 
 import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
 
+import java.util.Locale;
+
 public class SetCardFill extends SetCardFeature<SetCardFill.SetCardFillEnum> {
-    public enum SetCardFillEnum implements SetCardFeatureEnum {
+    enum SetCardFillEnum implements SetCardFeatureEnum {
         EMPTY(0, "Empty"), PARTIAL(1, "Partial"), FULL(2, "Full");
 
-        private String name;
+        private final String name;
         public String getName() {
             return name;
         }
-        private int id;
+        private final int id;
         public int getId() {
             return id;
-        }
-        @Override
-        public String toString() {
-            return getName();
         }
 
         private SetCardFillEnum(int id, String name) {
@@ -25,26 +23,28 @@ public class SetCardFill extends SetCardFeature<SetCardFill.SetCardFillEnum> {
         }
 
     }
-    private SetCardFillEnum fill;
-
-    public SetCardFillEnum getFill() {
-        return fill;
-    }
-
+    private final SetCardFillEnum fill;
 
     private SetCardFill(SetCardFillEnum fill, double certainty) {
         this.fill = fill;
-        this.certainty = certainty;
+        this.confidence = certainty;
     }
 
     public SetCardFill(ClassificationResult result){
         this.fill = getEnumFromId(result.id);
-        this.certainty = result.probability;
+        this.confidence = result.probability;
     }
 
     @Override
-    public String toString(){
-        return String.format("%.0f%% certainty that the cards' fill is %s", certainty*100, fill.toString());
+    public String getDescription(){
+        return String.format(Locale.US,
+                "%.0f%% confidence that the cards' fill is %s",
+                confidence *100, getName());
+    }
+
+    @Override
+    public String getName() {
+        return fill.getName();
     }
 
     protected SetCardFillEnum[] getFeatureEnumValues(){

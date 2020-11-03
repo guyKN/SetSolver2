@@ -1,4 +1,4 @@
-package com.guykn.setsolver.imageprocessing.classify.models;
+package com.guykn.setsolver.imageprocessing.classify;
 
 import android.content.Context;
 import android.graphics.Bitmap;

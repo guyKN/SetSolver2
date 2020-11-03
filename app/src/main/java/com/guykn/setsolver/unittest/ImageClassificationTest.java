@@ -48,19 +48,19 @@ public class ImageClassificationTest {
     public void test2() {
         Log.d(TAG, "testing RED: ");
         PositionlessSetCard res = classifyFromFile(imRed3);
-        Log.d(TAG, "RED result: " + res.getColor().getColor().getName());
-        Log.d(TAG, "RED probability: " + res.getColor().getCertainty());
+        Log.d(TAG, "RED result: " + res.getColor().getName());
+        Log.d(TAG, "RED probability: " + res.getColor().getConfidence());
 
         Log.d(TAG, "testing PURPLE: ");
         res = classifyFromFile(imPurple2);
-        Log.d(TAG, "PURPLE result: " + res.getColor().getColor().getName());
-        Log.d(TAG, "PURPLE probability: " + res.getColor().getCertainty());
+        Log.d(TAG, "PURPLE result: " + res.getColor().getName());
+        Log.d(TAG, "PURPLE probability: " + res.getColor().getConfidence());
 
 
         Log.d(TAG, "testing GREEN: ");
         res = classifyFromFile(imGreen2);
-        Log.d(TAG, "GREEN result: " + res.getColor().getColor().getName());
-        Log.d(TAG, "GREEN probability: " + res.getColor().getCertainty());
+        Log.d(TAG, "GREEN result: " + res.getColor().getName());
+        Log.d(TAG, "GREEN probability: " + res.getColor().getConfidence());
     }
 
     public PositionlessSetCard classifyFromFile(String filepath) {

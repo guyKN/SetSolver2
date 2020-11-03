@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 
 import com.guykn.setsolver.ImageFileManager;
 import com.guykn.setsolver.MainActivity;
-import com.guykn.setsolver.drawing.DrawableOnCanvas;
+import com.guykn.setsolver.drawing.DrawingCallback;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.JavaImageProcessingManager;
@@ -60,7 +60,7 @@ public class ImageProcessingThreadManager {
                     }
                     callback.onImageProcessingFailure(exception);
                 }else{
-                    DrawableOnCanvas drawable = message.getDrawable();
+                    DrawingCallback drawable = message.getDrawable();
                     if(drawable == null){
                         callback.onImageProcessingFailure(
                                 new NullPointerException("The given drawableOnCanvas was null"));
@@ -155,15 +155,15 @@ public class ImageProcessingThreadManager {
         }
         abstract boolean isError();
         @Nullable
-        abstract DrawableOnCanvas getDrawable();
+        abstract DrawingCallback getDrawable();
         @Nullable
         abstract Exception getException();
 
     }
 
     private class WorkerThreadToUiSuccessMessage extends WorkerThreadToUiMessage{
-        private final DrawableOnCanvas drawable;
-        public WorkerThreadToUiSuccessMessage(DrawableOnCanvas drawable){
+        private final DrawingCallback drawable;
+        public WorkerThreadToUiSuccessMessage(DrawingCallback drawable){
             this.drawable = drawable;
         }
         @Override
@@ -173,7 +173,7 @@ public class ImageProcessingThreadManager {
 
         @Nullable
         @Override
-        DrawableOnCanvas getDrawable() {
+        DrawingCallback getDrawable() {
             return drawable;
         }
 
@@ -195,7 +195,7 @@ public class ImageProcessingThreadManager {
 
         @Nullable
         @Override
-        DrawableOnCanvas getDrawable() {
+        DrawingCallback getDrawable() {
             return null;
         }
 

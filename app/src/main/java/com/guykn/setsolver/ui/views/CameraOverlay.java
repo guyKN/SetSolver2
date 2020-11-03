@@ -10,11 +10,11 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
-import com.guykn.setsolver.drawing.DrawableOnCanvas;
+import com.guykn.setsolver.drawing.DrawingCallback;
 
 public class CameraOverlay extends View implements LifecycleObserver {
 
-    private DrawableOnCanvas drawable;
+    private DrawingCallback drawable;
     private Paint mPaint;
 
     public CameraOverlay(Context context, Lifecycle lifecycle) {
@@ -31,7 +31,7 @@ public class CameraOverlay extends View implements LifecycleObserver {
         mPaint.setStyle(Paint.Style.STROKE);
     }
 
-    public void setDrawable(DrawableOnCanvas drawable){
+    public void setDrawable(DrawingCallback drawable){
         //todo: do all the math ahead of time, so that the location of the rect doesn't have to be calculated every time
         this.drawable = drawable;
         invalidate();

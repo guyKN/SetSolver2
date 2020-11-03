@@ -8,15 +8,16 @@ public abstract class SetCardFeature<FeatureEnum extends SetCardFeatureEnum> {
                 return featureEnum;
             }
         }
-        throw new IllegalArgumentException("Id must be between 0 and 2. Given: " + id);
+        throw new IllegalArgumentException("Id does not match a : " + id);
     }
 
-    protected double certainty;
-    public double getCertainty(){
-        return certainty;
+    protected double confidence;
+    public double getConfidence(){
+        return confidence;
     }
 
-    public abstract String toString();
     protected abstract FeatureEnum[] getFeatureEnumValues();
+    public abstract String getName();
+    public abstract String getDescription();
 
 }

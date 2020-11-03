@@ -4,8 +4,8 @@ import android.content.Context;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.classify.CardClassifier;
+import com.guykn.setsolver.imageprocessing.classify.InternalFeatureClassifier;
 import com.guykn.setsolver.imageprocessing.classify.MLCardClassifier;
-import com.guykn.setsolver.imageprocessing.classify.models.InternalFeatureClassifier;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 
 import java.io.IOException;
