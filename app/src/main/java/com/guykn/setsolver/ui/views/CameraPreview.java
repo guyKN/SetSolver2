@@ -12,8 +12,7 @@ import androidx.lifecycle.OnLifecycleEvent;
 import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
-import com.guykn.setsolver.threading.CameraPreviewThread;
-import com.guykn.setsolver.threading.CameraProcessingThread;
+import com.guykn.setsolver.threading.CameraThreadManager;
 
 /**
  * This class extends the SurfaceView class, and simply forwards oll SurfaceHolder Callbacks to CameraPreviewThread
@@ -25,11 +24,11 @@ public class CameraPreview extends SurfaceView implements LifecycleObserver {
 
     public static final String TAG = "CameraPreviewTag";
 
-    private final CameraPreviewThread previewThread;
+    private final CameraThreadManager.CameraPreviewThread previewThread;
 
 
     public CameraPreview(Context context, ImageProcessingManager processingManager,
-                         @Nullable CameraProcessingThread.Callback processingCallback,
+                         @Nullable CameraThreadManager.CameraProcessingThread.Callback processingCallback,
                          @Nullable FpsCounter fpsCounter,
                          @Nullable Lifecycle lifecycle) {
         super(context);
@@ -37,14 +36,14 @@ public class CameraPreview extends SurfaceView implements LifecycleObserver {
         if(lifecycle != null){
             lifecycle.addObserver(this);
         }
-        this.previewThread = new CameraProcessingThread(context, fpsCounter,
+        this.previewThread = new CameraThreadManager.CameraProcessingThread(context, fpsCounter,
                 processingManager, processingCallback);
 
         init();
     }
 
     public CameraPreview(Context  context,
-                         CameraPreviewThread previewThread, Lifecycle lifecycle){
+                         CameraThreadManager.CameraPreviewThread previewThread, Lifecycle lifecycle){
         super(context);
         if(lifecycle != null){
             lifecycle.addObserver(this);

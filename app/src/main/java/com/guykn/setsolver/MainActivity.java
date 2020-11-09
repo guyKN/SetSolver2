@@ -24,7 +24,7 @@ import androidx.core.content.FileProvider;
 import com.bumptech.glide.Glide;
 import com.guykn.setsolver.drawing.DrawingCallback;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
-import com.guykn.setsolver.threading.CameraProcessingThread;
+import com.guykn.setsolver.threading.CameraThreadManager;
 import com.guykn.setsolver.threading.deprecated.ImageProcessingThreadManager;
 import com.guykn.setsolver.unittest.ImageClassificationTest;
 import com.yalantis.ucrop.UCrop;
@@ -37,7 +37,7 @@ import java.io.IOException;
 
 import static com.guykn.setsolver.imageprocessing.ImageProcessingConfig.getDefaultConfig;
 
-public class MainActivity extends AppCompatActivity implements CameraProcessingThread.Callback {
+public class MainActivity extends AppCompatActivity implements CameraThreadManager.CameraProcessingThread.Callback {
     //todo: remove most stuff from this activity and move it to CameraActivity
 
 

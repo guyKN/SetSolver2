@@ -73,6 +73,7 @@ public abstract class Classifier implements Closeable {
                 return new NormalizeOp(PROBABILITY_MEAN, PROBABILITY_STD);
             }
         },
+
         QUANTIZED {
             /**
              * The quantized model does not require normalization, thus set mean as 0.0f, and std as 1.0f to
@@ -108,11 +109,6 @@ public abstract class Classifier implements Closeable {
         CPU,
         NNAPI
     }
-
-    /**
-     * Number of results to show in the UI.
-     */
-    private static final int MAX_RESULTS = 3;
 
     /**
      * Image size along the x axis.
@@ -227,7 +223,7 @@ public abstract class Classifier implements Closeable {
      * Closes the interpreter and model to release resources.
      */
     @Override
-    public void close() {
+    public void close() throws IOException {
         if (tflite != null) {
             tflite.close();
             tflite = null;
@@ -262,11 +258,8 @@ public abstract class Classifier implements Closeable {
         // Creates processor for the TensorImage.
         ImageProcessor imageProcessor =
                 new ImageProcessor.Builder()
-                        //.add(new ResizeWithCropOrPadOp(cropSize, cropSize))
-                        // To get the same inference results as lib_task_api, which is built on top of the Task
-                        // Library, use ResizeMethod.BILINEAR.
-                        .add(new ResizeOp(imageSizeX, imageSizeY, ResizeMethod.BILINEAR))
-                        //.add(new Rot90Op(numRotation))
+                        //todo: is nearestNeighbor better a better resize method
+                        .add(new ResizeOp(imageSizeY, imageSizeX, ResizeMethod.BILINEAR))
                         .add(getPreprocessNormalizeOp())
                         .build();
         return imageProcessor.process(inputImageBuffer);

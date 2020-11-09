@@ -27,10 +27,6 @@ public abstract class MLCardClassifier implements CardClassifier {
         colorClassifier = getColorClassifier(context, config);
     }
 
-
-
-
-
     @Override
     public PositionlessSetCard classify(Mat image) {
         Bitmap bmp = new MatImage(image).toBitmap();
@@ -44,13 +40,15 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     @Override
     public void close() throws IOException {
-        colorClassifier.close();
         //todo: is this all?
+        if(colorClassifier != null) {
+            colorClassifier.close();
+        }
     }
 
 
 
     protected abstract InternalFeatureClassifier<SetCardColor> getColorClassifier(Context context,
-                                                                                  ImageProcessingConfig config) throws IOException;
+                                                  ImageProcessingConfig config) throws IOException;
 
 }

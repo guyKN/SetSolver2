@@ -18,7 +18,7 @@ import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.JavaImageProcessingManager;
 import com.guykn.setsolver.imageprocessing.image.ByteArrayImage;
 import com.guykn.setsolver.imageprocessing.image.MatImage;
-import com.guykn.setsolver.threading.CameraProcessingThread;
+import com.guykn.setsolver.threading.CameraThreadManager;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -39,10 +39,10 @@ public class ImageProcessingThreadManager {
 
     private Handler workerThreadToUiHandler;
     private volatile Handler uiToWorkerThreadHandler;
-    private final CameraProcessingThread.Callback callback;
+    private final CameraThreadManager.CameraProcessingThread.Callback callback;
 
 
-    public ImageProcessingThreadManager(Context context, CameraProcessingThread.Callback callback){
+    public ImageProcessingThreadManager(Context context, CameraThreadManager.CameraProcessingThread.Callback callback){
         this.context = context;
         this.callback = callback;
         threadBusy.set(false);

@@ -6,9 +6,9 @@ import androidx.lifecycle.ViewModel;
 
 import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.drawing.DrawingCallback;
-import com.guykn.setsolver.threading.CameraProcessingThread;
+import com.guykn.setsolver.threading.CameraThreadManager;
 
-public class MainViewModel extends ViewModel implements CameraProcessingThread.Callback,
+    public class MainViewModel extends ViewModel implements CameraThreadManager.CameraProcessingThread.Callback,
         FpsCounter.FpsCallback {
 
     private final MutableLiveData<DrawingCallback> drawingLiveData;

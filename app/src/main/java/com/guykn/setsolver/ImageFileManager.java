@@ -23,7 +23,7 @@ public class ImageFileManager {
     public ImageFileManager(Context context){
         // getApplicationContext is used to avoid a direct refrence to the activity,
         // which causes a memory leak.
-        this.context = context.getApplicationContext();
+        this.context = context;
     }
 
     public File createTempImage() throws IOException {
