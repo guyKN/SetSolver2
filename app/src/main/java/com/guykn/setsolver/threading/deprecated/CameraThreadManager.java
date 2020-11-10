@@ -9,7 +9,7 @@ import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 
 public class CameraThreadManager extends ImageProcessingThreadManager implements Camera.PreviewCallback {
     private DelayChecker delayChecker;
-    public CameraThreadManager(Context context, com.guykn.setsolver.threading.CameraThreadManager.CameraProcessingThread.Callback callback,
+    public CameraThreadManager(Context context, CameraThreadManager2.CameraProcessingThread.Callback callback,
                                DelayChecker delayChecker) {
         super(context, callback);
         this.delayChecker = delayChecker;

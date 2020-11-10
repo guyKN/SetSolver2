@@ -83,7 +83,6 @@ public class ImageProcessingConfig {
     }
 
 
-
     public Image image = new Image();
     public GaussianBlur gaussianBlur = new GaussianBlur();
     public CannyEdgeDetection cannyEdgeDetection = new CannyEdgeDetection();

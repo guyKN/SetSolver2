@@ -30,25 +30,24 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
             this.id = id;
         }
 
-        public boolean isAtLeast(CameraState targetState){
-            return this.id>=targetState.id;
+        public boolean isAtLeast(CameraState targetState) {
+            return this.id >= targetState.id;
         }
 
         private static final CameraState[] allStates = {DESTROYED, STOPPED, ACTIVE};
 
-        private static CameraState fromId(int id){
+        private static CameraState fromId(int id) {
             return allStates[id];
         }
 
-        public static CameraState lowestState(CameraState state1, CameraState state2){
+        public static CameraState lowestState(CameraState state1, CameraState state2) {
             int lowestStateId = Math.min(state1.id, state2.id);
             return fromId(lowestStateId);
         }
     }
 
 
-
-    protected static class SurfaceViewState {
+    public static class SurfaceViewState {
         private final SurfaceHolder holder;
 
         private final int format;
@@ -91,25 +90,111 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
 
     }
 
-    public void setTargetPreviewState(CameraState newTargetState){
-        targetCameraState = newTargetState;
-        if(surfaceViewState == null){
-            // the surfaceHolder that this CameraThread is attached to is currntly destroyed
-            // this is mostly likely because the activity is paused,
-            // or because the surfaceview hasn't been created yet.
-            // We can just change our target state for now, and when the surface holder is created
-            // our new state will apply
-            return;
+
+
+    public void setTargetPreviewState(CameraState targetState) {
+        changeCameraState(targetState, this.maxPossibleCameraState);
+    }
+
+    public void setMaxPossibleCameraState(CameraState maxPossibleState) {
+        changeCameraState(this.targetCameraState, maxPossibleState);
+    }
+
+    public void takePicture(){
+        try{
+            onTakePicture();
+        } catch (CameraException e) {
+            onCameraError(e);
         }
     }
 
+    private void changeCameraState(CameraState targetState, CameraState maxPossibleState) {
+        CameraState oldCameraState = getActualCameraState();
+        this.targetCameraState = targetState;
+        this.maxPossibleCameraState = maxPossibleState;
+        CameraState newCameraState = getActualCameraState();
+        try {
+
+            switch (newCameraState) {
+                case DESTROYED:
+                    switch (oldCameraState) {
+                        case DESTROYED:
+                            break;
+                        case STOPPED:
+                            onDestroyCamera();
+                            break;
+                        case ACTIVE:
+                            onStopCamera();
+                            onDestroyCamera();
+                            break;
+                    }
+                    break;
+
+                case STOPPED:
+                    switch (oldCameraState) {
+                        case DESTROYED:
+                            onOpenCamera();
+                            break;
+                        case STOPPED:
+                            break;
+                        case ACTIVE:
+                            onStopCamera();
+                            break;
+                    }
+                    break;
+
+                case ACTIVE:
+                    switch (oldCameraState) {
+                        case DESTROYED:
+                            onOpenCamera();
+                            onStartCamera(surfaceViewState);
+                            break;
+                        case STOPPED:
+                            onStartCamera(surfaceViewState);
+                            break;
+                        case ACTIVE:
+                            break;
+                    }
+                    break;
+            }
+        } catch (CameraException e) {
+            onCameraError(e);
+        }
+    }
+
+    protected void onCameraError(@Nullable CameraException exception) {
+        if (exception != null) {
+            exception.printStackTrace();
+            exceptionCallback.onException(exception);
+        }else {
+            exceptionCallback.onException();
+        }
+
+        try {
+            onStopCamera();
+        } catch (CameraException ignored) {
+            //ignored. We already know an error was happening, so there's no need to do anything.
+        }
+        try {
+            onDestroyCamera();
+        } catch (CameraException ignored) {
+            //ignored. We already know an error was happening, so there's no need to do anything.
+        }
+        targetCameraState = DESTROYED;
+    }
+
+    private void updateCameraSurface(){
+        // stop the cameraPreview, then start it with the new surfaceHolder.
+        setMaxPossibleCameraState(STOPPED);
+        setMaxPossibleCameraState(ACTIVE);
+    }
 
 
     @Nullable
     public Handler getHandler() {
         if (handler == null) {
             Looper looper = getLooper();
-            if(looper == null) {
+            if (looper == null) {
                 return null;
             }
             handler = new Handler(looper);
@@ -119,9 +204,7 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
-        if(targetCameraState.isAtLeast(STOPPED)) {
-            onOpenCamera();
-        }
+            setMaxPossibleCameraState(STOPPED);
     }
 
     @Override
@@ -133,15 +216,10 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
     @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
         surfaceViewState = null;
-        if(targetCameraState.isAtLeast(ACTIVE)) {
-            onStopCamera();
-        }
-        if(targetCameraState.isAtLeast(STOPPED)) {
-            onDestroyCamera();
-        }
+        setMaxPossibleCameraState(DESTROYED);
     }
 
-    private CameraState getActualCameraState(){
+    private CameraState getActualCameraState() {
         return CameraState.lowestState(targetCameraState, maxPossibleCameraState);
     }
 
@@ -154,9 +232,12 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
 
     protected abstract void onDestroyCamera() throws CameraException;
 
+    protected abstract void onTakePicture() throws CameraException;
+
 
     public static class CameraException extends Exception {
-        public CameraException() { }
+        public CameraException() {
+        }
 
         public CameraException(String message) {
             super(message);
@@ -171,7 +252,9 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
         }
     }
 
-    public interface CameraExceptionCallback{
-        public void onException(CameraException exception);
+    public interface CameraExceptionCallback {
+        public void onException();
+        public void onException(@NonNull CameraException exception);
+        public void onException(String message);
     }
 }

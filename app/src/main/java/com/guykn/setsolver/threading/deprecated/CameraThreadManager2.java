@@ -1,4 +1,4 @@
-package com.guykn.setsolver.threading;
+package com.guykn.setsolver.threading.deprecated;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -13,36 +13,35 @@ import androidx.lifecycle.LifecycleObserver;
 
 import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.ImageFileManager;
-import com.guykn.setsolver.drawing.DrawingCallback;
 import com.guykn.setsolver.drawing.RotatedRectangleList;
+import com.guykn.setsolver.imageprocessing.CameraProcessingAction;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
 import com.guykn.setsolver.imageprocessing.image.ByteArrayImage;
 import com.guykn.setsolver.imageprocessing.image.JpegByteArrayImage;
 import com.guykn.setsolver.imageprocessing.image.MatImage;
 import com.guykn.setsolver.set.SetBoardPosition;
-import com.guykn.setsolver.ui.views.CameraPreview;
 
 import org.opencv.core.Mat;
 
 @SuppressWarnings("deprecation")
-public class CameraThreadManager implements SurfaceHolder.Callback, LifecycleObserver {
+public class CameraThreadManager2 implements SurfaceHolder.Callback, LifecycleObserver {
 
     private enum CameraThreadType {
         CAMERA_PREVIEW{
             @Override
-            CameraPreviewThread createCameraThread(CameraThreadManager manager) {
+            CameraPreviewThread createCameraThread(CameraThreadManager2 manager) {
                 return manager.new CameraPreviewThread();
             }
         },
         CAMERA_PROCESSING{
             @Override
-            CameraPreviewThread createCameraThread(CameraThreadManager manager) {
+            CameraPreviewThread createCameraThread(CameraThreadManager2 manager) {
                 return null;//todo
             }
         };
 
-        abstract CameraPreviewThread createCameraThread(CameraThreadManager manager);
+        abstract CameraPreviewThread createCameraThread(CameraThreadManager2 manager);
     }
 
     final private CameraPreviewThread mPreviewThread;
@@ -56,13 +55,12 @@ public class CameraThreadManager implements SurfaceHolder.Callback, LifecycleObs
     @Nullable
     final private ImageFileManager mFileManager;
 
-    private volatile ImageProcessingConfig mConfig; //todo: check thred safety
 
-    private CameraThreadManager(ImageProcessingConfig config,
-                                CameraThreadType cameraThreadType,
-                                @Nullable ImageProcessingManager processingManager,
-                                @Nullable Context context,
-                                @Nullable FpsCounter fpsCounter) {
+    private CameraThreadManager2(ImageProcessingConfig config,
+                                 CameraThreadType cameraThreadType,
+                                 @Nullable ImageProcessingManager processingManager,
+                                 @Nullable Context context,
+                                 @Nullable FpsCounter fpsCounter) {
         mContext = context;
         mProcessingManager = processingManager;
         mFpsCounter = fpsCounter;
@@ -78,25 +76,25 @@ public class CameraThreadManager implements SurfaceHolder.Callback, LifecycleObs
 
     }
 
-    private CameraThreadManager(ImageProcessingConfig config,
-                                CameraThreadType cameraThreadType,
-                                @Nullable Context context,
-                                @Nullable FpsCounter fpsCounter) {
+    private CameraThreadManager2(ImageProcessingConfig config,
+                                 CameraThreadType cameraThreadType,
+                                 @Nullable Context context,
+                                 @Nullable FpsCounter fpsCounter) {
         this(config, cameraThreadType, null, context, fpsCounter);
     }
 
-    public static CameraThreadManager createPreviewThreadManager(ImageProcessingConfig config,
-                                @Nullable Context context,
-                                @Nullable FpsCounter fpsCounter){
-        return new CameraThreadManager(config, CameraThreadType.CAMERA_PREVIEW, context, fpsCounter);
+    public static CameraThreadManager2 createPreviewThreadManager(ImageProcessingConfig config,
+                                                                  @Nullable Context context,
+                                                                  @Nullable FpsCounter fpsCounter){
+        return new CameraThreadManager2(config, CameraThreadType.CAMERA_PREVIEW, context, fpsCounter);
     }
 
-    public static CameraThreadManager createProcessingThreadManager(ImageProcessingConfig config,
-                                @Nullable Context context,
-                                @Nullable FpsCounter fpsCounter,
-                                @NonNull ImageProcessingManager processingManager){
+    public static CameraThreadManager2 createProcessingThreadManager(ImageProcessingConfig config,
+                                                                     @Nullable Context context,
+                                                                     @Nullable FpsCounter fpsCounter,
+                                                                     @NonNull ImageProcessingManager processingManager){
 
-        return new CameraThreadManager(config, CameraThreadType.CAMERA_PROCESSING,
+        return new CameraThreadManager2(config, CameraThreadType.CAMERA_PROCESSING,
                 processingManager, context, fpsCounter);
     }
 
@@ -291,7 +289,9 @@ public class CameraThreadManager implements SurfaceHolder.Callback, LifecycleObs
          * After a certain amount of time, start the camera again.
          * Used to give the user a certain amount of time to look at the camera output
          * before it starts again
+         *
          */
+
         private void startCameraDelayed() {
             getHandler().postDelayed(
                     () -> {
@@ -306,15 +306,17 @@ public class CameraThreadManager implements SurfaceHolder.Callback, LifecycleObs
     }
 
 
+
+
     @SuppressWarnings("deprecation")
     public class CameraProcessingThread extends CameraPreviewThread {
 
         //todo: use a byte buffer in the callback for better performance
 
         private final ImageProcessingManager mmProcessingManager;
-        private final Callback mmCallback;
+        private final CameraProcessingAction.Callback mmCallback;
 
-        public CameraProcessingThread(ImageProcessingManager processingManager, Callback callback){
+        public CameraProcessingThread(ImageProcessingManager processingManager, CameraProcessingAction.Callback callback){
             mmProcessingManager = processingManager;
             mmCallback = callback;
         }
@@ -362,8 +364,5 @@ public class CameraThreadManager implements SurfaceHolder.Callback, LifecycleObs
 
 
 
-    public interface Callback {
-        public void onImageProcessingSuccess(DrawingCallback drawable);
-        public void onImageProcessingFailure(Exception exception);
-    }
+
 }

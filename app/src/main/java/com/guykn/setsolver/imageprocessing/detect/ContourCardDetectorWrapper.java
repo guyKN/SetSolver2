@@ -15,16 +15,13 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
+//todo: change to a factory based card detector
 public class ContourCardDetectorWrapper implements CardDetector{
     private ImageProcessingConfig config;
-    public ContourCardDetectorWrapper(ImageProcessingConfig config){
-        this.config = config;
-    }
 
     @Override
     public void setConfig(ImageProcessingConfig config) {
         this.config = config;
-
     }
 
     /**

@@ -50,7 +50,7 @@ public class StandardImagePreprocessor implements ImageProcessingManager.ImagePr
      * @param targetTotalPixels How many total pixels the returned Mat should have.
      * @return a scaled down version of src.
      */
-    private static Mat scaleDown(Mat src, int targetTotalPixels, int interpolation ){
+    private static Mat scaleDown(Mat src, int targetTotalPixels, int interpolation){
         double area = src.size().area();
         double areaScaleFactor = targetTotalPixels/area;
         //since we're adjusting both sides evenly, we need to scale based on the square root.

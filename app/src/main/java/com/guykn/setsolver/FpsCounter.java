@@ -1,9 +1,13 @@
 package com.guykn.setsolver;
 
+import android.hardware.Camera;
 import android.os.SystemClock;
 
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
+import com.guykn.setsolver.threading.CameraAction;
+
 //todo: finish
-public class FpsCounter {
+public class FpsCounter implements CameraAction {
 
 
 
@@ -18,12 +22,14 @@ public class FpsCounter {
         this.fpsUpdateTimeInterval = fpsUpdateTimeInterval;
     }
 
-    public void startCounting(){
+    @Override
+    public void onCameraStarted() {
         lastTime = getElapsedRealTime();
         numFrames = 0;
     }
 
-    public void onFrame(){
+    @Override
+    public void onPreviewFrame(byte[] data, Camera camera) {
         numFrames++;
         long currentTime = getElapsedRealTime();
         long deltaTime = currentTime - lastTime;
@@ -35,7 +41,23 @@ public class FpsCounter {
         }
     }
 
-    public void stopCounting(){
+    @Override
+    public void configureCamera(Camera camera) {
+
+    }
+
+    @Override
+    public void onCameraStopped() {
+
+    }
+
+    @Override
+    public void setConfig(ImageProcessingConfig config) {
+
+    }
+
+    @Override
+    public void onPictureTaken(byte[] data, Camera camera) {
 
     }
 

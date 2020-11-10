@@ -20,11 +20,11 @@ import androidx.lifecycle.ViewModelProviders;
 import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.R;
 import com.guykn.setsolver.SettingsActivity;
-import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
-import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
-import com.guykn.setsolver.imageprocessing.JavaImageProcessingManager;
+import com.guykn.setsolver.threading.CameraPreviewThread;
+import com.guykn.setsolver.threading.CameraThread;
+import com.guykn.setsolver.threading.CameraThreadManager3;
 import com.guykn.setsolver.ui.views.CameraOverlay;
-import com.guykn.setsolver.ui.views.CameraPreview;
+import com.guykn.setsolver.ui.views.CameraPreview2;
 
 import java.util.Locale;
 
@@ -36,11 +36,12 @@ public class CameraFragment extends Fragment {
 
     public static final String TAG = "CameraFragment";
     private MainViewModel mViewModel;
-    private CameraPreview mCameraPreview;
+    private CameraPreview2 mCameraPreview;
     private CameraOverlay mCameraOverlay;
     private FrameLayout cameraFrame;
     private Button captureButton;
     private TextView fpsView;
+    private CameraThreadManager3 cameraThreadManager;
 
     public static CameraFragment newInstance() {
         return new CameraFragment();
@@ -51,7 +52,6 @@ public class CameraFragment extends Fragment {
         Log.d(TAG,"inside of updated program");
         super.onAttach(context);
     }
-
 
     @Nullable
     @Override
@@ -69,19 +69,9 @@ public class CameraFragment extends Fragment {
             fpsView = root.findViewById(R.id.fps_display);
 
 
-            ImageProcessingConfig config = ImageProcessingConfig.getDefaultConfig();
-
-            ImageProcessingManager processingManager =
-                    JavaImageProcessingManager.getDefaultManager(context.getApplicationContext(), config);
-
             FpsCounter fpsCounter = new FpsCounter(mViewModel, 300);
 
-//            CameraPreviewThread previewThread = new CameraPreviewThread(context, fpsCounter);
-//            mCameraPreview = new CameraPreview(context, previewThread, getLifecycle());
-
-            mCameraPreview = new CameraPreview(
-                    context, processingManager, mViewModel, fpsCounter, getLifecycle());
-            mCameraOverlay = new CameraOverlay(context, getLifecycle());
+            CameraThread cameraThread = new CameraPreviewThread(mViewModel, fpsCounter);
 
             cameraFrame.addView(mCameraPreview);
             cameraFrame.addView(mCameraOverlay);
@@ -99,7 +89,7 @@ public class CameraFragment extends Fragment {
             captureButton = root.findViewById(R.id.button_capture);
             captureButton.setOnClickListener(
                     (View v) -> {
-                        mCameraPreview.takePicture();
+                        cameraThreadManager.
                     }
             );
 
