@@ -1,6 +1,5 @@
 package com.guykn.setsolver.imageprocessing;
 
-import com.guykn.setsolver.threading.deprecated.ImageProcessingThreadManager.ImageProcessingAction;
 
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -60,27 +59,6 @@ public class ImageProcessingConfig {
         public boolean shouldReleaseUnprocessedImage = false;
     }
 
-    public enum ShouldSaveToGallery {
-        ALWAYS{
-            @Override
-            public boolean shouldSaveToGallery(ImageProcessingAction action) {
-                return true;
-            }
-        },
-        ONLY_WHEN_PICTURE_IS_TAKEN{
-            @Override
-            public boolean shouldSaveToGallery(ImageProcessingAction action) {
-                return action == ImageProcessingAction.DETECT_AND_CLASSIFY_CARDS;
-            }
-        },
-        NEVER{
-            @Override
-            public boolean shouldSaveToGallery(ImageProcessingAction action) {
-                return false;
-            }
-        };
-        public abstract boolean shouldSaveToGallery(ImageProcessingAction action);
-    }
 
 
     public Image image = new Image();
@@ -88,7 +66,6 @@ public class ImageProcessingConfig {
     public CannyEdgeDetection cannyEdgeDetection = new CannyEdgeDetection();
     public Contours contours = new Contours();
     public ContourVerification contourVerification = new ContourVerification();
-    public ShouldSaveToGallery shouldSaveToGallery = ShouldSaveToGallery.NEVER;
     public MemoryManagement memoryManagement= new MemoryManagement();
 
 

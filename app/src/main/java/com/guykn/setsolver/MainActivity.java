@@ -24,8 +24,6 @@ import androidx.core.content.FileProvider;
 import com.bumptech.glide.Glide;
 import com.guykn.setsolver.drawing.DrawingCallback;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
-import com.guykn.setsolver.threading.deprecated.CameraThreadManager2;
-import com.guykn.setsolver.threading.deprecated.ImageProcessingThreadManager;
 import com.guykn.setsolver.unittest.ImageClassificationTest;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
@@ -37,7 +35,7 @@ import java.io.IOException;
 
 import static com.guykn.setsolver.imageprocessing.ImageProcessingConfig.getDefaultConfig;
 
-public class MainActivity extends AppCompatActivity implements CameraThreadManager2.CameraProcessingThread.Callback {
+public class MainActivity extends AppCompatActivity {
     //todo: remove most stuff from this activity and move it to CameraActivity
 
 
@@ -56,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements CameraThreadManag
     private Button recalculate;
     private TextView messageDisplay;
 
-    private ImageProcessingThreadManager imThreadManager;
 
 
     @Override
@@ -81,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements CameraThreadManag
         blurRadiusPicker.setTransformationMethod(new NumericKeyBoardTransformationMethod());
         //show the update button if the user changes any textbox
         imageLoadingProgressBar.setVisibility(View.GONE);//make the progress bar disapear.
-        imThreadManager = new ImageProcessingThreadManager(getApplicationContext(), this);//initialize the image processing thread
 
         initOpenCV();
         //todo: save important variables in a bundle
@@ -244,7 +240,6 @@ public class MainActivity extends AppCompatActivity implements CameraThreadManag
     }
 
 
-    @Override
     public void onImageProcessingSuccess(DrawingCallback drawable) {
         try {
             recalculate.setVisibility(View.INVISIBLE);
@@ -273,7 +268,6 @@ public class MainActivity extends AppCompatActivity implements CameraThreadManag
 
     }
 
-    @Override
     public void onImageProcessingFailure(Exception e) {
         showImageErrorMessage();
         Log.i(TAG,"1");

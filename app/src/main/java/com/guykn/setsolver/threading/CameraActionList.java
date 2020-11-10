@@ -11,16 +11,9 @@ public class CameraActionList extends ArrayList<CameraAction>
         implements CameraAction {
 
     @Override
-    public void configureCamera(Camera camera) {
+    public void onCameraStarted(Camera camera, CameraThread.SurfaceViewState surfaceViewState) {
         for(CameraAction action : this){
-            action.configureCamera(camera);
-        }
-    }
-
-    @Override
-    public void onCameraStarted() {
-        for(CameraAction action : this){
-            action.onCameraStarted();
+            action.onCameraStarted(camera, surfaceViewState);
         }
     }
 

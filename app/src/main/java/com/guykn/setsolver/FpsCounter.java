@@ -5,6 +5,7 @@ import android.os.SystemClock;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.threading.CameraAction;
+import com.guykn.setsolver.threading.CameraThread;
 
 //todo: finish
 public class FpsCounter implements CameraAction {
@@ -23,7 +24,7 @@ public class FpsCounter implements CameraAction {
     }
 
     @Override
-    public void onCameraStarted() {
+    public void onCameraStarted(Camera camera, CameraThread.SurfaceViewState surfaceViewState) {
         lastTime = getElapsedRealTime();
         numFrames = 0;
     }
@@ -39,11 +40,6 @@ public class FpsCounter implements CameraAction {
             numFrames = 0;
             lastTime = currentTime;
         }
-    }
-
-    @Override
-    public void configureCamera(Camera camera) {
-
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.hardware.Camera;
 import com.guykn.setsolver.drawing.DrawingCallback;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager.ImageProcessingManagerBuilder;
 import com.guykn.setsolver.threading.CameraAction;
+import com.guykn.setsolver.threading.CameraThread;
 
 @SuppressWarnings("deprecation")
 public class CameraProcessingAction implements CameraAction {
@@ -19,7 +20,7 @@ public class CameraProcessingAction implements CameraAction {
     }
 
     @Override
-    public void onCameraStarted(Camera camera) {
+    public void onCameraStarted(Camera camera, CameraThread.SurfaceViewState surfaceViewState) {
         processingManager = processingManagerBuilder.build(config);
     }
 

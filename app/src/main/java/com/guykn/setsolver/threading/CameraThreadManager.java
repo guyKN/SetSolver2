@@ -10,12 +10,12 @@ import androidx.lifecycle.OnLifecycleEvent;
 
 import com.guykn.setsolver.ui.views.CameraPreview2;
 
-public class CameraThreadManager3 implements LifecycleObserver, SurfaceHolder.Callback {
+public class CameraThreadManager implements LifecycleObserver, SurfaceHolder.Callback {
     private final CameraThread cameraThread;
     private final Lifecycle lifecycle;
     private CameraPreview2 cameraPreview;
 
-    public CameraThreadManager3(CameraThread cameraThread, Lifecycle lifecycle) {
+    public CameraThreadManager(CameraThread cameraThread, Lifecycle lifecycle) {
         this.cameraThread = cameraThread;
         this.lifecycle = lifecycle;
         lifecycle.addObserver(this);

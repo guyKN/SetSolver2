@@ -22,7 +22,7 @@ import com.guykn.setsolver.R;
 import com.guykn.setsolver.SettingsActivity;
 import com.guykn.setsolver.threading.CameraPreviewThread;
 import com.guykn.setsolver.threading.CameraThread;
-import com.guykn.setsolver.threading.CameraThreadManager3;
+import com.guykn.setsolver.threading.CameraThreadManager;
 import com.guykn.setsolver.ui.views.CameraOverlay;
 import com.guykn.setsolver.ui.views.CameraPreview2;
 
@@ -41,7 +41,7 @@ public class CameraFragment extends Fragment {
     private FrameLayout cameraFrame;
     private Button captureButton;
     private TextView fpsView;
-    private CameraThreadManager3 cameraThreadManager;
+    private CameraThreadManager cameraThreadManager;
 
     public static CameraFragment newInstance() {
         return new CameraFragment();
@@ -72,6 +72,10 @@ public class CameraFragment extends Fragment {
             FpsCounter fpsCounter = new FpsCounter(mViewModel, 300);
 
             CameraThread cameraThread = new CameraPreviewThread(mViewModel, fpsCounter);
+            cameraThreadManager = new CameraThreadManager(cameraThread, getLifecycle());
+            mCameraPreview = cameraThreadManager.getCameraPreview(context);
+            cameraThreadManager.startCamera();
+            mCameraOverlay = new CameraOverlay(context, getLifecycle());
 
             cameraFrame.addView(mCameraPreview);
             cameraFrame.addView(mCameraOverlay);
@@ -89,7 +93,7 @@ public class CameraFragment extends Fragment {
             captureButton = root.findViewById(R.id.button_capture);
             captureButton.setOnClickListener(
                     (View v) -> {
-                        cameraThreadManager.
+                        cameraThreadManager.takePicture();
                     }
             );
 
