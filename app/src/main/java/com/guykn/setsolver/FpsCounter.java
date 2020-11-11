@@ -4,16 +4,15 @@ import android.hardware.Camera;
 import android.os.SystemClock;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
-import com.guykn.setsolver.threading.CameraAction;
 import com.guykn.setsolver.threading.CameraThread;
 
 //todo: finish
-public class FpsCounter implements CameraAction {
+public class FpsCounter {
 
 
 
     private final FpsCallback callback;
-    private final long fpsUpdateTimeInterval;
+    private long fpsUpdateTimeInterval;
 
     private long lastTime;
     private long numFrames;
@@ -23,14 +22,16 @@ public class FpsCounter implements CameraAction {
         this.fpsUpdateTimeInterval = fpsUpdateTimeInterval;
     }
 
-    @Override
+    public FpsCounter(FpsCallback callback, ImageProcessingConfig config){
+        this(callback, config.fpsCounting.fpsUpdateInterval);
+    }
+
     public void onCameraStarted(Camera camera, CameraThread.SurfaceViewState surfaceViewState) {
         lastTime = getElapsedRealTime();
         numFrames = 0;
     }
 
-    @Override
-    public void onPreviewFrame(byte[] data, Camera camera) {
+    public void onFrame() {
         numFrames++;
         long currentTime = getElapsedRealTime();
         long deltaTime = currentTime - lastTime;
@@ -42,19 +43,8 @@ public class FpsCounter implements CameraAction {
         }
     }
 
-    @Override
-    public void onCameraStopped() {
-
-    }
-
-    @Override
     public void setConfig(ImageProcessingConfig config) {
-
-    }
-
-    @Override
-    public void onPictureTaken(byte[] data, Camera camera) {
-
+        this.fpsUpdateTimeInterval = config.fpsCounting.fpsUpdateInterval;
     }
 
     private static long getElapsedRealTime(){

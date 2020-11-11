@@ -3,10 +3,13 @@ package com.guykn.setsolver.threading;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 
 import static com.guykn.setsolver.threading.CameraThread.CameraState.ACTIVE;
 import static com.guykn.setsolver.threading.CameraThread.CameraState.DESTROYED;
@@ -15,6 +18,10 @@ import static com.guykn.setsolver.threading.CameraThread.CameraState.STOPPED;
 public abstract class CameraThread extends HandlerThread implements SurfaceHolder.Callback {
 
     private static final String TAG = "CameraThread";
+    private ImageProcessingConfig config;
+    private CameraState lifecycleBasedMaxCameraState;
+    private CameraState targetCameraState;
+    private CameraState maxPossibleCameraState;
     private Handler handler;
     private SurfaceViewState surfaceViewState;
     private CameraExceptionCallback exceptionCallback;
@@ -44,6 +51,15 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
             int lowestStateId = Math.min(state1.id, state2.id);
             return fromId(lowestStateId);
         }
+
+        public static CameraState lowestState(CameraState state1, CameraState state2, CameraState state3) {
+            int lowestStateId = Math.min(
+                    Math.min(state1.id, state2.id),
+                    state3.id);
+            return fromId(lowestStateId);
+        }
+
+
     }
 
 
@@ -78,26 +94,40 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
         }
     }
 
-    private CameraState targetCameraState;
-    private CameraState maxPossibleCameraState;
 
-    public CameraThread(String name, CameraExceptionCallback exceptionCallback) {
+    public CameraThread(String name, CameraExceptionCallback exceptionCallback,
+                        ImageProcessingConfig config) {
         super(name);
         this.exceptionCallback = exceptionCallback;
+        this.config = config;
 
         targetCameraState = DESTROYED;
         maxPossibleCameraState = DESTROYED;
-
+        lifecycleBasedMaxCameraState = ACTIVE;
     }
 
-
+    public void setConfig(ImageProcessingConfig config){
+        this.config = config;
+        onConfigChanged(config);
+    }
 
     public void setTargetPreviewState(CameraState targetState) {
-        changeCameraState(targetState, this.maxPossibleCameraState);
+        changeCameraState(targetState,
+                this.maxPossibleCameraState,
+                this.lifecycleBasedMaxCameraState);
     }
 
-    public void setMaxPossibleCameraState(CameraState maxPossibleState) {
-        changeCameraState(this.targetCameraState, maxPossibleState);
+
+    private void setMaxPossibleCameraState(CameraState maxPossibleState) {
+        changeCameraState(this.targetCameraState,
+                maxPossibleState,
+                this.lifecycleBasedMaxCameraState);
+    }
+
+    public void setLifecycleBasedMaxCameraState(CameraState lifecycleBasedMaxCameraState){
+        changeCameraState(this.targetCameraState,
+                this.maxPossibleCameraState,
+                lifecycleBasedMaxCameraState);
     }
 
     public void takePicture(){
@@ -108,11 +138,22 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
         }
     }
 
-    private void changeCameraState(CameraState targetState, CameraState maxPossibleState) {
+    private void changeCameraState(CameraState targetState,
+                                   CameraState maxPossibleState,
+                                   CameraState lifecycleBasedState) {
+        Log.d(TAG, "changeCameraState() called");
         CameraState oldCameraState = getActualCameraState();
+        Log.d(TAG, "old targetState: " + this.targetCameraState +
+                "\nold MaxPossibleState: " + this.maxPossibleCameraState +
+                "\nold actualState: " + oldCameraState);
         this.targetCameraState = targetState;
         this.maxPossibleCameraState = maxPossibleState;
+        this.lifecycleBasedMaxCameraState = lifecycleBasedState;
         CameraState newCameraState = getActualCameraState();
+        Log.d(TAG, "new targetState: " + targetState +
+                "\nnew MaxPossibleState: " + maxPossibleState +
+                "\nnew actualState: " + newCameraState);
+
         try {
 
             switch (newCameraState) {
@@ -142,7 +183,6 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
                             break;
                     }
                     break;
-
                 case ACTIVE:
                     switch (oldCameraState) {
                         case DESTROYED:
@@ -210,7 +250,7 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
         surfaceViewState = new SurfaceViewState(holder, format, width, height);
-
+        updateCameraSurface();
     }
 
     @Override
@@ -220,11 +260,14 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
     }
 
     private CameraState getActualCameraState() {
-        return CameraState.lowestState(targetCameraState, maxPossibleCameraState);
+        return CameraState.lowestState(targetCameraState, maxPossibleCameraState, lifecycleBasedMaxCameraState);
+    }
+
+    protected ImageProcessingConfig getConfig(){
+        return config;
     }
 
     protected abstract void onOpenCamera() throws CameraException;
-
 
     protected abstract void onStartCamera(SurfaceViewState surfaceViewState) throws CameraException;
 
@@ -234,6 +277,7 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
 
     protected abstract void onTakePicture() throws CameraException;
 
+    protected abstract void onConfigChanged(ImageProcessingConfig config);
 
     public static class CameraException extends Exception {
         public CameraException() {
@@ -257,4 +301,6 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
         public void onException(@NonNull CameraException exception);
         public void onException(String message);
     }
+
+
 }

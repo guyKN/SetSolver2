@@ -44,7 +44,7 @@ public class ImageProcessingConfig {
         public boolean useAreaCheck=true;
 
         public boolean shouldDoOutlierDetection  = true;
-        public double maxDistance = 1000000000;
+        public double maxDistance = 100000000;
 
         public boolean shouldDoAverageColorCheck = false;
         public double averageColorCheckThreshold = 80;
@@ -59,6 +59,10 @@ public class ImageProcessingConfig {
         public boolean shouldReleaseUnprocessedImage = false;
     }
 
+    public static class FpsCounting{
+        public long fpsUpdateInterval = 300;
+    }
+
 
 
     public Image image = new Image();
@@ -67,6 +71,8 @@ public class ImageProcessingConfig {
     public Contours contours = new Contours();
     public ContourVerification contourVerification = new ContourVerification();
     public MemoryManagement memoryManagement= new MemoryManagement();
+    public FpsCounting fpsCounting = new FpsCounting();
+
 
 
     public static ImageProcessingConfig getDefaultConfig(){

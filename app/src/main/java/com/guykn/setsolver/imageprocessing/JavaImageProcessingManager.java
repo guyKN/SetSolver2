@@ -10,6 +10,7 @@ import com.guykn.setsolver.imageprocessing.classify.CardClassifier.CardClassifie
 import com.guykn.setsolver.imageprocessing.detect.CardDetector;
 import com.guykn.setsolver.imageprocessing.detect.ContourCardDetectorWrapper;
 import com.guykn.setsolver.imageprocessing.image.Image;
+import com.guykn.setsolver.imageprocessing.verify.indirect.DBSCANCardVerifier;
 import com.guykn.setsolver.imageprocessing.verify.indirect.IndirectCardVerifier;
 import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.SetBoardPosition;
@@ -38,8 +39,9 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
 
 
     public static final String TAG = "ImageProcessing";
+    private CardClassifier cardClassifier;
 
-    private JavaImageProcessingManager(JavaImageProcessingManagerBuilder builder,
+    private JavaImageProcessingManager(Builder builder,
                                        ImageProcessingConfig config) {
         this.detector = builder.detector;
         this.detector.setConfig(config);
@@ -48,6 +50,15 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         this.indirectCardVerifier = builder.indirectCardVerifier;
         this.config = config;
         this.context = builder.context;
+
+        if(this.classifierFactory != null){
+            try {
+                cardClassifier = classifierFactory.createCardClassifier(context, config);
+            }catch (IOException e){
+                e.printStackTrace();
+                //todo: better error Handling
+            }
+        }
     }
 
     @Override
@@ -97,21 +108,12 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         }
         cardPositions.printStates();
         Mat mat = getMat();
-        ImageFileManager fileManager = new ImageFileManager(context); //todo: do earlier
         boardPosition = new SetBoardPosition();
-        try (CardClassifier classifier = classifierFactory.createCardClassifier(context, config)) {
-            for (GenericRotatedRectangle rect : cardPositions.getDrawables()) {
-                Mat cropped = rect.cropToRect(mat);
-
-                //todo: remove
-                fileManager.saveToGallery(cropped);
-
-                PositionlessSetCard result = classifier.classify(cropped);
-                SetCard card = new SetCard(rect, result);
-                boardPosition.addCard(card);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (GenericRotatedRectangle rect : cardPositions.getDrawables()) {
+            Mat cropped = rect.cropToRect(mat);
+            PositionlessSetCard result = cardClassifier.classify(cropped);
+            SetCard card = new SetCard(rect, result);
+            boardPosition.addCard(card);
         }
     }
 
@@ -160,36 +162,36 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         boardPosition = null;
     }
 
-    public static class JavaImageProcessingManagerBuilder
+    public static class Builder
             implements ImageProcessingManagerBuilder {
 
         private final Context context;
         private CardDetector detector = new ContourCardDetectorWrapper();
         private CardClassifierFactory classifierFactory;
-        private ImagePreProcessor preProcessor;
-        private IndirectCardVerifier indirectCardVerifier;
+        private ImagePreProcessor preProcessor = new StandardImagePreprocessor();
+        private IndirectCardVerifier indirectCardVerifier = new DBSCANCardVerifier();
 
-        public JavaImageProcessingManagerBuilder(Context context){
+        public Builder(Context context){
             this.context = context;
         }
 
 
-        public JavaImageProcessingManagerBuilder setDetector(CardDetector detector) {
+        public Builder setDetector(CardDetector detector) {
             this.detector = detector;
             return this;
         }
 
-        public JavaImageProcessingManagerBuilder setClassifierFactory(CardClassifierFactory classifierFactory) {
+        public Builder setClassifierFactory(CardClassifierFactory classifierFactory) {
             this.classifierFactory = classifierFactory;
             return this;
         }
 
-        public JavaImageProcessingManagerBuilder setPreProcessor(ImagePreProcessor preProcessor) {
+        public Builder setPreProcessor(ImagePreProcessor preProcessor) {
             this.preProcessor = preProcessor;
             return this;
         }
 
-        public JavaImageProcessingManagerBuilder setIndirectCardVerifier(IndirectCardVerifier indirectCardVerifier) {
+        public Builder setIndirectCardVerifier(IndirectCardVerifier indirectCardVerifier) {
             this.indirectCardVerifier = indirectCardVerifier;
             return this;
         }

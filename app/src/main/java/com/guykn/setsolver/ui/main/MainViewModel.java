@@ -7,10 +7,12 @@ import androidx.lifecycle.ViewModel;
 
 import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.drawing.DrawingCallback;
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
+import com.guykn.setsolver.imageprocessing.camera.CameraFrameProcessor;
 import com.guykn.setsolver.threading.CameraThread;
 
 public class MainViewModel extends ViewModel implements CameraThread.CameraExceptionCallback,
-        FpsCounter.FpsCallback {
+        FpsCounter.FpsCallback, CameraFrameProcessor.Callback {
 
     private final MutableLiveData<DrawingCallback> drawingLiveData = new MutableLiveData<>();
 
@@ -18,8 +20,11 @@ public class MainViewModel extends ViewModel implements CameraThread.CameraExcep
 
     private final MutableLiveData<String> cameraExceptionData = new MutableLiveData<>();
 
+    private final MutableLiveData<ImageProcessingConfig> configLiveData = new MutableLiveData<>();
+
     public MainViewModel() {
         super();
+        configLiveData.setValue(ImageProcessingConfig.getDefaultConfig());
     }
 
     public void setDrawable(DrawingCallback drawable) {
@@ -28,6 +33,12 @@ public class MainViewModel extends ViewModel implements CameraThread.CameraExcep
 
     public void postDrawable(DrawingCallback drawable) {
         drawingLiveData.postValue(drawable);
+    }
+
+
+
+    public void setConfig(ImageProcessingConfig config){
+        configLiveData.postValue(config);
     }
 
     public LiveData<DrawingCallback> getDrawableLiveData() {
@@ -46,6 +57,10 @@ public class MainViewModel extends ViewModel implements CameraThread.CameraExcep
         return cameraExceptionData;
     }
 
+    public LiveData<ImageProcessingConfig> getConfigLiveData(){
+        return configLiveData;
+    }
+
     @Override
     public void onException() {
         onException("Something went wrong with the Camera");
@@ -59,5 +74,10 @@ public class MainViewModel extends ViewModel implements CameraThread.CameraExcep
     @Override
     public void onException(String message) {
         cameraExceptionData.postValue(message);
+    }
+
+    @Override
+    public void onImageProcessingSuccess(DrawingCallback drawable) {
+        postDrawable(drawable);
     }
 }

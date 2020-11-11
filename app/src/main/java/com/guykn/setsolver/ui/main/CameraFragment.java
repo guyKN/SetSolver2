@@ -71,17 +71,26 @@ public class CameraFragment extends Fragment {
 
             FpsCounter fpsCounter = new FpsCounter(mViewModel, 300);
 
-            CameraThread cameraThread = new CameraPreviewThread(mViewModel, fpsCounter);
+            Log.d(TAG, mViewModel.getConfigLiveData().getValue() == null ? "null": "not null");
+
+            CameraThread cameraThread = new CameraPreviewThread(context.getApplicationContext(),
+                    mViewModel, mViewModel.getConfigLiveData().getValue());
+
             cameraThreadManager = new CameraThreadManager(cameraThread, getLifecycle());
             mCameraPreview = cameraThreadManager.getCameraPreview(context);
             cameraThreadManager.startCamera();
             mCameraOverlay = new CameraOverlay(context, getLifecycle());
+
+            cameraFrame.setOnClickListener((View v)->{
+                cameraThreadManager.startCamera();
+            });
 
             cameraFrame.addView(mCameraPreview);
             cameraFrame.addView(mCameraOverlay);
 
             mViewModel.getDrawableLiveData().observe(getViewLifecycleOwner(), drawable -> {
                 mCameraOverlay.setDrawable(drawable);
+                Log.d(TAG, "drawable changed");
             });
 
             mViewModel.getFpsLiveData().observe(getViewLifecycleOwner(), fps ->{
@@ -102,7 +111,6 @@ public class CameraFragment extends Fragment {
             settingsButton.setOnClickListener(
                     (View v) -> openSettingsActivity()
             );
-
         }
 
         return root;

@@ -2,12 +2,14 @@ package com.guykn.setsolver.threading;
 
 import android.content.Context;
 import android.view.SurfaceHolder;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
+import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.ui.views.CameraPreview2;
 
 public class CameraThreadManager implements LifecycleObserver, SurfaceHolder.Callback {
@@ -18,7 +20,7 @@ public class CameraThreadManager implements LifecycleObserver, SurfaceHolder.Cal
     public CameraThreadManager(CameraThread cameraThread, Lifecycle lifecycle) {
         this.cameraThread = cameraThread;
         this.lifecycle = lifecycle;
-        lifecycle.addObserver(this);
+        this.lifecycle.addObserver(this);
         cameraThread.start();
     }
 
@@ -50,18 +52,24 @@ public class CameraThreadManager implements LifecycleObserver, SurfaceHolder.Cal
         cameraThread.getHandler().post(cameraThread::takePicture);
     }
 
+    public void setConfig(ImageProcessingConfig config){
+        cameraThread.getHandler().post(
+                ()->cameraThread.setConfig(config)
+        );
+    }
+
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     public void onResume(){
-        cameraThread.getHandler().post(()->{
-            cameraThread.setMaxPossibleCameraState(CameraThread.CameraState.ACTIVE);
-        });
+        if(cameraPreview != null){
+            cameraPreview.setVisibility(View.VISIBLE);
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     public void onPause(){
-        cameraThread.getHandler().post(()->{
-            cameraThread.setMaxPossibleCameraState(CameraThread.CameraState.DESTROYED);
-        });
+        if(cameraPreview != null){
+            cameraPreview.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -74,7 +82,7 @@ public class CameraThreadManager implements LifecycleObserver, SurfaceHolder.Cal
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
         cameraThread.getHandler().post(()->{
-            cameraThread.surfaceChanged(holder, width, height, format);
+            cameraThread.surfaceChanged(holder, format, width, height);
         });
     }
 
