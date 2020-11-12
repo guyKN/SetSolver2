@@ -223,7 +223,7 @@ public abstract class Classifier implements Closeable {
      * Closes the interpreter and model to release resources.
      */
     @Override
-    public void close() throws IOException {
+    public void close()  {
         if (tflite != null) {
             tflite.close();
             tflite = null;

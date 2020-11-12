@@ -8,6 +8,7 @@ import com.guykn.setsolver.imageprocessing.image.MatImage;
 import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
+import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 
 import org.opencv.core.Mat;
 
@@ -23,11 +24,13 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     private final InternalFeatureClassifier<SetCardColor> colorClassifier;
     private final InternalFeatureClassifier<SetCardCount> countClassifier;
+    private final InternalFeatureClassifier<SetCardShape> shapeClassifier;
 
     public MLCardClassifier(Context context, ImageProcessingConfig config) throws IOException {
         this.config = config;
         colorClassifier = getColorClassifier(context, config);
         countClassifier = getCountClassifier(context, config);
+        shapeClassifier = getShapeClassifier(context, config);
     }
 
     @Override
@@ -39,14 +42,21 @@ public abstract class MLCardClassifier implements CardClassifier {
     public PositionlessSetCard classify(Bitmap bmp){
         SetCardColor color = colorClassifier.classifyCardFeature(bmp);
         SetCardCount count = countClassifier.classifyCardFeature(bmp);
-        return new PositionlessSetCard(color, count, null, null);
+        SetCardShape shape = shapeClassifier.classifyCardFeature(bmp);
+        return new PositionlessSetCard(color, count, null, shape);
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         //todo: is this all?
         if(colorClassifier != null) {
             colorClassifier.close();
+        }
+        if(shapeClassifier != null){
+            shapeClassifier.close();
+        }
+        if(countClassifier != null){
+            countClassifier.close();
         }
     }
 
@@ -56,5 +66,9 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     protected abstract InternalFeatureClassifier<SetCardColor>
             getColorClassifier(Context context, ImageProcessingConfig config) throws IOException;
+
+    protected abstract InternalFeatureClassifier<SetCardShape>
+    getShapeClassifier(Context context, ImageProcessingConfig config) throws IOException;
+
 
 }
