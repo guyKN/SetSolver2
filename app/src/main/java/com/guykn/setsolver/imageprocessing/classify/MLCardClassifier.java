@@ -7,6 +7,7 @@ import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.image.MatImage;
 import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
+import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
 
 import org.opencv.core.Mat;
 
@@ -21,10 +22,12 @@ public abstract class MLCardClassifier implements CardClassifier {
     private final ImageProcessingConfig config;
 
     private final InternalFeatureClassifier<SetCardColor> colorClassifier;
+    private final InternalFeatureClassifier<SetCardCount> countClassifier;
 
     public MLCardClassifier(Context context, ImageProcessingConfig config) throws IOException {
         this.config = config;
         colorClassifier = getColorClassifier(context, config);
+        countClassifier = getCountClassifier(context, config);
     }
 
     @Override
@@ -35,7 +38,8 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     public PositionlessSetCard classify(Bitmap bmp){
         SetCardColor color = colorClassifier.classifyCardFeature(bmp);
-        return new PositionlessSetCard(color, null, null, null);
+        SetCardCount count = countClassifier.classifyCardFeature(bmp);
+        return new PositionlessSetCard(color, count, null, null);
     }
 
     @Override
@@ -46,9 +50,11 @@ public abstract class MLCardClassifier implements CardClassifier {
         }
     }
 
+    protected abstract InternalFeatureClassifier<SetCardCount>
+            getCountClassifier(Context context, ImageProcessingConfig config) throws IOException;
 
 
-    protected abstract InternalFeatureClassifier<SetCardColor> getColorClassifier(Context context,
-                                                  ImageProcessingConfig config) throws IOException;
+    protected abstract InternalFeatureClassifier<SetCardColor>
+            getColorClassifier(Context context, ImageProcessingConfig config) throws IOException;
 
 }
