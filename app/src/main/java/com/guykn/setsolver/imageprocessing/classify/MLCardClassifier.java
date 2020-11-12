@@ -8,9 +8,11 @@ import com.guykn.setsolver.imageprocessing.image.MatImage;
 import com.guykn.setsolver.set.PositionlessSetCard;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
+import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
 import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 
 import org.opencv.core.Mat;
+import org.tensorflow.lite.support.image.TensorImage;
 
 import java.io.IOException;
 
@@ -28,9 +30,9 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     public MLCardClassifier(Context context, ImageProcessingConfig config) throws IOException {
         this.config = config;
-        colorClassifier = getColorClassifier(context, config);
-        countClassifier = getCountClassifier(context, config);
-        shapeClassifier = getShapeClassifier(context, config);
+        colorClassifier = createColorClassifier(context, config);
+        countClassifier = createCountClassifier(context, config);
+        shapeClassifier = createShapeClassifier(context, config);
     }
 
     @Override
@@ -40,10 +42,12 @@ public abstract class MLCardClassifier implements CardClassifier {
     }
 
     public PositionlessSetCard classify(Bitmap bmp){
-        SetCardColor color = colorClassifier.classifyCardFeature(bmp);
-        SetCardCount count = countClassifier.classifyCardFeature(bmp);
-        SetCardShape shape = shapeClassifier.classifyCardFeature(bmp);
-        return new PositionlessSetCard(color, count, null, shape);
+        TensorImage inputImageBuffer = colorClassifier.loadImage(bmp);
+        SetCardColor color = colorClassifier.classifyCardFeature(inputImageBuffer);
+        SetCardCount count = countClassifier.classifyCardFeature(inputImageBuffer);
+        SetCardShape shape = shapeClassifier.classifyCardFeature(inputImageBuffer);
+        SetCardFill __fill = new SetCardFill(new ClassificationResult(0, 10000)); //todo: change!!!
+        return new PositionlessSetCard(color, count, __fill, shape);
     }
 
     @Override
@@ -61,14 +65,12 @@ public abstract class MLCardClassifier implements CardClassifier {
     }
 
     protected abstract InternalFeatureClassifier<SetCardCount>
-            getCountClassifier(Context context, ImageProcessingConfig config) throws IOException;
+            createCountClassifier(Context context, ImageProcessingConfig config) throws IOException;
 
 
     protected abstract InternalFeatureClassifier<SetCardColor>
-            getColorClassifier(Context context, ImageProcessingConfig config) throws IOException;
+            createColorClassifier(Context context, ImageProcessingConfig config) throws IOException;
 
     protected abstract InternalFeatureClassifier<SetCardShape>
-    getShapeClassifier(Context context, ImageProcessingConfig config) throws IOException;
-
-
+            createShapeClassifier(Context context, ImageProcessingConfig config) throws IOException;
 }

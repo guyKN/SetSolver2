@@ -40,8 +40,15 @@ public class PositionlessSetCard {
 
     public String getDescription(){
         return String.format(Locale.US,
-                "%s\n%s\n%s\n%s\nOverall Confidence: %.0f%%",
-                color.getName(), count.getName(), fill.getName(), shape.getName(),
+                "Color: %s (%.0f%% confidence)\n" +
+                        "Count %s (%.0f%% confidence)\n" +
+                        "Fill: %s (%.0f%% confidence)\n" +
+                        "Shape: %s (%.0f%% confidence)\n" +
+                        "Total Confidence: %.0f%%",
+                color.getName(), color.getConfidence(),
+                count.getName(), count.getConfidence(),
+                fill.getName(), fill.getConfidence(),
+                shape.getName(), shape.getConfidence(),
                 getTotalConfidence()*100);
     }
 

@@ -7,6 +7,8 @@ import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.classify.tflite.copypasta.Classifier;
 import com.guykn.setsolver.set.setcardfeatures.SetCardFeature;
 
+import org.tensorflow.lite.support.image.TensorImage;
+
 import java.io.IOException;
 
 public abstract class InternalFeatureClassifier<CardFeature extends SetCardFeature<?>>
@@ -21,6 +23,8 @@ public abstract class InternalFeatureClassifier<CardFeature extends SetCardFeatu
     }
 
     public abstract CardFeature classifyCardFeature(Bitmap bitmap);
+    public abstract CardFeature classifyCardFeature(TensorImage inputImageBuffer);
+
 
     protected ImageProcessingConfig getConfig() {
         return config;

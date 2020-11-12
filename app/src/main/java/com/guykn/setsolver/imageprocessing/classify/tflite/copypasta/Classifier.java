@@ -48,6 +48,7 @@ import java.nio.MappedByteBuffer;
  */
 public abstract class Classifier implements Closeable {
     public static final String TAG = "ClassifierWithSupport";
+    private final DataType imageDataType;
 
     public enum ModelType {
         FLOAT {
@@ -136,10 +137,6 @@ public abstract class Classifier implements Closeable {
     private final Interpreter.Options tfliteOptions = new Interpreter.Options();
 
 
-    /**
-     * Input image TensorBuffer.
-     */
-    private TensorImage inputImageBuffer;
 
     /**
      * Output probability TensorBuffer.
@@ -173,14 +170,13 @@ public abstract class Classifier implements Closeable {
         int[] imageShape = tflite.getInputTensor(imageTensorIndex).shape(); // {1, height, width, 3}
         imageSizeY = imageShape[1];
         imageSizeX = imageShape[2];
-        DataType imageDataType = tflite.getInputTensor(imageTensorIndex).dataType();
+        imageDataType = tflite.getInputTensor(imageTensorIndex).dataType();
         int probabilityTensorIndex = 0;
         int[] probabilityShape =
                 tflite.getOutputTensor(probabilityTensorIndex).shape(); // {1, NUM_CLASSES}
         DataType probabilityDataType = tflite.getOutputTensor(probabilityTensorIndex).dataType();
 
         // Creates the input tensor.
-        inputImageBuffer = new TensorImage(imageDataType);
 
         // Creates the output tensor and its processor.
         outputProbabilityBuffer = TensorBuffer.createFixedSize(probabilityShape, probabilityDataType);
@@ -188,7 +184,6 @@ public abstract class Classifier implements Closeable {
         // Creates the post processor for the output probability.
         probabilityProcessor = new TensorProcessor.Builder().add(getPostprocessNormalizeOp()).build();
 
-        Log.d(TAG, "Created a Tensorflow Lite Image Classifier.");
     }
 
     /**
@@ -198,25 +193,26 @@ public abstract class Classifier implements Closeable {
         // Logs this method so that it can be analyzed with systrace.
         Trace.beginSection("recognizeImage");
 
-        Trace.beginSection("loadImage");
-        long startTimeForLoadImage = SystemClock.uptimeMillis();
-        inputImageBuffer = loadImage(bitmap);
-        long endTimeForLoadImage = SystemClock.uptimeMillis();
-        Trace.endSection();
-        Log.v(TAG, "Timecost to load the image: " + (endTimeForLoadImage - startTimeForLoadImage));
+        TensorImage inputImageBuffer = loadImage(bitmap);
+        return classify(inputImageBuffer);
+    }
+    //todo: add overload to classify a tImage
 
-        // Runs the inference call.
+    public ClassificationResult classify(final TensorImage inputImageBuffer){
         Trace.beginSection("runInference");
         long startTimeForReference = SystemClock.uptimeMillis();
-        tflite.run(inputImageBuffer.getBuffer(), outputProbabilityBuffer.getBuffer().rewind());
+
+        tflite.run(inputImageBuffer.getBuffer().rewind(),
+                outputProbabilityBuffer.getBuffer().rewind());
         probabilityProcessor.process(outputProbabilityBuffer);
+
         long endTimeForReference = SystemClock.uptimeMillis();
         Trace.endSection();
-        Log.v(TAG, "Timecost to run model inference: " + (endTimeForReference - startTimeForReference));
+
+        Log.v(TAG, "Timecost to run model inference: " +
+                (endTimeForReference - startTimeForReference));
 
         return ClassificationResult.fromProbabilityBuffer(outputProbabilityBuffer);
-
-
     }
 
     /**
@@ -251,17 +247,27 @@ public abstract class Classifier implements Closeable {
     /**
      * Loads input image, and applies preprocessing.
      */
-    private TensorImage loadImage(final Bitmap bitmap) {
+    public TensorImage loadImage(final Bitmap bitmap) {
+
+        Trace.beginSection("loadImage");
+        long startTimeForLoadImage = SystemClock.uptimeMillis();
+
         // Loads bitmap into a TensorImage.
+        TensorImage inputImageBuffer = new TensorImage(imageDataType);
         inputImageBuffer.load(bitmap);
 
         // Creates processor for the TensorImage.
         ImageProcessor imageProcessor =
                 new ImageProcessor.Builder()
                         //todo: is nearestNeighbor better a better resize method
+                        //todo: maybe create the imageProcessor only once
                         .add(new ResizeOp(imageSizeY, imageSizeX, ResizeMethod.BILINEAR))
                         .add(getPreprocessNormalizeOp())
                         .build();
+        long endTimeForLoadImage = SystemClock.uptimeMillis();
+        Trace.endSection();
+        Log.v(TAG, "Timecost to load the image: " + (endTimeForLoadImage - startTimeForLoadImage));
+
         return imageProcessor.process(inputImageBuffer);
     }
 

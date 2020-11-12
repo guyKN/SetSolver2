@@ -39,6 +39,13 @@ public abstract class DrawingCallbackList<Drawable extends DrawingCallback>
         }
     }
 
+    @Override
+    public void onSizeChange(int width, int height) {
+        for(Drawable drawable: drawables){
+            drawable.onSizeChange(width, height);
+        }
+    }
+
     /**
      * Cuts off elements at the end of the list until it is of length maxSize.
      * Used in order to restrict the size of the list in order to avoid the awful lag that may come from high amounts of drawables.

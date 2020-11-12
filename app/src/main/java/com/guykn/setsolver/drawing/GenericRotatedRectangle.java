@@ -27,47 +27,76 @@ public class GenericRotatedRectangle implements DrawingCallback, SavableToGaller
 
     public static final String TAG = "GenericRotatedRectangle";
 
-    final private int centerX;
-    final private int centerY;
-    final private int width;
-    final private int height;
+    final protected int centerX;
+    final protected int centerY;
+    final protected int width;
+    final protected int height;
     final private double angle;
 
     private int originalCanvasWidth;
     private int originalCanvasHeight;
 
+    private Rect adjustedCardRect;
+    private Point adjustedCenterPoint;
+
     private int area;
 
     private static final boolean WRITE_TO_CONSOLE = false;
 
+    protected Rect getAdjustedCardRect() {
+        return adjustedCardRect;
+    }
+
+    protected Point getAdjustedCenterPoint() {
+        return adjustedCenterPoint;
+    }
+
     @Override
-    public void drawOnCanvas(Canvas canvas, Paint paint) {
-
-        ScaleFactor scaleFactor = new ScaleFactor(canvas.getWidth(), canvas.getHeight());
-
-        if (WRITE_TO_CONSOLE) Log.d(TAG, angle > -45.0 ? "angle>-45" : "-45>angle");
-        if (WRITE_TO_CONSOLE) Log.d(TAG, (height > width ? "h>w" : "w>h"));
-
-        Rect rect = new Rect(
+    public void onSizeChange(int width, int height) {
+        ScaleFactor scaleFactor = new ScaleFactor(width, height);
+        adjustedCardRect = new Rect(
                 (int) ((centerX - width / 2) * scaleFactor.x),
                 (int) ((centerY - height / 2) * scaleFactor.y),
                 (int) ((centerX + width / 2) * scaleFactor.x),
                 (int) ((centerY + height / 2) * scaleFactor.y)
         );
+
+        adjustedCenterPoint = new Point(
+                centerX * scaleFactor.x,
+                centerY * scaleFactor.y
+        );
+
+    }
+
+    @Override
+    public final void drawOnCanvas(Canvas canvas, Paint paint) {
+
+
+        if (WRITE_TO_CONSOLE) Log.d(TAG, angle > -45.0 ? "angle>-45" : "-45>angle");
+        if (WRITE_TO_CONSOLE) Log.d(TAG, (height > width ? "h>w" : "w>h"));
+
+
         canvas.save();
         canvas.rotate(
                 (float) angle,
-                (float) (centerX * scaleFactor.x),
-                (float) (centerY * scaleFactor.y)
+                (float) adjustedCenterPoint.x,
+                (float) adjustedCenterPoint.y
         );
-
-        canvas.drawRect(rect, paint);
+        drawOnCanvasRotated(canvas, paint);
         canvas.restore();
 
         if (WRITE_TO_CONSOLE)
             Log.i(TAG, "canvas width: " + canvas.getWidth()
                     + "canvas height: " + canvas.getHeight());
     }
+
+    /**
+     * Called Internally after the canvas is rotated to do the drawing.
+     */
+    protected void drawOnCanvasRotated(Canvas canvas, Paint paint) {
+        canvas.drawRect(getAdjustedCardRect(), paint);
+    }
+
 
     @Override
     public void saveToGallery(ImageFileManager fileManager, Mat originalImage) {
@@ -174,7 +203,7 @@ public class GenericRotatedRectangle implements DrawingCallback, SavableToGaller
 
     }
 
-    private class ScaleFactor {
+    protected class ScaleFactor {
         public double x;
         public double y;
 

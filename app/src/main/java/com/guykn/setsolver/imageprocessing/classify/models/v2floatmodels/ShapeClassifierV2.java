@@ -8,6 +8,8 @@ import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
 import com.guykn.setsolver.imageprocessing.classify.InternalFeatureClassifier;
 import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 
+import org.tensorflow.lite.support.image.TensorImage;
+
 import java.io.IOException;
 
 public class ShapeClassifierV2 extends InternalFeatureClassifier<SetCardShape> {
@@ -21,6 +23,12 @@ public class ShapeClassifierV2 extends InternalFeatureClassifier<SetCardShape> {
     @Override
     public SetCardShape classifyCardFeature(Bitmap bitmap){
         ClassificationResult res = classify(bitmap);
+        return new SetCardShape(res);
+    }
+
+    @Override
+    public SetCardShape classifyCardFeature(TensorImage inputImageBuffer) {
+        ClassificationResult res = classify(inputImageBuffer);
         return new SetCardShape(res);
     }
 

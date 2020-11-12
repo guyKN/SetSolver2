@@ -34,7 +34,16 @@ public class CameraOverlay extends View implements LifecycleObserver {
     public void setDrawable(DrawingCallback drawable){
         //todo: do all the math ahead of time, so that the location of the rect doesn't have to be calculated every time
         this.drawable = drawable;
+        drawable.onSizeChange(getWidth(), getHeight());
         invalidate();
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        if(drawable != null){
+            drawable.onSizeChange(w, h);
+        }
     }
 
     @Override

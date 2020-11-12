@@ -9,4 +9,5 @@ import android.graphics.Paint;
 public interface DrawingCallback {
     String TAG = "DrawingDebug";
     public void drawOnCanvas(Canvas canvas, Paint paint);
+    public void onSizeChange(int width, int height);
 }
