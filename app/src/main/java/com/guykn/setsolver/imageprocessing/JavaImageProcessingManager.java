@@ -149,6 +149,16 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
 
     @Override
     public void finish() {
+
+        if(cardClassifier != null){
+            try {
+                cardClassifier.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                //igonred, classifier is probably already closed
+            }
+        }
+
         if (processedMat != null) {
             processedMat.release();
         }

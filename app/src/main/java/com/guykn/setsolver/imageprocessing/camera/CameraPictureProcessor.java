@@ -2,7 +2,6 @@ package com.guykn.setsolver.imageprocessing.camera;
 
 import android.content.Context;
 import android.hardware.Camera;
-import android.util.Log;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.ImageProcessingManager;
@@ -15,8 +14,8 @@ import com.guykn.setsolver.set.SetBoardPosition;
 import com.guykn.setsolver.threading.CameraAction;
 import com.guykn.setsolver.threading.CameraThread;
 
-import static com.guykn.setsolver.imageprocessing.JavaImageProcessingManager.TAG;
 
+//todo: maybe just simplify the code a bit by putting everything into the cameraPreview Class
 @SuppressWarnings("deprecation")
 public class CameraPictureProcessor implements CameraAction {
 
@@ -65,7 +64,6 @@ public class CameraPictureProcessor implements CameraAction {
         processingManager.setImage(byteArrayImage);
         SetBoardPosition cardLocations =  processingManager.getBoard();
         callback.onImageProcessingSuccess(cardLocations);
-        Log.d(TAG, "onPreviewFrame called from CameraProcessingAction");
         processingManager.finish();
     }
 }
