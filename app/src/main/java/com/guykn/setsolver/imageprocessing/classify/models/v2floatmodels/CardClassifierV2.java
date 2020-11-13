@@ -8,6 +8,7 @@ import com.guykn.setsolver.imageprocessing.classify.InternalFeatureClassifier;
 import com.guykn.setsolver.imageprocessing.classify.MLCardClassifier;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
+import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
 import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 
 import java.io.IOException;
@@ -43,5 +44,11 @@ public class CardClassifierV2 extends MLCardClassifier {
     protected InternalFeatureClassifier<SetCardShape> createShapeClassifier(
                 Context context, ImageProcessingConfig config) throws IOException {
         return new ShapeClassifierV2(context, config);
+    }
+
+    @Override
+    protected InternalFeatureClassifier<SetCardFill> createFillClassifier(
+                Context context, ImageProcessingConfig config) throws IOException {
+        return new FillClassifierV2(context, config);
     }
 }

@@ -52,14 +52,25 @@ public class GenericRotatedRectangle implements DrawingCallback, SavableToGaller
     }
 
     @Override
-    public void onSizeChange(int width, int height) {
-        ScaleFactor scaleFactor = new ScaleFactor(width, height);
+    public void onSizeChange(int newCanvasWidth, int newCanvasHeight) {
+        if(WRITE_TO_CONSOLE) {
+            Log.d(TAG, "called OnsizeChanged()!");
+            Log.d(TAG, "onSizeChange() width = " + newCanvasWidth + "height = " + newCanvasHeight);
+        }
+        ScaleFactor scaleFactor = new ScaleFactor(newCanvasWidth, newCanvasHeight);
+
+
+
         adjustedCardRect = new Rect(
-                (int) ((centerX - width / 2) * scaleFactor.x),
-                (int) ((centerY - height / 2) * scaleFactor.y),
-                (int) ((centerX + width / 2) * scaleFactor.x),
-                (int) ((centerY + height / 2) * scaleFactor.y)
+                (int) ((centerX - this.width / 2) * scaleFactor.x),
+                (int) ((centerY - this.height / 2) * scaleFactor.y),
+                (int) ((centerX + this.width / 2) * scaleFactor.x),
+                (int) ((centerY + this.height / 2) * scaleFactor.y)
         );
+
+        Log.d(TAG, adjustedCardRect.toString());
+
+
 
         adjustedCenterPoint = new Point(
                 centerX * scaleFactor.x,
@@ -203,7 +214,7 @@ public class GenericRotatedRectangle implements DrawingCallback, SavableToGaller
 
     }
 
-    protected class ScaleFactor {
+    private class ScaleFactor {
         public double x;
         public double y;
 

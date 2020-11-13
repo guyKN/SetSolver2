@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.guykn.setsolver.drawing.DrawingHelper;
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
 import com.guykn.setsolver.set.setcardfeatures.SetCardColor;
 import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
@@ -23,10 +24,14 @@ public class SetCard extends GenericRotatedRectangle {
         textPaint.setColor(Color.BLACK);
         textPaint.setStrokeWidth(20f);
         textPaint.setStyle(Paint.Style.FILL);
+        textPaint.setTextSize(40f);
     }
 
+    static final int TEXT_SHIFT_RIGHT= 30;
+    static final int TEXT_SHIFT_BOTTOM = 45;
+    static final float TEXT_LINE_SPACING = 1f;
 
-    //Todo: check if there is a better implementation (Maybe Use a decorator pattern: https://en.wikipedia.org/wiki/Decorator_pattern)
+
     public SetCard(GenericRotatedRectangle rotatedRect,
                    PositionlessSetCard card) {
         super(rotatedRect);
@@ -37,10 +42,12 @@ public class SetCard extends GenericRotatedRectangle {
     @Override
     protected void drawOnCanvasRotated(Canvas canvas, Paint paint) {
         super.drawOnCanvasRotated(canvas, paint);
-        canvas.drawText(
-                card.getDescription(),
-                (float) getAdjustedCenterPoint().x,
-                (float) getAdjustedCenterPoint().y,
+        DrawingHelper.drawTextOnCanvasWithLineBreaks(
+                canvas,
+                card.getVeryShortDescription(),
+                (float) getAdjustedCardRect().left + TEXT_SHIFT_RIGHT,
+                (float) getAdjustedCardRect().top + TEXT_SHIFT_BOTTOM,
+                TEXT_LINE_SPACING,
                 textPaint
         );
     }

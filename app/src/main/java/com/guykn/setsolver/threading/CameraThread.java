@@ -17,7 +17,7 @@ import static com.guykn.setsolver.threading.CameraThread.CameraState.STOPPED;
 
 public abstract class CameraThread extends HandlerThread implements SurfaceHolder.Callback {
 
-    private static final String TAG = "CameraThread";
+    public static final String TAG = "CameraThread";
     private ImageProcessingConfig config;
     private CameraState lifecycleBasedMaxCameraState;
     private CameraState targetCameraState;

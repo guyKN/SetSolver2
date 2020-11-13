@@ -12,8 +12,10 @@ import androidx.lifecycle.OnLifecycleEvent;
 
 import com.guykn.setsolver.drawing.DrawingCallback;
 
+
 public class CameraOverlay extends View implements LifecycleObserver {
 
+    private static final String TAG = DrawingCallback.TAG;
     private DrawingCallback drawable;
     private Paint mPaint;
 
@@ -42,7 +44,7 @@ public class CameraOverlay extends View implements LifecycleObserver {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if(drawable != null){
-            drawable.onSizeChange(w, h);
+            drawable.onSizeChange(getWidth(), getHeight());
         }
     }
 
@@ -51,6 +53,7 @@ public class CameraOverlay extends View implements LifecycleObserver {
         //todo: do all the math ahead of time, so that the location of the rect doesn't have to be calculated every time
 
         if(drawable == null) return;
+
         drawable.drawOnCanvas(canvas, mPaint);
     }
     

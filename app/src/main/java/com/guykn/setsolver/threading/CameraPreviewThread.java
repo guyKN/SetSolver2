@@ -2,6 +2,7 @@ package com.guykn.setsolver.threading;
 
 import android.content.Context;
 import android.hardware.Camera;
+import android.hardware.Camera.Size;
 
 import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
@@ -10,6 +11,9 @@ import com.guykn.setsolver.imageprocessing.camera.CameraPictureProcessor;
 import com.guykn.setsolver.ui.main.MainViewModel;
 
 import java.io.IOException;
+import java.util.List;
+
+import static android.hardware.Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE;
 
 @SuppressWarnings("deprecation")
 public class CameraPreviewThread extends CameraThread implements Camera.PreviewCallback,
@@ -21,6 +25,8 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
     private final FpsCounter fpsCounter;
     private final CameraFrameProcessor frameProcessor;
     private final CameraPictureProcessor pictureProcessor;
+
+    private final String TAG = "CameraPreviewThread";
 
     @Override
     protected void onConfigChanged(ImageProcessingConfig config) {
@@ -42,24 +48,40 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
     protected void onOpenCamera() throws CameraException {
         try {
             camera = Camera.open();
-            if(camera == null){
+            if (camera == null) {
                 throw new CameraException("Couldn't open Camera");
             }
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             throw new CameraException(e);
         }
     }
 
     @Override
-    protected void onStartCamera(SurfaceViewState surfaceViewState) throws CameraException{
+    protected void onStartCamera(SurfaceViewState surfaceViewState) throws CameraException {
         try {
-            if(surfaceViewState == null){
+            if (surfaceViewState == null) {
                 throw new CameraException(
                         "Method onStartCamera() was given a null surfaceViewState");
             }
 
             frameProcessor.onCameraStarted(camera, surfaceViewState);
 
+            Camera.Parameters parameters = camera.getParameters();
+
+            Size bestPreviewSize = findBestSize(surfaceViewState.getWidth(),
+                    surfaceViewState.getHeight(),
+                    parameters.getSupportedPreviewSizes());
+            parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
+
+            Size bestPictureSize = findBestSize(surfaceViewState.getWidth(),
+                    surfaceViewState.getHeight(),
+                    parameters.getSupportedPictureSizes());
+            parameters.setPictureSize(bestPictureSize.width, bestPictureSize.height);
+
+
+            parameters.setFocusMode(FOCUS_MODE_CONTINUOUS_PICTURE);
+
+            camera.setParameters(parameters);
 
             camera.setPreviewDisplay(surfaceViewState.getHolder());
             surfaceViewState.getHolder().setKeepScreenOn(true);
@@ -77,7 +99,7 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
             camera.stopPreview();
             camera.cancelAutoFocus();
             camera.setPreviewCallback(null);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             throw new CameraException(e);
         }
     }
@@ -86,12 +108,12 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
     protected void onDestroyCamera() throws CameraException {
         try {
             camera.release();
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             throw new CameraException(e);
         }
     }
 
-    public void onTakePicture(){
+    public void onTakePicture() {
         camera.takePicture(null, null, null, this);
     }
 
@@ -106,4 +128,31 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
         fpsCounter.onFrame();
         frameProcessor.onPreviewFrame(data, camera);
     }
+
+    private static Size findBestSize(int previewWidth, int previewHeight,
+                                     List<Size> sizes) {
+
+        double targetAspectRatio = getAspectRatio(previewWidth, previewHeight);
+
+        Size currentBestSize = null;
+        double currentLowestError = 10000;
+        for (Size size : sizes) {
+            double currentAspectRatio = getAspectRatio(size);
+            double currentError = Math.abs(currentAspectRatio - targetAspectRatio);
+            if (currentError < currentLowestError){
+                currentBestSize = size;
+                currentLowestError = currentError;
+            }
+        }
+        return currentBestSize;
+    }
+
+    private static double getAspectRatio(int width, int height) {
+        return ((double) width) / ((double) height);
+    }
+
+    private static double getAspectRatio(Size size) {
+        return getAspectRatio(size.width, size.height);
+    }
+
 }

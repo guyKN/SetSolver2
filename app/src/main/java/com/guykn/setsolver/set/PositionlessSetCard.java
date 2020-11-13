@@ -52,6 +52,30 @@ public class PositionlessSetCard {
                 getTotalConfidence()*100);
     }
 
+    public String getShortDescription(){
+        return String.format(Locale.US,
+                "%s (%.0f%%)\n" +
+                        "%s (%.0f%%)\n" +
+                        "%s (%.0f%%)\n" +
+                        "%s (%.0f%%)\n",
+                color.getName(), color.getConfidence()*100,
+                count.getName(), count.getConfidence()*100,
+                fill.getName(), fill.getConfidence()*100,
+                shape.getName(), shape.getConfidence()*100);
+    }
+
+    public String getVeryShortDescription(){
+        return String.format(Locale.US,
+                "%s\n" +
+                        "%s\n" +
+                        "%s\n" +
+                        "%s\n",
+                color.getName(),
+                count.getName(),
+                fill.getName(),
+                shape.getName());
+    }
+
     public double getTotalConfidence(){
         return color.getConfidence() * count.getConfidence() * fill.getConfidence() * shape.getConfidence();
     }

@@ -6,7 +6,7 @@ public class ClassificationResult {
     public final int id;
     public final double probability;
 
-    public ClassificationResult(int id, double resultProbability) { //todo: bring back private
+    private ClassificationResult(int id, double resultProbability) {
         this.id = id;
         this.probability = resultProbability;
     }

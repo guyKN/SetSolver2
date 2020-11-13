@@ -27,12 +27,14 @@ public abstract class MLCardClassifier implements CardClassifier {
     private final InternalFeatureClassifier<SetCardColor> colorClassifier;
     private final InternalFeatureClassifier<SetCardCount> countClassifier;
     private final InternalFeatureClassifier<SetCardShape> shapeClassifier;
+    private final InternalFeatureClassifier<SetCardFill> fillClassifier;
 
     public MLCardClassifier(Context context, ImageProcessingConfig config) throws IOException {
         this.config = config;
         colorClassifier = createColorClassifier(context, config);
         countClassifier = createCountClassifier(context, config);
         shapeClassifier = createShapeClassifier(context, config);
+        fillClassifier = createFillClassifier(context, config);
     }
 
     @Override
@@ -46,8 +48,8 @@ public abstract class MLCardClassifier implements CardClassifier {
         SetCardColor color = colorClassifier.classifyCardFeature(inputImageBuffer);
         SetCardCount count = countClassifier.classifyCardFeature(inputImageBuffer);
         SetCardShape shape = shapeClassifier.classifyCardFeature(inputImageBuffer);
-        SetCardFill __fill = new SetCardFill(new ClassificationResult(0, 10000)); //todo: change!!!
-        return new PositionlessSetCard(color, count, __fill, shape);
+        SetCardFill fill = fillClassifier.classifyCardFeature(inputImageBuffer);
+        return new PositionlessSetCard(color, count, fill, shape);
     }
 
     @Override
@@ -73,4 +75,7 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     protected abstract InternalFeatureClassifier<SetCardShape>
             createShapeClassifier(Context context, ImageProcessingConfig config) throws IOException;
+
+    protected abstract InternalFeatureClassifier<SetCardFill>
+    createFillClassifier(Context context, ImageProcessingConfig config) throws IOException;
 }

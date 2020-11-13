@@ -17,7 +17,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.R;
 import com.guykn.setsolver.SettingsActivity;
 import com.guykn.setsolver.threading.CameraPreviewThread;
@@ -67,9 +66,6 @@ public class CameraFragment extends Fragment {
         if(context != null) {
 
             fpsView = root.findViewById(R.id.fps_display);
-
-
-            FpsCounter fpsCounter = new FpsCounter(mViewModel, 300);
 
             Log.d(TAG, mViewModel.getConfigLiveData().getValue() == null ? "null": "not null");
 
