@@ -24,10 +24,10 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     private final ImageProcessingConfig config;
 
-    private final InternalFeatureClassifier<SetCardColor> colorClassifier;
-    private final InternalFeatureClassifier<SetCardCount> countClassifier;
-    private final InternalFeatureClassifier<SetCardShape> shapeClassifier;
-    private final InternalFeatureClassifier<SetCardFill> fillClassifier;
+    private final FeatureClassifier<SetCardColor> colorClassifier;
+    private final FeatureClassifier<SetCardCount> countClassifier;
+    private final FeatureClassifier<SetCardShape> shapeClassifier;
+    private final FeatureClassifier<SetCardFill> fillClassifier;
 
     public MLCardClassifier(Context context, ImageProcessingConfig config) throws IOException {
         this.config = config;
@@ -64,18 +64,21 @@ public abstract class MLCardClassifier implements CardClassifier {
         if(countClassifier != null){
             countClassifier.close();
         }
+        if(fillClassifier != null){
+            fillClassifier.close();
+        }
     }
 
-    protected abstract InternalFeatureClassifier<SetCardCount>
+    protected abstract FeatureClassifier<SetCardCount>
             createCountClassifier(Context context, ImageProcessingConfig config) throws IOException;
 
 
-    protected abstract InternalFeatureClassifier<SetCardColor>
+    protected abstract FeatureClassifier<SetCardColor>
             createColorClassifier(Context context, ImageProcessingConfig config) throws IOException;
 
-    protected abstract InternalFeatureClassifier<SetCardShape>
+    protected abstract FeatureClassifier<SetCardShape>
             createShapeClassifier(Context context, ImageProcessingConfig config) throws IOException;
 
-    protected abstract InternalFeatureClassifier<SetCardFill>
+    protected abstract FeatureClassifier<SetCardFill>
     createFillClassifier(Context context, ImageProcessingConfig config) throws IOException;
 }

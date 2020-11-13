@@ -5,19 +5,20 @@ import android.graphics.Bitmap;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
-import com.guykn.setsolver.imageprocessing.classify.InternalFeatureClassifier;
+import com.guykn.setsolver.imageprocessing.classify.FeatureClassifier;
+import com.guykn.setsolver.imageprocessing.classify.tflite.copypasta.Classifier;
 import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
 
 import org.tensorflow.lite.support.image.TensorImage;
 
 import java.io.IOException;
 
-public class FillClassifierV2 extends InternalFeatureClassifier<SetCardFill> {
+public class FillClassifierV2 extends Classifier implements FeatureClassifier<SetCardFill> {
 
     private static final String MODEL_PATH = "Models/NewFloat/Fill/model_unquant.tflite";
 
     public FillClassifierV2(Context context, ImageProcessingConfig config) throws IOException {
-        super(context, config);
+        super(context, Device.CPU, 1);
     }
 
     @Override
