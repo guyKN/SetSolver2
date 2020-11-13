@@ -3,6 +3,8 @@ package com.guykn.setsolver.imageprocessing.classify;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import androidx.annotation.Nullable;
+
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.image.MatImage;
 import com.guykn.setsolver.set.PositionlessSetCard;
@@ -24,6 +26,7 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     private final ImageProcessingConfig config;
 
+    private final IsACardClassifier isACardClassifier;
     private final FeatureClassifier<SetCardColor> colorClassifier;
     private final FeatureClassifier<SetCardCount> countClassifier;
     private final FeatureClassifier<SetCardShape> shapeClassifier;
@@ -31,6 +34,7 @@ public abstract class MLCardClassifier implements CardClassifier {
 
     public MLCardClassifier(Context context, ImageProcessingConfig config) throws IOException {
         this.config = config;
+        isACardClassifier = createIsACardClassier(context, config);
         colorClassifier = createColorClassifier(context, config);
         countClassifier = createCountClassifier(context, config);
         shapeClassifier = createShapeClassifier(context, config);
@@ -43,8 +47,17 @@ public abstract class MLCardClassifier implements CardClassifier {
         return classify(bmp);
     }
 
+
+
+    @Nullable
+    @Override
     public PositionlessSetCard classify(Bitmap bmp){
         TensorImage inputImageBuffer = colorClassifier.loadImage(bmp);
+        if(!isACardClassifier.isACard(inputImageBuffer)){
+            //todo: figure out a system better than returning null,
+            // maybe have each setCard track itself on wheter it's an actual card
+            return null;
+        }
         SetCardColor color = colorClassifier.classifyCardFeature(inputImageBuffer);
         SetCardCount count = countClassifier.classifyCardFeature(inputImageBuffer);
         SetCardShape shape = shapeClassifier.classifyCardFeature(inputImageBuffer);
@@ -55,6 +68,9 @@ public abstract class MLCardClassifier implements CardClassifier {
     @Override
     public void close() {
         //todo: is this all?
+        if(isACardClassifier != null){
+            isACardClassifier.close();
+        }
         if(colorClassifier != null) {
             colorClassifier.close();
         }
@@ -68,6 +84,10 @@ public abstract class MLCardClassifier implements CardClassifier {
             fillClassifier.close();
         }
     }
+
+    protected abstract IsACardClassifier
+            createIsACardClassier(Context context, ImageProcessingConfig config) throws IOException;
+
 
     protected abstract FeatureClassifier<SetCardCount>
             createCountClassifier(Context context, ImageProcessingConfig config) throws IOException;

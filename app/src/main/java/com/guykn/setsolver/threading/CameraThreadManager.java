@@ -10,12 +10,12 @@ import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
-import com.guykn.setsolver.ui.views.CameraPreview2;
+import com.guykn.setsolver.ui.views.CameraPreview;
 
 public class CameraThreadManager implements LifecycleObserver, SurfaceHolder.Callback {
     private final CameraThread cameraThread;
     private final Lifecycle lifecycle;
-    private CameraPreview2 cameraPreview;
+    private CameraPreview cameraPreview;
 
     public CameraThreadManager(CameraThread cameraThread, Lifecycle lifecycle) {
         this.cameraThread = cameraThread;
@@ -24,11 +24,11 @@ public class CameraThreadManager implements LifecycleObserver, SurfaceHolder.Cal
         cameraThread.start();
     }
 
-    public CameraPreview2 getCameraPreview(Context context){
+    public CameraPreview getCameraPreview(Context context){
         if(cameraPreview == null){
             synchronized (this){
                 if(cameraPreview == null){
-                    cameraPreview = new CameraPreview2(context);
+                    cameraPreview = new CameraPreview(context);
                     cameraPreview.setHolderCallback(this);
                 }
             }

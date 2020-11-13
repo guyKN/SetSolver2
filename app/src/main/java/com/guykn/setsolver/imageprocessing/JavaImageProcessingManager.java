@@ -112,6 +112,10 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
         for (GenericRotatedRectangle rect : cardPositions.getDrawables()) {
             Mat cropped = rect.cropToRect(mat);
             PositionlessSetCard result = cardClassifier.classify(cropped);
+            if(result == null){
+                //the classifier found that the Image wasn't actually a card
+                continue;
+            }
             SetCard card = new SetCard(rect, result);
             boardPosition.addCard(card);
         }

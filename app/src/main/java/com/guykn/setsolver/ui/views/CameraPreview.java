@@ -4,9 +4,10 @@ import android.content.Context;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-public class CameraPreview2 extends SurfaceView {
-    public CameraPreview2(Context context) {
+public class CameraPreview extends SurfaceView {
+    public CameraPreview(Context context) {
         super(context);
+        setZOrderOnTop(false);
     }
 
     public void setHolderCallback(SurfaceHolder.Callback callback){

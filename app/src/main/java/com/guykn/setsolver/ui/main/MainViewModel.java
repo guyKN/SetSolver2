@@ -22,9 +22,14 @@ public class MainViewModel extends ViewModel implements CameraThread.CameraExcep
 
     private final MutableLiveData<ImageProcessingConfig> configLiveData = new MutableLiveData<>();
 
+    private final MutableLiveData<Boolean> shouldHaveLoadingIcon = new MutableLiveData<>();
+
+    private final MutableLiveData<Long> totalProcessingTimeData = new MutableLiveData<>();
+
     public MainViewModel() {
         super();
         configLiveData.setValue(ImageProcessingConfig.getDefaultConfig());
+        shouldHaveLoadingIcon.setValue(false);
     }
 
     public void setDrawable(DrawingCallback drawable) {
@@ -61,6 +66,26 @@ public class MainViewModel extends ViewModel implements CameraThread.CameraExcep
         return configLiveData;
     }
 
+    public void enableLoadingIcon(){
+        shouldHaveLoadingIcon.postValue(true);
+    }
+
+    public void disableLoadingIcon(){
+        shouldHaveLoadingIcon.postValue(false);
+    }
+
+    public void setTotalProcessingTime(long totalProcessingTime){
+        totalProcessingTimeData.postValue(totalProcessingTime);
+    }
+
+    public LiveData<Boolean> getShouldHaveLoadingIconData(){
+        return shouldHaveLoadingIcon;
+    }
+
+    public LiveData<Long> getTotalProcessingTimeData(){
+        return totalProcessingTimeData;
+    }
+
     @Override
     public void onException() {
         onException("Something went wrong with the Camera");
@@ -80,4 +105,6 @@ public class MainViewModel extends ViewModel implements CameraThread.CameraExcep
     public void onImageProcessingSuccess(DrawingCallback drawable) {
         postDrawable(drawable);
     }
+
+
 }

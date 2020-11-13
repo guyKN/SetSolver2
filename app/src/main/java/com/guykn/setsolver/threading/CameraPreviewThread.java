@@ -3,6 +3,7 @@ package com.guykn.setsolver.threading;
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
+import android.os.SystemClock;
 
 import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
@@ -119,8 +120,16 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
+        mainViewModel.enableLoadingIcon();
+        long startTime = SystemClock.elapsedRealtime();
+
         setTargetPreviewState(CameraState.STOPPED);
         pictureProcessor.onPictureTaken(data, camera);
+
+        long endTime = SystemClock.elapsedRealtime();
+
+        mainViewModel.setTotalProcessingTime(endTime - startTime);
+        mainViewModel.disableLoadingIcon();
     }
 
     @Override
@@ -139,7 +148,7 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
         for (Size size : sizes) {
             double currentAspectRatio = getAspectRatio(size);
             double currentError = Math.abs(currentAspectRatio - targetAspectRatio);
-            if (currentError < currentLowestError){
+            if (currentError < currentLowestError) {
                 currentBestSize = size;
                 currentLowestError = currentError;
             }

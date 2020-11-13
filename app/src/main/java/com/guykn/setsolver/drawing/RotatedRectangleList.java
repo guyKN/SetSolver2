@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class RotatedRectangleList extends DrawingCallbackList<GenericRotatedRectangle>
         implements CardDetector.CardAction, SavableToGallery {
+    //todo: find better naming
 
     public RotatedRectangleList(){}
 

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,24 +24,23 @@ import com.guykn.setsolver.threading.CameraPreviewThread;
 import com.guykn.setsolver.threading.CameraThread;
 import com.guykn.setsolver.threading.CameraThreadManager;
 import com.guykn.setsolver.ui.views.CameraOverlay;
-import com.guykn.setsolver.ui.views.CameraPreview2;
+import com.guykn.setsolver.ui.views.CameraPreview;
 
+import java.text.DecimalFormat;
 import java.util.Locale;
 
 public class CameraFragment extends Fragment {
-    //todo: have a visible FPS counter
-    //todo: scale saved image down to fixed resolution
-    //todo: gather data for ML
-    //todo: make it save images on all phones
-
+    //todo: allow both landscape and portrait
+    //todo: keep image even after phone activity pauses
     public static final String TAG = "CameraFragment";
-    private MainViewModel mViewModel;
-    private CameraPreview2 mCameraPreview;
+    private MainViewModel mainViewModel;
+    private CameraPreview mCameraPreview;
     private CameraOverlay mCameraOverlay;
     private FrameLayout cameraFrame;
     private Button captureButton;
     private TextView fpsView;
     private CameraThreadManager cameraThreadManager;
+    private ProgressBar loadingIcon;
 
     public static CameraFragment newInstance() {
         return new CameraFragment();
@@ -48,7 +48,7 @@ public class CameraFragment extends Fragment {
 
     @Override
     public void onAttach(@NonNull Context context) {
-        Log.d(TAG,"inside of updated program");
+        Log.d(TAG, "inside of updated program");
         super.onAttach(context);
     }
 
@@ -62,38 +62,68 @@ public class CameraFragment extends Fragment {
 
         cameraFrame = root.findViewById(R.id.camera_preview_frame);
         Context context = getActivity();
-        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        if(context != null) {
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        if (context != null) {
+
+            loadingIcon = root.findViewById(R.id.loading_icon);
 
             fpsView = root.findViewById(R.id.fps_display);
 
-            Log.d(TAG, mViewModel.getConfigLiveData().getValue() == null ? "null": "not null");
+            Log.d(TAG, mainViewModel.getConfigLiveData().getValue() == null ? "null" : "not null");
 
             CameraThread cameraThread = new CameraPreviewThread(context.getApplicationContext(),
-                    mViewModel, mViewModel.getConfigLiveData().getValue());
+                    mainViewModel, mainViewModel.getConfigLiveData().getValue());
 
             cameraThreadManager = new CameraThreadManager(cameraThread, getLifecycle());
             mCameraPreview = cameraThreadManager.getCameraPreview(context);
             cameraThreadManager.startCamera();
             mCameraOverlay = new CameraOverlay(context, getLifecycle());
 
-            cameraFrame.setOnClickListener((View v)->{
+            cameraFrame.setOnClickListener((View v) -> {
                 cameraThreadManager.startCamera();
             });
 
             cameraFrame.addView(mCameraPreview);
             cameraFrame.addView(mCameraOverlay);
 
-            mViewModel.getDrawableLiveData().observe(getViewLifecycleOwner(), drawable -> {
+            fpsView.bringToFront();
+            loadingIcon.bringToFront();
+
+            mainViewModel.getDrawableLiveData().observe(getViewLifecycleOwner(), drawable -> {
                 mCameraOverlay.setDrawable(drawable);
                 Log.d(TAG, "drawable changed");
             });
 
-            mViewModel.getFpsLiveData().observe(getViewLifecycleOwner(), fps ->{
+            mainViewModel.getFpsLiveData().observe(getViewLifecycleOwner(), fps -> {
                 String fpsText = String.format(Locale.US,
                         "%s FPS", fps);
+                fpsView.setVisibility(View.VISIBLE);
                 fpsView.setText(fpsText);
             });
+
+            mainViewModel.getTotalProcessingTimeData().observe(getViewLifecycleOwner(),
+                    milliseconds -> {
+                        String processingTimeText =
+                                new DecimalFormat("Processing Time: 0.00sec")
+                                        .format(
+                                                ((double) milliseconds) / 1000.0
+                                        );
+                        fpsView.setVisibility(View.VISIBLE);
+                        fpsView.setText(processingTimeText);
+                    }
+            );
+
+            mainViewModel.getShouldHaveLoadingIconData().observe(getViewLifecycleOwner(),
+                    shouldHaveLoadingIcon -> {
+                        if (shouldHaveLoadingIcon) {
+                            loadingIcon.setVisibility(View.VISIBLE);
+                            fpsView.setVisibility(View.GONE);
+
+                        } else {
+                            loadingIcon.setVisibility(View.GONE);
+                        }
+                    }
+            );
 
             captureButton = root.findViewById(R.id.button_capture);
             captureButton.setOnClickListener(
@@ -112,7 +142,7 @@ public class CameraFragment extends Fragment {
         return root;
     }
 
-    private void openSettingsActivity(){
+    private void openSettingsActivity() {
         Intent intent = new Intent(requireContext(), SettingsActivity.class);
         startActivity(intent);
     }
