@@ -12,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,19 +30,23 @@ import com.guykn.setsolver.ui.views.CameraPreview;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
+import static com.guykn.setsolver.threading.CameraPreviewThread.CameraUiState;
+
 public class CameraFragment extends Fragment {
     //todo: allow both landscape and portrait
     //todo: keep image even after phone activity pauses
     public static final String TAG = "CameraFragment";
+    public static final int CAMERA_ACTIVE_UI_UPDATE_DELAY = 750;
     private MainViewModel mainViewModel;
-    private CameraPreview mCameraPreview;
-    private CameraOverlay mCameraOverlay;
+    private CameraPreview cameraPreview;
+    private CameraOverlay cameraOverlay;
     private FrameLayout cameraFrame;
     private ImageButton captureButton;
     private TextView fpsView;
     private CameraThreadManager cameraThreadManager;
     private ProgressBar loadingIcon;
     private View loadingColorMask;
+    private CameraUiState currentCameraUiState;
 
     public static CameraFragment newInstance() {
         return new CameraFragment();
@@ -64,7 +69,7 @@ public class CameraFragment extends Fragment {
         cameraFrame = root.findViewById(R.id.camera_preview_frame);
         Context context = getActivity();
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        if (context != null &&  root != null) {
+        if (context != null && root != null) {
 
             loadingIcon = root.findViewById(R.id.loading_icon);
             fpsView = root.findViewById(R.id.fps_display);
@@ -77,16 +82,16 @@ public class CameraFragment extends Fragment {
                     mainViewModel, mainViewModel.getConfigLiveData().getValue());
 
             cameraThreadManager = new CameraThreadManager(cameraThread, getLifecycle());
-            mCameraPreview = cameraThreadManager.getCameraPreview(context);
+            cameraPreview = cameraThreadManager.getCameraPreview(context);
             cameraThreadManager.startCamera();
-            mCameraOverlay = new CameraOverlay(context, getLifecycle());
+            cameraOverlay = new CameraOverlay(context, getLifecycle());
 
             cameraFrame.setOnClickListener((View v) -> {
                 cameraThreadManager.startCamera();
             });
 
-            cameraFrame.addView(mCameraPreview);
-            cameraFrame.addView(mCameraOverlay);
+            cameraFrame.addView(cameraPreview);
+            cameraFrame.addView(cameraOverlay);
 
             fpsView.bringToFront();
             loadingColorMask.bringToFront();
@@ -94,14 +99,13 @@ public class CameraFragment extends Fragment {
             captureButton.bringToFront();
 
             mainViewModel.getDrawableLiveData().observe(getViewLifecycleOwner(), drawable -> {
-                mCameraOverlay.setDrawable(drawable);
+                cameraOverlay.setDrawable(drawable);
                 Log.d(TAG, "drawable changed");
             });
 
             mainViewModel.getFpsLiveData().observe(getViewLifecycleOwner(), fps -> {
                 String fpsText = String.format(Locale.US,
                         "%s FPS", fps);
-                fpsView.setVisibility(View.VISIBLE);
                 fpsView.setText(fpsText);
             });
 
@@ -112,20 +116,62 @@ public class CameraFragment extends Fragment {
                                         .format(
                                                 ((double) milliseconds) / 1000.0
                                         );
-                        fpsView.setVisibility(View.VISIBLE);
                         fpsView.setText(processingTimeText);
                     }
             );
 
-            mainViewModel.getShouldHaveLoadingIconData().observe(getViewLifecycleOwner(),
-                    shouldHaveLoadingIcon -> {
-                        if (shouldHaveLoadingIcon) {
-                            loadingIcon.setVisibility(View.VISIBLE);
-                            loadingColorMask.setVisibility(View.VISIBLE);
-                            fpsView.setVisibility(View.GONE);
-                        } else {
-                            loadingIcon.setVisibility(View.GONE);
-                            loadingColorMask.setVisibility(View.GONE);
+            mainViewModel.getCameraExceptionData().observe(getViewLifecycleOwner(),
+                    errorMessage -> {
+                        Context context1 = getActivity();
+                        if (context1 == null)
+                            return;
+
+                        Toast.makeText(context1,
+                                "Camera Error: " + errorMessage, Toast.LENGTH_LONG)
+                                .show();
+                    }
+            );
+
+            mainViewModel.getCameraUiStateLiveData().observe(getViewLifecycleOwner(),
+                    cameraUiState -> {
+                        currentCameraUiState = cameraUiState;
+                        //noinspection DuplicateBranchesInSwitch
+                        switch (cameraUiState) {
+                            case CAMERA_INACTIVE:
+                                fpsView.setVisibility(View.GONE);
+                                captureButton.setVisibility(View.GONE);
+                                loadingIcon.setVisibility(View.GONE);
+                                loadingColorMask.setVisibility(View.GONE);
+                                cameraOverlay.setVisibility(View.GONE);
+                                break;
+                            case CAMERA_LOADING:
+                                fpsView.setVisibility(View.GONE);
+                                captureButton.setVisibility(View.GONE);
+                                loadingIcon.setVisibility(View.GONE);
+                                loadingColorMask.setVisibility(View.GONE);
+                                cameraOverlay.setVisibility(View.GONE);
+                                break;
+                            case CAMERA_ACTIVE:
+                                fpsView.setVisibility(View.VISIBLE);
+                                captureButton.setVisibility(View.VISIBLE);
+                                loadingIcon.setVisibility(View.GONE);
+                                loadingColorMask.setVisibility(View.GONE);
+                                cameraOverlay.setVisibility(View.VISIBLE);
+                                break;
+                            case CAMERA_CURRENTLY_PROCESSING:
+                                fpsView.setVisibility(View.GONE);
+                                captureButton.setVisibility(View.GONE);
+                                loadingIcon.setVisibility(View.VISIBLE);
+                                loadingColorMask.setVisibility(View.VISIBLE);
+                                cameraOverlay.setVisibility(View.VISIBLE);
+                                break;
+                            case CAMERA_DONE_PROCESSING:
+                                fpsView.setVisibility(View.VISIBLE);
+                                captureButton.setVisibility(View.GONE);
+                                loadingIcon.setVisibility(View.GONE);
+                                loadingColorMask.setVisibility(View.GONE);
+                                cameraOverlay.setVisibility(View.VISIBLE);
+                                break;
                         }
                     }
             );

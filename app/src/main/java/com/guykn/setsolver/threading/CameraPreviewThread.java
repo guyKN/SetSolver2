@@ -15,6 +15,11 @@ import java.io.IOException;
 import java.util.List;
 
 import static android.hardware.Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE;
+import static com.guykn.setsolver.threading.CameraPreviewThread.CameraUiState.CAMERA_ACTIVE;
+import static com.guykn.setsolver.threading.CameraPreviewThread.CameraUiState.CAMERA_CURRENTLY_PROCESSING;
+import static com.guykn.setsolver.threading.CameraPreviewThread.CameraUiState.CAMERA_DONE_PROCESSING;
+import static com.guykn.setsolver.threading.CameraPreviewThread.CameraUiState.CAMERA_INACTIVE;
+import static com.guykn.setsolver.threading.CameraPreviewThread.CameraUiState.CAMERA_LOADING;
 
 @SuppressWarnings("deprecation")
 public class CameraPreviewThread extends CameraThread implements Camera.PreviewCallback,
@@ -28,6 +33,7 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
     private final CameraPictureProcessor pictureProcessor;
 
     private final String TAG = "CameraPreviewThread";
+    private boolean isLoading;
 
     @Override
     protected void onConfigChanged(ImageProcessingConfig config) {
@@ -48,6 +54,7 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
     @Override
     protected void onOpenCamera() throws CameraException {
         try {
+            mainViewModel.setCameraUiState(CAMERA_LOADING);
             camera = Camera.open();
             if (camera == null) {
                 throw new CameraException("Couldn't open Camera");
@@ -66,9 +73,9 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
             }
 
             frameProcessor.onCameraStarted(camera, surfaceViewState);
-
             Camera.Parameters parameters = camera.getParameters();
 
+            //todo: ensure no exception is thrown, based on: https://developer.android.com/reference/android/hardware/Camera.Parameters#setPreviewSize(int,%20int)
             Size bestPreviewSize = findBestSize(surfaceViewState.getWidth(),
                     surfaceViewState.getHeight(),
                     parameters.getSupportedPreviewSizes());
@@ -80,7 +87,7 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
             parameters.setPictureSize(bestPictureSize.width, bestPictureSize.height);
 
 
-            parameters.setFocusMode(FOCUS_MODE_CONTINUOUS_PICTURE);
+            parameters.setFocusMode(FOCUS_MODE_CONTINUOUS_PICTURE); //todo: ensure setting is supported
 
             camera.setParameters(parameters);
 
@@ -97,6 +104,9 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
     @Override
     protected void onStopCamera() throws CameraException {
         try {
+            if(!isLoading) {
+                mainViewModel.setCameraUiState(CAMERA_INACTIVE);
+            }
             camera.stopPreview();
             camera.cancelAutoFocus();
             camera.setPreviewCallback(null);
@@ -108,6 +118,7 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
     @Override
     protected void onDestroyCamera() throws CameraException {
         try {
+            mainViewModel.setCameraUiState(CAMERA_INACTIVE);
             camera.release();
         } catch (RuntimeException e) {
             throw new CameraException(e);
@@ -115,27 +126,44 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
     }
 
     public void onTakePicture() {
-        camera.takePicture(null, null, null, this);
+        try {
+            camera.takePicture(null, null, null, this);
+        }catch (RuntimeException ignored){
+            // Ignored. The user tried to press the shutter button while camera was inactive.
+        }
     }
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
-        mainViewModel.enableLoadingIcon();
-        long startTime = SystemClock.elapsedRealtime();
+        isLoading = true;
+        try {
+            long startTime = SystemClock.elapsedRealtime();
 
-        setTargetPreviewState(CameraState.STOPPED);
-        pictureProcessor.onPictureTaken(data, camera);
+            setTargetPreviewState(CameraState.STOPPED);
 
-        long endTime = SystemClock.elapsedRealtime();
+            mainViewModel.setCameraUiState(CAMERA_CURRENTLY_PROCESSING);
 
-        mainViewModel.setTotalProcessingTime(endTime - startTime);
-        mainViewModel.disableLoadingIcon();
+            pictureProcessor.onPictureTaken(data, camera);
+
+            long endTime = SystemClock.elapsedRealtime();
+            mainViewModel.setTotalProcessingTime(endTime - startTime);
+            mainViewModel.setCameraUiState(CAMERA_DONE_PROCESSING);
+            isLoading = false;
+        }catch (RuntimeException e){
+            isLoading = false;
+            onCameraError(new CameraException(e));
+        }
     }
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        fpsCounter.onFrame();
-        frameProcessor.onPreviewFrame(data, camera);
+        try {
+            fpsCounter.onFrame();
+            mainViewModel.setCameraUiState(CAMERA_ACTIVE); //todo: don't do this every frame
+            frameProcessor.onPreviewFrame(data, camera);
+        }catch (RuntimeException e){
+            onCameraError(new CameraException(e));
+        }
     }
 
     private static Size findBestSize(int previewWidth, int previewHeight,
@@ -144,7 +172,7 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
         double targetAspectRatio = getAspectRatio(previewWidth, previewHeight);
 
         Size currentBestSize = null;
-        double currentLowestError = 10000;
+        double currentLowestError = 10000; // arbitrary large number
         for (Size size : sizes) {
             double currentAspectRatio = getAspectRatio(size);
             double currentError = Math.abs(currentAspectRatio - targetAspectRatio);
@@ -164,4 +192,11 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
         return getAspectRatio(size.width, size.height);
     }
 
+    public enum CameraUiState{
+        CAMERA_INACTIVE,
+        CAMERA_LOADING,
+        CAMERA_ACTIVE,
+        CAMERA_CURRENTLY_PROCESSING,
+        CAMERA_DONE_PROCESSING
+    }
 }

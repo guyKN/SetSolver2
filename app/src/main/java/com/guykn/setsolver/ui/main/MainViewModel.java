@@ -9,7 +9,10 @@ import com.guykn.setsolver.FpsCounter;
 import com.guykn.setsolver.drawing.DrawingCallback;
 import com.guykn.setsolver.imageprocessing.ImageProcessingConfig;
 import com.guykn.setsolver.imageprocessing.camera.CameraFrameProcessor;
+import com.guykn.setsolver.threading.CameraPreviewThread.CameraUiState;
 import com.guykn.setsolver.threading.CameraThread;
+
+import static com.guykn.setsolver.threading.CameraPreviewThread.CameraUiState.CAMERA_INACTIVE;
 
 public class MainViewModel extends ViewModel implements CameraThread.CameraExceptionCallback,
         FpsCounter.FpsCallback, CameraFrameProcessor.Callback {
@@ -22,14 +25,14 @@ public class MainViewModel extends ViewModel implements CameraThread.CameraExcep
 
     private final MutableLiveData<ImageProcessingConfig> configLiveData = new MutableLiveData<>();
 
-    private final MutableLiveData<Boolean> shouldHaveLoadingIcon = new MutableLiveData<>();
+    private final MutableLiveData<CameraUiState> cameraUiStateLiveData = new MutableLiveData<>();
 
     private final MutableLiveData<Long> totalProcessingTimeData = new MutableLiveData<>();
 
     public MainViewModel() {
         super();
         configLiveData.setValue(ImageProcessingConfig.getDefaultConfig());
-        shouldHaveLoadingIcon.setValue(false);
+        cameraUiStateLiveData.setValue(CAMERA_INACTIVE);
     }
 
     public void setDrawable(DrawingCallback drawable) {
@@ -66,24 +69,20 @@ public class MainViewModel extends ViewModel implements CameraThread.CameraExcep
         return configLiveData;
     }
 
-    public void enableLoadingIcon(){
-        shouldHaveLoadingIcon.postValue(true);
-    }
-
-    public void disableLoadingIcon(){
-        shouldHaveLoadingIcon.postValue(false);
+    public void setCameraUiState(CameraUiState cameraUiState){
+        cameraUiStateLiveData.postValue(cameraUiState);
     }
 
     public void setTotalProcessingTime(long totalProcessingTime){
         totalProcessingTimeData.postValue(totalProcessingTime);
     }
 
-    public LiveData<Boolean> getShouldHaveLoadingIconData(){
-        return shouldHaveLoadingIcon;
-    }
-
     public LiveData<Long> getTotalProcessingTimeData(){
         return totalProcessingTimeData;
+    }
+
+    public LiveData<CameraUiState> getCameraUiStateLiveData(){
+        return cameraUiStateLiveData;
     }
 
     @Override
