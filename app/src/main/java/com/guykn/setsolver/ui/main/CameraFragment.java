@@ -41,6 +41,7 @@ public class CameraFragment extends Fragment {
     private TextView fpsView;
     private CameraThreadManager cameraThreadManager;
     private ProgressBar loadingIcon;
+    private View loadingColorMask;
 
     public static CameraFragment newInstance() {
         return new CameraFragment();
@@ -65,9 +66,10 @@ public class CameraFragment extends Fragment {
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         if (context != null) {
 
-            loadingIcon = root.findViewById(R.id.loading_icon);
 
+            loadingIcon = root.findViewById(R.id.loading_icon);
             fpsView = root.findViewById(R.id.fps_display);
+            loadingColorMask = root.findViewById(R.id.loading_color_mask);
 
             Log.d(TAG, mainViewModel.getConfigLiveData().getValue() == null ? "null" : "not null");
 
@@ -87,6 +89,7 @@ public class CameraFragment extends Fragment {
             cameraFrame.addView(mCameraOverlay);
 
             fpsView.bringToFront();
+            loadingColorMask.bringToFront();
             loadingIcon.bringToFront();
 
             mainViewModel.getDrawableLiveData().observe(getViewLifecycleOwner(), drawable -> {
@@ -117,10 +120,11 @@ public class CameraFragment extends Fragment {
                     shouldHaveLoadingIcon -> {
                         if (shouldHaveLoadingIcon) {
                             loadingIcon.setVisibility(View.VISIBLE);
+                            loadingColorMask.setVisibility(View.VISIBLE);
                             fpsView.setVisibility(View.GONE);
-
                         } else {
                             loadingIcon.setVisibility(View.GONE);
+                            loadingColorMask.setVisibility(View.GONE);
                         }
                     }
             );
