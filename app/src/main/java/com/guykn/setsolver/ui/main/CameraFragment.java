@@ -8,8 +8,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -37,7 +37,7 @@ public class CameraFragment extends Fragment {
     private CameraPreview mCameraPreview;
     private CameraOverlay mCameraOverlay;
     private FrameLayout cameraFrame;
-    private Button captureButton;
+    private ImageButton captureButton;
     private TextView fpsView;
     private CameraThreadManager cameraThreadManager;
     private ProgressBar loadingIcon;
@@ -64,12 +64,12 @@ public class CameraFragment extends Fragment {
         cameraFrame = root.findViewById(R.id.camera_preview_frame);
         Context context = getActivity();
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        if (context != null) {
-
+        if (context != null &&  root != null) {
 
             loadingIcon = root.findViewById(R.id.loading_icon);
             fpsView = root.findViewById(R.id.fps_display);
             loadingColorMask = root.findViewById(R.id.loading_color_mask);
+            captureButton = root.findViewById(R.id.button_capture);
 
             Log.d(TAG, mainViewModel.getConfigLiveData().getValue() == null ? "null" : "not null");
 
@@ -91,6 +91,7 @@ public class CameraFragment extends Fragment {
             fpsView.bringToFront();
             loadingColorMask.bringToFront();
             loadingIcon.bringToFront();
+            captureButton.bringToFront();
 
             mainViewModel.getDrawableLiveData().observe(getViewLifecycleOwner(), drawable -> {
                 mCameraOverlay.setDrawable(drawable);
@@ -107,7 +108,7 @@ public class CameraFragment extends Fragment {
             mainViewModel.getTotalProcessingTimeData().observe(getViewLifecycleOwner(),
                     milliseconds -> {
                         String processingTimeText =
-                                new DecimalFormat("Processing Time: 0.00sec")
+                                new DecimalFormat("0.00sec")
                                         .format(
                                                 ((double) milliseconds) / 1000.0
                                         );
@@ -129,7 +130,6 @@ public class CameraFragment extends Fragment {
                     }
             );
 
-            captureButton = root.findViewById(R.id.button_capture);
             captureButton.setOnClickListener(
                     (View v) -> {
                         cameraThreadManager.takePicture();
