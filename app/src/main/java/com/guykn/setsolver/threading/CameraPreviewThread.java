@@ -73,6 +73,7 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
             }
 
             frameProcessor.onCameraStarted(camera, surfaceViewState);
+            mainViewModel.setCameraUiState(CAMERA_LOADING);
             Camera.Parameters parameters = camera.getParameters();
 
             //todo: ensure no exception is thrown, based on: https://developer.android.com/reference/android/hardware/Camera.Parameters#setPreviewSize(int,%20int)

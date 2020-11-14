@@ -41,6 +41,22 @@
             android:id="@+id/loading_icon"
             android:visibility="gone"/>
 
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#FFFFFF"
+            android:alpha="0.4"
+            android:visibility="gone"
+            android:id="@+id/loading_color_mask"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000000"
+            android:visibility="gone"
+            android:id="@+id/loading_black_screen" />
+
         <Button
             android:id="@+id/button_settings"
             android:layout_width="wrap_content"
@@ -51,15 +67,6 @@
             app:layout_constraintRight_toRightOf="parent"
             android:visibility="gone"
             />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#FFFFFF"
-            android:alpha="0.4"
-            android:visibility="gone"
-            android:id="@+id/loading_color_mask"/>
-
 
 
     </FrameLayout>

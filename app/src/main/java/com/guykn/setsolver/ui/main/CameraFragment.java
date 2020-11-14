@@ -35,6 +35,7 @@ import static com.guykn.setsolver.threading.CameraPreviewThread.CameraUiState;
 public class CameraFragment extends Fragment {
     //todo: allow both landscape and portrait
     //todo: keep image even after phone activity pauses
+    //todo: handle unexpected user actions
     public static final String TAG = "CameraFragment";
     public static final int CAMERA_ACTIVE_UI_UPDATE_DELAY = 750;
     private MainViewModel mainViewModel;
@@ -46,6 +47,7 @@ public class CameraFragment extends Fragment {
     private CameraThreadManager cameraThreadManager;
     private ProgressBar loadingIcon;
     private View loadingColorMask;
+    private View loadingBlackScreen;
     private CameraUiState currentCameraUiState;
 
     public static CameraFragment newInstance() {
@@ -75,8 +77,7 @@ public class CameraFragment extends Fragment {
             fpsView = root.findViewById(R.id.fps_display);
             loadingColorMask = root.findViewById(R.id.loading_color_mask);
             captureButton = root.findViewById(R.id.button_capture);
-
-            Log.d(TAG, mainViewModel.getConfigLiveData().getValue() == null ? "null" : "not null");
+            loadingBlackScreen = root.findViewById(R.id.loading_black_screen);
 
             CameraThread cameraThread = new CameraPreviewThread(context.getApplicationContext(),
                     mainViewModel, mainViewModel.getConfigLiveData().getValue());
@@ -97,6 +98,7 @@ public class CameraFragment extends Fragment {
             loadingColorMask.bringToFront();
             loadingIcon.bringToFront();
             captureButton.bringToFront();
+            loadingBlackScreen.bringToFront();
 
             mainViewModel.getDrawableLiveData().observe(getViewLifecycleOwner(), drawable -> {
                 cameraOverlay.setDrawable(drawable);
@@ -143,6 +145,7 @@ public class CameraFragment extends Fragment {
                                 loadingIcon.setVisibility(View.GONE);
                                 loadingColorMask.setVisibility(View.GONE);
                                 cameraOverlay.setVisibility(View.GONE);
+                                loadingBlackScreen.setVisibility(View.VISIBLE);
                                 break;
                             case CAMERA_LOADING:
                                 fpsView.setVisibility(View.GONE);
@@ -150,6 +153,7 @@ public class CameraFragment extends Fragment {
                                 loadingIcon.setVisibility(View.GONE);
                                 loadingColorMask.setVisibility(View.GONE);
                                 cameraOverlay.setVisibility(View.GONE);
+                                loadingBlackScreen.setVisibility(View.VISIBLE);
                                 break;
                             case CAMERA_ACTIVE:
                                 fpsView.setVisibility(View.VISIBLE);
@@ -157,6 +161,7 @@ public class CameraFragment extends Fragment {
                                 loadingIcon.setVisibility(View.GONE);
                                 loadingColorMask.setVisibility(View.GONE);
                                 cameraOverlay.setVisibility(View.VISIBLE);
+                                loadingBlackScreen.setVisibility(View.GONE);
                                 break;
                             case CAMERA_CURRENTLY_PROCESSING:
                                 fpsView.setVisibility(View.GONE);
@@ -164,6 +169,7 @@ public class CameraFragment extends Fragment {
                                 loadingIcon.setVisibility(View.VISIBLE);
                                 loadingColorMask.setVisibility(View.VISIBLE);
                                 cameraOverlay.setVisibility(View.VISIBLE);
+                                loadingBlackScreen.setVisibility(View.GONE);
                                 break;
                             case CAMERA_DONE_PROCESSING:
                                 fpsView.setVisibility(View.VISIBLE);
@@ -171,6 +177,7 @@ public class CameraFragment extends Fragment {
                                 loadingIcon.setVisibility(View.GONE);
                                 loadingColorMask.setVisibility(View.GONE);
                                 cameraOverlay.setVisibility(View.VISIBLE);
+                                loadingBlackScreen.setVisibility(View.GONE);
                                 break;
                         }
                     }

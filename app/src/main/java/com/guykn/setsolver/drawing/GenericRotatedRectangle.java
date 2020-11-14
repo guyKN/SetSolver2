@@ -31,7 +31,7 @@ public class GenericRotatedRectangle implements DrawingCallback, SavableToGaller
     final protected int centerY;
     final protected int width;
     final protected int height;
-    final private double angle;
+    final protected double angle;
 
     private int originalCanvasWidth;
     private int originalCanvasHeight;
@@ -69,8 +69,6 @@ public class GenericRotatedRectangle implements DrawingCallback, SavableToGaller
         );
 
         Log.d(TAG, adjustedCardRect.toString());
-
-
 
         adjustedCenterPoint = new Point(
                 centerX * scaleFactor.x,
@@ -178,14 +176,25 @@ public class GenericRotatedRectangle implements DrawingCallback, SavableToGaller
         this.originalCanvasWidth = rotatedRect.originalCanvasWidth;
         this.originalCanvasHeight = rotatedRect.originalCanvasHeight;
         this.area = rotatedRect.area;
+        this.adjustedCenterPoint = rotatedRect.adjustedCenterPoint;
+        this.adjustedCardRect = rotatedRect.adjustedCardRect;
     }
 
     private GenericRotatedRectangle(RotatedRect rect) {
         centerX = (int) rect.center.x;
         centerY = (int) rect.center.y;
-        width = (int) rect.size.width;
-        height = (int) rect.size.height;
-        angle = rect.angle;
+
+        // ensure that the angle is between -45 and 45.
+        // Used to ensure that text is always displayed up to down.
+        if(rect.angle > -45) {
+            width = (int) rect.size.width;
+            height = (int) rect.size.height;
+            angle = rect.angle;
+        }else {
+            width = (int) rect.size.height;
+            height = (int) rect.size.width;
+            angle = rect.angle + 90.0;
+        }
     }
 
     public GenericRotatedRectangle(RotatedRect rect, int canvasWidth, int canvasHeight) {

@@ -29,6 +29,7 @@ public class SetCard extends GenericRotatedRectangle {
 
     static final int TEXT_SHIFT_RIGHT= 30;
     static final int TEXT_SHIFT_BOTTOM = 45;
+
     static final float TEXT_LINE_SPACING = 1f;
 
 

@@ -17,6 +17,8 @@ import static com.guykn.setsolver.threading.CameraThread.CameraState.STOPPED;
 
 public abstract class CameraThread extends HandlerThread implements SurfaceHolder.Callback {
 
+
+
     public static final String TAG = "CameraThread";
     private ImageProcessingConfig config;
     private CameraState lifecycleBasedMaxCameraState;
@@ -141,18 +143,12 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
     private void changeCameraState(CameraState targetState,
                                    CameraState maxPossibleState,
                                    CameraState lifecycleBasedState) {
-        Log.d(TAG, "changeCameraState() called");
         CameraState oldCameraState = getActualCameraState();
-        Log.d(TAG, "old targetState: " + this.targetCameraState +
-                "\nold MaxPossibleState: " + this.maxPossibleCameraState +
-                "\nold actualState: " + oldCameraState);
         this.targetCameraState = targetState;
         this.maxPossibleCameraState = maxPossibleState;
         this.lifecycleBasedMaxCameraState = lifecycleBasedState;
         CameraState newCameraState = getActualCameraState();
-        Log.d(TAG, "new targetState: " + targetState +
-                "\nnew MaxPossibleState: " + maxPossibleState +
-                "\nnew actualState: " + newCameraState);
+        Log.d(TAG, "current state: " + newCameraState);
 
         try {
 
