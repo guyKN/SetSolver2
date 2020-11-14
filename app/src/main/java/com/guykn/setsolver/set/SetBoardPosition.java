@@ -4,20 +4,17 @@ import android.graphics.Color;
 import android.graphics.Paint;
 
 import com.guykn.setsolver.drawing.DrawingCallbackList;
+import com.guykn.setsolver.set.setcardfeatures.SetCardFeatureEnum;
+
+import java.util.List;
 
 //todo: implement logic to find sets
 public class SetBoardPosition extends DrawingCallbackList<SetCard> {
 
     private final static boolean adjustColor = false;
-
-    public void addCard(SetCard card) {
-        addDrawable(card);
-    }
-
     private static final Paint redPaint;
     private static final Paint greenPaint;
     private static final Paint purplePaint;
-
     private static final Paint textPaint;
 
     static {
@@ -46,6 +43,58 @@ public class SetBoardPosition extends DrawingCallbackList<SetCard> {
         purplePaint.setColor(Color.MAGENTA);
         purplePaint.setStrokeWidth(10f);
         purplePaint.setStyle(Paint.Style.STROKE);
+    }
+
+    static boolean isSet(SetCard card1, SetCard card2, SetCard card3) {
+        return !containsDuplicates(card1, card2, card3) &&
+                isFeatureSet(card1.getColorEnum(), card2.getColorEnum(), card3.getColorEnum()) &&
+                isFeatureSet(card1.getCountEnum(), card2.getCountEnum(), card3.getCountEnum()) &&
+                isFeatureSet(card1.getShapeEnum(), card2.getShapeEnum(), card3.getShapeEnum()) &&
+                isFeatureSet(card1.getFillEnum(), card2.getFillEnum(), card3.getFillEnum());
+    }
+
+    static boolean containsDuplicates(SetCard card1, SetCard card2, SetCard card3) {
+        return card1.isSameAs(card2) ||
+                card2.isSameAs(card3) ||
+                card3.isSameAs(card1);
+
+    }
+
+    static boolean isFeatureSet(SetCardFeatureEnum feature1,
+                                SetCardFeatureEnum feature2,
+                                SetCardFeatureEnum feature3) {
+        int id1 = feature1.getId();
+        int id2 = feature2.getId();
+        int id3 = feature3.getId();
+
+        return (((id2 == id3) && (id1 == id3))) ||
+                ((id1 != id2) && (id2 != id3) && (id3 != id1));
+
+
+    }
+
+    public void addCard(SetCard card) {
+        addDrawable(card);
+    }
+
+    private List<SetCard> getCards() {
+        return getDrawables();
+    }
+
+    public void findSets() {
+        int setId = 0;
+        for (SetCard card1 : getCards()) {
+            for (SetCard card2 : getCards()) {
+                for (SetCard card3 : getCards()) {
+                    if (isSet(card1, card2, card3)) {
+                        card1.addToSet(setId);
+                        card2.addToSet(setId);
+                        card3.addToSet(setId);
+                        setId++;
+                    }
+                }
+            }
+        }
     }
 
     /*

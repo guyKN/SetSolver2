@@ -140,7 +140,7 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
         try {
             long startTime = SystemClock.elapsedRealtime();
 
-            setTargetPreviewState(CameraState.STOPPED);
+            setTargetPreviewState(CameraState.STOPPED); //todo: change or remove, since this causes a lot of delays between pictures
 
             mainViewModel.setCameraUiState(CAMERA_CURRENTLY_PROCESSING);
 
@@ -167,14 +167,13 @@ public class CameraPreviewThread extends CameraThread implements Camera.PreviewC
         }
     }
 
-    private static Size findBestSize(int previewWidth, int previewHeight,
-                                     List<Size> sizes) {
+    private static Size findBestSize(int targetWidth, int targetHeight, List<Size> supportedSizes){
 
-        double targetAspectRatio = getAspectRatio(previewWidth, previewHeight);
+        double targetAspectRatio = getAspectRatio(targetWidth, targetHeight);
 
         Size currentBestSize = null;
         double currentLowestError = 10000; // arbitrary large number
-        for (Size size : sizes) {
+        for (Size size : supportedSizes) {
             double currentAspectRatio = getAspectRatio(size);
             double currentError = Math.abs(currentAspectRatio - targetAspectRatio);
             if (currentError < currentLowestError) {

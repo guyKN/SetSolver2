@@ -1,5 +1,6 @@
 package com.guykn.setsolver.ui.main;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -38,6 +39,7 @@ public class CameraFragment extends Fragment {
     //todo: handle unexpected user actions
     public static final String TAG = "CameraFragment";
     public static final int CAMERA_ACTIVE_UI_UPDATE_DELAY = 750;
+    private final DecimalFormat processingTimeDecimalFormat = new DecimalFormat("0.00sec");
     private MainViewModel mainViewModel;
     private CameraPreview cameraPreview;
     private CameraOverlay cameraOverlay;
@@ -106,31 +108,25 @@ public class CameraFragment extends Fragment {
             });
 
             mainViewModel.getFpsLiveData().observe(getViewLifecycleOwner(), fps -> {
-                String fpsText = String.format(Locale.US,
-                        "%s FPS", fps);
+                String fpsText = String.format(Locale.US, "%s FPS", fps);
                 fpsView.setText(fpsText);
             });
 
             mainViewModel.getTotalProcessingTimeData().observe(getViewLifecycleOwner(),
                     milliseconds -> {
-                        String processingTimeText =
-                                new DecimalFormat("0.00sec")
-                                        .format(
-                                                ((double) milliseconds) / 1000.0
-                                        );
+                        double seconds = ((double) milliseconds) / 1000.0;
+                        String processingTimeText = processingTimeDecimalFormat.format(seconds);
                         fpsView.setText(processingTimeText);
                     }
             );
 
             mainViewModel.getCameraExceptionData().observe(getViewLifecycleOwner(),
                     errorMessage -> {
-                        Context context1 = getActivity();
-                        if (context1 == null)
+                        Activity activity = getActivity();
+                        if (activity == null)
                             return;
-
-                        Toast.makeText(context1,
-                                "Camera Error: " + errorMessage, Toast.LENGTH_LONG)
-                                .show();
+                        String text = getString(R.string.camera_error_heading) + errorMessage;
+                        Toast.makeText(activity, text, Toast.LENGTH_LONG).show();
                     }
             );
 
@@ -187,12 +183,6 @@ public class CameraFragment extends Fragment {
                     (View v) -> {
                         cameraThreadManager.takePicture();
                     }
-            );
-
-            View settingsButton = root.findViewById(R.id.button_settings);
-
-            settingsButton.setOnClickListener(
-                    (View v) -> openSettingsActivity()
             );
         }
 

@@ -5,7 +5,7 @@ import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
 import java.util.Locale;
 
 public class SetCardCount extends SetCardFeature<SetCardCount.SetCardCountEnum> {
-    enum SetCardCountEnum implements SetCardFeatureEnum {
+    public enum SetCardCountEnum implements SetCardFeatureEnum {
         ONE_SYMBOL(0, "1 Symbol"), TWO_SYMBOLS(1, "2 Symbols"), THREE_SYMBOLS(2, "3 Symbols");
         private final int id;
         private final String name;
@@ -24,30 +24,29 @@ public class SetCardCount extends SetCardFeature<SetCardCount.SetCardCountEnum> 
         }
     }
 
-    final private double certainty;
-    final private SetCardCountEnum count;
+    final public SetCardCountEnum countEnum;
 
 
-    private SetCardCount(SetCardCountEnum count, double certainty) {
-        this.certainty = certainty;
-        this.count = count;
+    private SetCardCount(SetCardCountEnum countEnum, double confidence) {
+        super(confidence);
+        this.countEnum = countEnum;
     }
 
     public SetCardCount(ClassificationResult result) {
-        this.count = getEnumFromId(result.id);
-        this.certainty = result.probability;
+        super(result.probability);
+        this.countEnum = getEnumFromId(result.id);
     }
 
     @Override
     public String getDescription() {
         return String.format(Locale.US,
                 "%.0f%% confidence that there are %s",
-                certainty * 100, count.toString());
+                confidence * 100, countEnum.toString());
     }
 
     @Override
     public String getName() {
-        return count.getName();
+        return countEnum.getName();
     }
 
     protected SetCardCountEnum[] getFeatureEnumValues() {

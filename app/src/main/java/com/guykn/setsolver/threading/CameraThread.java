@@ -21,7 +21,6 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
 
     public static final String TAG = "CameraThread";
     private ImageProcessingConfig config;
-    private CameraState lifecycleBasedMaxCameraState;
     private CameraState targetCameraState;
     private CameraState maxPossibleCameraState;
     private Handler handler;
@@ -105,7 +104,6 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
 
         targetCameraState = DESTROYED;
         maxPossibleCameraState = DESTROYED;
-        lifecycleBasedMaxCameraState = ACTIVE;
     }
 
     public void setConfig(ImageProcessingConfig config){
@@ -114,22 +112,12 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
     }
 
     public void setTargetPreviewState(CameraState targetState) {
-        changeCameraState(targetState,
-                this.maxPossibleCameraState,
-                this.lifecycleBasedMaxCameraState);
+        changeCameraState(targetState, this.maxPossibleCameraState);
     }
 
 
     private void setMaxPossibleCameraState(CameraState maxPossibleState) {
-        changeCameraState(this.targetCameraState,
-                maxPossibleState,
-                this.lifecycleBasedMaxCameraState);
-    }
-
-    public void setLifecycleBasedMaxCameraState(CameraState lifecycleBasedMaxCameraState){
-        changeCameraState(this.targetCameraState,
-                this.maxPossibleCameraState,
-                lifecycleBasedMaxCameraState);
+        changeCameraState(this.targetCameraState, maxPossibleState);
     }
 
     public void takePicture(){
@@ -141,12 +129,10 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
     }
 
     private void changeCameraState(CameraState targetState,
-                                   CameraState maxPossibleState,
-                                   CameraState lifecycleBasedState) {
+                                   CameraState maxPossibleState) {
         CameraState oldCameraState = getActualCameraState();
         this.targetCameraState = targetState;
         this.maxPossibleCameraState = maxPossibleState;
-        this.lifecycleBasedMaxCameraState = lifecycleBasedState;
         CameraState newCameraState = getActualCameraState();
         Log.d(TAG, "current state: " + newCameraState);
 
@@ -179,6 +165,7 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
                             break;
                     }
                     break;
+
                 case ACTIVE:
                     switch (oldCameraState) {
                         case DESTROYED:
@@ -256,7 +243,7 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
     }
 
     private CameraState getActualCameraState() {
-        return CameraState.lowestState(targetCameraState, maxPossibleCameraState, lifecycleBasedMaxCameraState);
+        return CameraState.lowestState(targetCameraState, maxPossibleCameraState);
     }
 
     protected ImageProcessingConfig getConfig(){
@@ -291,6 +278,7 @@ public abstract class CameraThread extends HandlerThread implements SurfaceHolde
             super(cause);
         }
     }
+
 
     public interface CameraExceptionCallback {
         public void onException();

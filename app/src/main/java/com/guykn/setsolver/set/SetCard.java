@@ -12,11 +12,14 @@ import com.guykn.setsolver.set.setcardfeatures.SetCardCount;
 import com.guykn.setsolver.set.setcardfeatures.SetCardFill;
 import com.guykn.setsolver.set.setcardfeatures.SetCardShape;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SetCard extends GenericRotatedRectangle {
 
-    final private PositionlessSetCard card;
-
-
+    static final int TEXT_SHIFT_RIGHT = 30;
+    static final int TEXT_SHIFT_BOTTOM = 45;
+    static final float TEXT_LINE_SPACING = 1f;
     private static final Paint textPaint;
 
     static {
@@ -27,22 +30,21 @@ public class SetCard extends GenericRotatedRectangle {
         textPaint.setTextSize(40f);
     }
 
-    static final int TEXT_SHIFT_RIGHT= 30;
-    static final int TEXT_SHIFT_BOTTOM = 45;
-
-    static final float TEXT_LINE_SPACING = 1f;
+    final private PositionlessSetCard card;
+    private final List<Integer> setsContainingThisCard = new ArrayList<>();
 
 
-    public SetCard(GenericRotatedRectangle rotatedRect,
-                   PositionlessSetCard card) {
+    public SetCard(GenericRotatedRectangle rotatedRect, PositionlessSetCard card) {
         super(rotatedRect);
         this.card = card;
     }
 
+    public boolean isSameAs(SetCard otherCard){
+        return this.card.isSameAs(otherCard.card);
+    }
 
     @Override
     protected void drawOnCanvasRotated(Canvas canvas, Paint paint) {
-        super.drawOnCanvasRotated(canvas, paint);
         DrawingHelper.drawTextOnCanvasWithLineBreaks(
                 canvas,
                 card.getVeryShortDescription(),
@@ -51,21 +53,50 @@ public class SetCard extends GenericRotatedRectangle {
                 TEXT_LINE_SPACING,
                 textPaint
         );
+
+        if(setsContainingThisCard.isEmpty()){
+            super.drawOnCanvasRotated(canvas, paint);
+        }else {
+            int currentRectangleGrowth = 0;
+            for(int setId: setsContainingThisCard){
+
+            }
+        }
+    }
+
+    public void addToSet(int setId){
+        setsContainingThisCard.add(setId);
+    }
+
+    public SetCardShape.SetCardShapeEnum getShapeEnum(){
+        return card.shape.shapeEnum;
+    }
+
+    public SetCardColor.SetCardColorEnum getColorEnum(){
+        return card.color.colorEnum;
+    }
+
+    public SetCardCount.SetCardCountEnum getCountEnum(){
+        return card.count.countEnum;
+    }
+
+    public SetCardFill.SetCardFillEnum getFillEnum(){
+        return card.fill.fillEnum;
     }
 
     public SetCardColor getColor() {
-        return card.getColor();
+        return card.color;
     }
 
     public SetCardCount getCount() {
-        return card.getCount();
+        return card.count;
     }
 
     public SetCardFill getFill() {
-        return card.getFill();
+        return card.fill;
     }
 
     public SetCardShape getShape() {
-        return card.getShape();
+        return card.shape;
     }
 }

@@ -5,7 +5,7 @@ import com.guykn.setsolver.imageprocessing.classify.ClassificationResult;
 import java.util.Locale;
 
 public class SetCardFill extends SetCardFeature<SetCardFill.SetCardFillEnum> {
-    enum SetCardFillEnum implements SetCardFeatureEnum {
+    public enum SetCardFillEnum implements SetCardFeatureEnum {
         EMPTY(0, "Empty"), PARTIAL(1, "Partial"), FULL(2, "Full");
 
         private final String name;
@@ -23,16 +23,17 @@ public class SetCardFill extends SetCardFeature<SetCardFill.SetCardFillEnum> {
         }
 
     }
-    private final SetCardFillEnum fill;
 
-    private SetCardFill(SetCardFillEnum fill, double certainty) {
-        this.fill = fill;
-        this.confidence = certainty;
+    public final SetCardFillEnum fillEnum;
+
+    private SetCardFill(SetCardFillEnum fillEnum, double confidence) {
+        super(confidence);
+        this.fillEnum = fillEnum;
     }
 
     public SetCardFill(ClassificationResult result){
-        this.fill = getEnumFromId(result.id);
-        this.confidence = result.probability;
+        super(result.probability);
+        this.fillEnum = getEnumFromId(result.id);
     }
 
     @Override
@@ -44,7 +45,7 @@ public class SetCardFill extends SetCardFeature<SetCardFill.SetCardFillEnum> {
 
     @Override
     public String getName() {
-        return fill.getName();
+        return fillEnum.getName();
     }
 
     protected SetCardFillEnum[] getFeatureEnumValues(){

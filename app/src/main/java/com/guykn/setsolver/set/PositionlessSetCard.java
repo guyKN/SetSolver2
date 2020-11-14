@@ -12,23 +12,11 @@ import java.util.Locale;
  */
 public class PositionlessSetCard {
     //Todo: check if there is a better implementation (Maybe Use a decorator pattern: https://en.wikipedia.org/wiki/Decorator_pattern)
-    final private SetCardColor color;
-    final private SetCardCount count;
-    final private SetCardFill fill;
-    final private SetCardShape shape;
+    final public SetCardColor color;
+    final public SetCardCount count;
+    final public SetCardFill fill;
+    final public SetCardShape shape;
 
-    public SetCardColor getColor() {
-        return color;
-    }
-    public SetCardCount getCount() {
-        return count;
-    }
-    public SetCardFill getFill() {
-        return fill;
-    }
-    public SetCardShape getShape() {
-        return shape;
-    }
 
     public PositionlessSetCard(SetCardColor color, SetCardCount count,
                                SetCardFill fill, SetCardShape shape){
@@ -80,5 +68,11 @@ public class PositionlessSetCard {
         return color.getConfidence() * count.getConfidence() * fill.getConfidence() * shape.getConfidence();
     }
 
+    public boolean isSameAs(PositionlessSetCard card){
+        return this.color.colorEnum == card.color.colorEnum &&
+                this.count.countEnum == card.count.countEnum &&
+                this.fill.fillEnum == card.fill.fillEnum &&
+                this.shape.shapeEnum == card.shape.shapeEnum;
+    }
 
 }
