@@ -2,6 +2,7 @@ package com.guykn.setsolver.set;
 
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 
 import com.guykn.setsolver.drawing.DrawingCallbackList;
 import com.guykn.setsolver.set.setcardfeatures.SetCardFeatureEnum;
@@ -83,10 +84,24 @@ public class SetBoardPosition extends DrawingCallbackList<SetCard> {
 
     public void findSets() {
         int setId = 0;
-        for (SetCard card1 : getCards()) {
-            for (SetCard card2 : getCards()) {
-                for (SetCard card3 : getCards()) {
+        List<SetCard> cards = getCards();
+
+
+        for(int i1 = 0;i1<cards.size();i1++) {
+            SetCard card1 = cards.get(i1);
+            for (int i2 = i1 + 1; i2 < cards.size(); i2++) {
+                SetCard card2 = cards.get(i2);
+                for (int i3 = i2 + 1; i3 < cards.size(); i3++) {
+                    SetCard card3 = cards.get(i3);
+                    Log.d(TAG, card1.getVeryShotDescription());
+                    Log.d(TAG, card2.getVeryShotDescription());
+                    Log.d(TAG, card3.getVeryShotDescription());
                     if (isSet(card1, card2, card3)) {
+                        Log.d(TAG, "Found set!");
+                        Log.d(TAG, card1.getVeryShotDescription());
+                        Log.d(TAG, card2.getVeryShotDescription());
+                        Log.d(TAG, card3.getVeryShotDescription());
+
                         card1.addToSet(setId);
                         card2.addToSet(setId);
                         card3.addToSet(setId);

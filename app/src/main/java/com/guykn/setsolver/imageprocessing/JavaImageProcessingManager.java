@@ -119,6 +119,7 @@ public class JavaImageProcessingManager implements ImageProcessingManager {
             SetCard card = new SetCard(rect, result);
             boardPosition.addCard(card);
         }
+        boardPosition.findSets();
     }
 
     @Override

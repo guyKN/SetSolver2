@@ -18,6 +18,8 @@ public class PositionlessSetCard {
     final public SetCardShape shape;
 
 
+
+
     public PositionlessSetCard(SetCardColor color, SetCardCount count,
                                SetCardFill fill, SetCardShape shape){
         this.color = color;
@@ -25,6 +27,8 @@ public class PositionlessSetCard {
         this.fill = fill;
         this.shape = shape;
     }
+
+
 
     public String getDescription(){
         return String.format(Locale.US,
@@ -63,6 +67,7 @@ public class PositionlessSetCard {
                 fill.getName(),
                 shape.getName());
     }
+
 
     public double getTotalConfidence(){
         return color.getConfidence() * count.getConfidence() * fill.getConfidence() * shape.getConfidence();

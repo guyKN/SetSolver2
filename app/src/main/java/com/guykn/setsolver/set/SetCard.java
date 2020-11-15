@@ -4,6 +4,8 @@ package com.guykn.setsolver.set;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.util.Log;
 
 import com.guykn.setsolver.drawing.DrawingHelper;
 import com.guykn.setsolver.drawing.GenericRotatedRectangle;
@@ -21,6 +23,8 @@ public class SetCard extends GenericRotatedRectangle {
     static final int TEXT_SHIFT_BOTTOM = 45;
     static final float TEXT_LINE_SPACING = 1f;
     private static final Paint textPaint;
+    public static final boolean DO_DIFFERENT_DRAWING = true;
+    public static final boolean DRAW_TEXT = false;
 
     static {
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -45,22 +49,26 @@ public class SetCard extends GenericRotatedRectangle {
 
     @Override
     protected void drawOnCanvasRotated(Canvas canvas, Paint paint) {
-        DrawingHelper.drawTextOnCanvasWithLineBreaks(
-                canvas,
-                card.getVeryShortDescription(),
-                (float) getAdjustedCardRect().left + TEXT_SHIFT_RIGHT,
-                (float) getAdjustedCardRect().top + TEXT_SHIFT_BOTTOM,
-                TEXT_LINE_SPACING,
-                textPaint
-        );
 
-        if(setsContainingThisCard.isEmpty()){
-            super.drawOnCanvasRotated(canvas, paint);
-        }else {
-            int currentRectangleGrowth = 0;
-            for(int setId: setsContainingThisCard){
-
-            }
+        if(DRAW_TEXT) {
+            String description = card.getVeryShortDescription();
+            DrawingHelper.drawTextOnCanvasWithLineBreaks(
+                    canvas,
+                    description,
+                    (float) getAdjustedCardRect().left + TEXT_SHIFT_RIGHT,
+                    (float) getAdjustedCardRect().top + TEXT_SHIFT_BOTTOM,
+                    TEXT_LINE_SPACING,
+                    textPaint
+            );
+        }
+        Log.d(TAG, setsContainingThisCard.toString());
+        int currentRectangleGrowth = 0;
+        for (int setId : setsContainingThisCard) {
+            Paint drawingPaint = DrawingHelper.getPaintForId(setId);
+            Rect grownRect = DrawingHelper.growRect(getAdjustedCardRect(), currentRectangleGrowth);
+            canvas.drawRect(grownRect, drawingPaint);
+            currentRectangleGrowth += 20;
+            //todo: add constants
         }
     }
 
@@ -98,5 +106,9 @@ public class SetCard extends GenericRotatedRectangle {
 
     public SetCardShape getShape() {
         return card.shape;
+    }
+
+    public String getVeryShotDescription(){
+        return card.getVeryShortDescription();
     }
 }

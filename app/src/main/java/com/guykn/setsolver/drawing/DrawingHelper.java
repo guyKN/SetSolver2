@@ -4,30 +4,29 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
-import com.guykn.setsolver.R;
-
 public class DrawingHelper {
     private DrawingHelper(){}
 
-    int[] setDisplayColors = new int[] {0xFF0000,
-            0x00FF00,
-    0x0000FF,
-    };
+    static int[] setDisplayColors = new int[] {0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0xFFFFFF00, 0xFF00FFFF,
+            0xFF880000, 0xFF008800, 0xFF000088, 0xFF888800, 0xFF008888};
 
-    public static final int maxPossibleNumSets = 5;
+    public static final int maxPossibleNumSets = 10;
     public static Paint[] setDisplayPaints;
 
 
     static {
-
         setDisplayPaints = new Paint[maxPossibleNumSets];
         for(int i = 0; i< maxPossibleNumSets; i++){
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setStrokeWidth(30f);
+            paint.setStrokeWidth(25f);
             paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(R.color.);
-            setDisplayPaints[i]
+            paint.setColor(setDisplayColors[i]);
+            setDisplayPaints[i] = paint;
         }
+    }
+
+    public static Paint getPaintForId(int id){
+        return setDisplayPaints[id];
     }
 
     public static void drawTextOnCanvasWithLineBreaks(Canvas canvas,
@@ -46,8 +45,8 @@ public class DrawingHelper {
 
     public static Rect growRect(Rect originalRect, int growthSize){
         return new Rect(
-                originalRect.left + growthSize,
-                originalRect.top + growthSize,
+                originalRect.left - growthSize,
+                originalRect.top - growthSize,
                 originalRect.right + growthSize,
                  originalRect.bottom + growthSize
         );
